@@ -1,0 +1,21 @@
+{
+  "root.title": "GameDev toolbox",
+  "root.description": "Toolbox for game development.",
+  "library.title": "Library",
+  "library.addModal.title": "Add file(s)",
+  "library.addModal.type.label": "Type",
+  "library.addModal.name.label": "Name",
+  "library.addModal.fileSection.drop": "Drop the files here ...",
+  "library.addModal.fileSection.drag": "Drag 'n' drop some files here, or click to select files",
+  "library.addModal.fileSection.uploadTitle": "Uploaded files:",
+  "library.action.delete": "Delete",
+  "library.action.rename": "Rename",
+  "library.action.addFolder": "Add folder",
+  "library.action.addFile": "Add file(s)",
+  "library.action.cancel": "Cancel",
+  "library.action.submit": "Submit",
+  "fileType.image": "Image",
+  "fileType.textureAtlas": "Texture atlas",
+  "fileType.folder": "Folder",
+  "fileType.none": "Empty"
+}
