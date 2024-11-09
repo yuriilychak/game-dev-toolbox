@@ -18,9 +18,9 @@ import {
 } from "../../../constants";
 import { LIBRARY_FILE_TYPE } from "../../../enums";
 import { LibraryFile } from "../../../types";
-import { generateUUID } from "../../../helpers";
 import { DnDArea } from "./dnd-area";
 import { getSubmitDisabled } from "./helpers";
+import { createTextureAtlas } from "../helpers";
 
 type AddFileModalProps = {
   onSubmit(items: LibraryFile[]): void;
@@ -50,14 +50,7 @@ const AddFileModal: FC<AddFileModalProps> = ({ onCancel, onSubmit }) => {
     const nextType = parseInt(event.target.value) as LIBRARY_FILE_TYPE;
     const nextFiles: LibraryFile[] =
       nextType === LIBRARY_FILE_TYPE.TEXTURE_ATLAS
-        ? [
-            {
-              label: "",
-              id: generateUUID(),
-              type: LIBRARY_FILE_TYPE.TEXTURE_ATLAS,
-              data: { images: [] as string[], placement: [] as object[] },
-            },
-          ]
+        ? [createTextureAtlas()]
         : [];
 
     setType(nextType);

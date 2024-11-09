@@ -18,6 +18,43 @@ const App: FC = () => {
   const theme = useMemo(
     () =>
       createTheme({
+        components: {
+          MuiAccordion: {
+            styleOverrides: {
+              root: {
+                overflow: "hidden",
+                borderRadius: 0,
+                boxShadow: "none",
+                "&:before": {
+                  display: "none",
+                },
+              },
+            },
+          },
+          MuiAccordionSummary: {
+            styleOverrides: {
+              root: {
+                borderTop: "1px solid #666",
+                padding: 0,
+                boxSizing: "border-box",
+                minHeight: 32,
+                "&.Mui-expanded": {},
+                ".MuiAccordionSummary-content": {
+                  margin: 0,
+                },
+              },
+            },
+          },
+          MuiAccordionDetails: {
+            styleOverrides: {
+              root: {
+                borderRadius: 0,
+                padding: 0,
+                boxShadow: "none",
+              },
+            },
+          },
+        },
         typography: { fontFamily: "Arial" },
         palette: { mode: "dark" },
       }),

@@ -25,3 +25,19 @@ export function generateUUID() {
     },
   );
 }
+
+export function formatSize(bytes: number): string {
+  const units: string[] = ["b", "kb", "mb", "gb"];
+  const kbShift: number = 10;
+  const maxUnitIndex: number = units.length - 1;
+  const kbValue: number = 1 << kbShift;
+  let unitIndex: number = 0;
+  let currentBytes: number = bytes;
+
+  while (currentBytes >= kbValue && unitIndex < maxUnitIndex) {
+    currentBytes = currentBytes >> kbShift;
+    ++unitIndex;
+  }
+
+  return `${(bytes / (1 << (unitIndex * kbShift))).toFixed(2)}${units[unitIndex]}`;
+}

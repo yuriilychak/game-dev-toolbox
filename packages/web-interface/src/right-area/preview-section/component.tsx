@@ -4,6 +4,7 @@ import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 
 import { PreviewContext } from "../../contexts";
+import { SingleFileSection } from "./single-file-section";
 
 const PreviewSection: FC = () => {
   const { selectedFiles } = useContext(PreviewContext);
@@ -12,6 +13,7 @@ const PreviewSection: FC = () => {
   return (
     <Stack padding={0.5} gap={1}>
       <Typography>Properties</Typography>
+      {isSingleFile && <SingleFileSection file={selectedFiles[0]} />}
     </Stack>
   );
 };

@@ -9,7 +9,7 @@ const TopArea: FC = () => (
     sx={{
       padding: 1,
       boxSizing: "border-box",
-      borderBottom: "1px solid #555",
+      borderBottom: "1px solid #666",
     }}
   >
     <Box component="img" src="assets/icon.svg" height={16} width={16} />

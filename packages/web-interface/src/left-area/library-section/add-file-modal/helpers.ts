@@ -2,22 +2,6 @@ import { LIBRARY_FILE_TYPE } from "../../../enums";
 import { generateUUID } from "../../../helpers";
 import { LibraryFile, LibraryImageData } from "../../../types";
 
-export function formatSize(bytes: number): string {
-  const units: string[] = ["B", "KB", "MB", "GB"];
-  const kbShift: number = 10;
-  const maxUnitIndex: number = units.length - 1;
-  const kbValue: number = 1 << kbShift;
-  let unitIndex: number = 0;
-  let currentBytes: number = bytes;
-
-  while (currentBytes >= kbValue && unitIndex < maxUnitIndex) {
-    currentBytes = currentBytes >> kbShift;
-    ++unitIndex;
-  }
-
-  return `${(bytes / (1 << (unitIndex * kbShift))).toFixed(2)} ${units[unitIndex]}`;
-}
-
 export async function filesToLibraryItem(
   files: File[],
   type: LIBRARY_FILE_TYPE,
@@ -36,8 +20,8 @@ export async function filesToLibraryItem(
   for (const file of files) {
     size = file.size;
     labelSplit = file.name.split(".");
-    extension = labelSplit.pop().toLowerCase();
-    label = labelSplit.join(".");
+    extension = labelSplit.pop().toUpperCase();
+    label = labelSplit.join(".").substring(0, 32);
 
     src = await new Promise((resolve, reject) => {
       reader.onload = () => resolve(reader.result as string);

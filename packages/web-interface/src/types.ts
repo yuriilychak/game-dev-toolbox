@@ -1,15 +1,25 @@
 import { LIBRARY_FILE_TYPE } from "./enums";
 
+export type ImageResolution = { width: number; height: number };
+
 export type LibraryImageData = {
   src: string;
   extension: string;
   size: number;
-  resolution: { width: number; height: number };
+  resolution: ImageResolution;
+};
+
+export type LibraryTextureAtlasData = {
+  size: number;
+  images: string[];
+  placement: object[];
+  resolution: ImageResolution;
+  isGenerated: boolean;
 };
 
 type LibraryFileDataMapping = {
   [LIBRARY_FILE_TYPE.IMAGE]: LibraryImageData;
-  [LIBRARY_FILE_TYPE.TEXTURE_ATLAS]: { images: string[]; placement: object[] };
+  [LIBRARY_FILE_TYPE.TEXTURE_ATLAS]: LibraryTextureAtlasData;
   [LIBRARY_FILE_TYPE.FOLDER]: null;
   [LIBRARY_FILE_TYPE.NONE]: null;
 };

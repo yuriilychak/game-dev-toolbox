@@ -236,10 +236,24 @@ export const renameItem = (
     return result;
   }, getExecutionResult());
 
-export const createNode = (): LibraryFile => ({
+export const createNode = (): LibraryFile<LIBRARY_FILE_TYPE.FOLDER> => ({
   id: generateUUID(),
   type: LIBRARY_FILE_TYPE.FOLDER,
   children: [],
   label: "New Folder",
   data: null,
 });
+
+export const createTextureAtlas =
+  (): LibraryFile<LIBRARY_FILE_TYPE.TEXTURE_ATLAS> => ({
+    label: "Texture atlas",
+    id: generateUUID(),
+    type: LIBRARY_FILE_TYPE.TEXTURE_ATLAS,
+    data: {
+      size: 0,
+      images: [] as string[],
+      placement: [] as object[],
+      isGenerated: false,
+      resolution: { width: 4096, height: 4096 },
+    },
+  });
