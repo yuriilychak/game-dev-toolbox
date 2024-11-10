@@ -16,17 +16,28 @@ type DnDAreaProps = {
   onChange(nodes: LibraryFile[]): void;
   onRemove(id: string): void;
   nodes: LibraryFile[];
+  onToggleLoading(): void;
 };
 
-const DnDArea: FC<DnDAreaProps> = ({ type, nodes, onChange, onRemove }) => {
+const DnDArea: FC<DnDAreaProps> = ({
+  type,
+  nodes,
+  onChange,
+  onRemove,
+  onToggleLoading,
+}) => {
   const { t } = useTranslation();
   const AppIcon = useMemo(() => LIBRARY_ITEM_ICONS.get(type), [type]);
 
   const onDropAccepted = useCallback(
     async (files: File[]) => {
+      onToggleLoading();
+
       const resultFiles = await filesToLibraryItem(files, type);
 
       onChange(resultFiles);
+
+      onToggleLoading();
     },
     [type],
   );
