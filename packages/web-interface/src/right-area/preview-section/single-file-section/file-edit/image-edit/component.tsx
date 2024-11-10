@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef, useLayoutEffect } from "react";
+import { useState, useCallback, useRef, useLayoutEffect, useMemo } from "react";
 
 import Button from "@mui/material/Button";
 import Modal from "@mui/material/Modal";
@@ -9,36 +9,20 @@ import Typography from "@mui/material/Typography";
 
 import { LIBRARY_FILE_TYPE } from "../../../../../enums";
 import { SingleFileComponent } from "../../types";
+import BoundEditor from "./bound-editor";
 
-const ImageEdit: SingleFileComponent<LIBRARY_FILE_TYPE.IMAGE> = () => {
+const ImageEdit: SingleFileComponent<LIBRARY_FILE_TYPE.IMAGE> = ({ file }) => {
   const [isModalOpen, setModalOpen] = useState(false);
   const canvasRef = useRef(null);
+  const boundEditor = useMemo(() => new BoundEditor(), []);
 
   useLayoutEffect(() => {
     if (isModalOpen) {
-      setTimeout(() => {
-        const canvas = canvasRef.current;
-
-        canvas.width = canvas.offsetWidth;
-        canvas.height = canvas.offsetHeight;
-        const ctx = canvas.getContext("2d");
-        const img = new Image();
-
-        // Set the src to the SVG data URL
-        img.src = "assets/checkerPattern.svg";
-
-        img.onload = () => {
-          // Create a pattern from the SVG image
-          const pattern = ctx.createPattern(img, "repeat");
-
-          if (pattern) {
-            ctx.fillStyle = pattern;
-            ctx.fillRect(0, 0, canvas.width, canvas.height); // Fill entire canvas
-          }
-        };
-      }, 100);
+      boundEditor.init(file, canvasRef);
     }
-  }, [isModalOpen]);
+
+    return boundEditor.destroy.bind(boundEditor);
+  }, [file, isModalOpen, boundEditor]);
 
   const onOpenModal = useCallback(() => setModalOpen(true), []);
 
