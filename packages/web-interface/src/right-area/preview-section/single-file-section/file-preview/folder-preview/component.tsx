@@ -1,12 +1,12 @@
 import { memo } from "react";
 
 import { LIBRARY_FILE_TYPE } from "../../../../../enums";
-import { TypedPreviewComponent } from "../types";
+import { SingleFileComponent } from "../../types";
 import { getFolderStatistic } from "./helpers";
 import { formatSize } from "../../../../../helpers";
 import { StatisticsContainer } from "../statistics-container";
 
-const FolderPreview: TypedPreviewComponent<LIBRARY_FILE_TYPE.FOLDER> = ({
+const FolderPreview: SingleFileComponent<LIBRARY_FILE_TYPE.FOLDER> = ({
   file,
 }) => {
   const { size, childCount } = getFolderStatistic(file.children);

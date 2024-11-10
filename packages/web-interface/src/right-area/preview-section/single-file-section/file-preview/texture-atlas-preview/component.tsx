@@ -1,10 +1,10 @@
 import { memo } from "react";
 
 import { LIBRARY_FILE_TYPE } from "../../../../../enums";
-import { TypedPreviewComponent } from "../types";
+import { SingleFileComponent } from "../../types";
 import { StatisticsContainer } from "../statistics-container";
 
-const TextureAtlasPreview: TypedPreviewComponent<
+const TextureAtlasPreview: SingleFileComponent<
   LIBRARY_FILE_TYPE.TEXTURE_ATLAS
 > = ({ file }) => (
   <StatisticsContainer

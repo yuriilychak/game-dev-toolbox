@@ -1,17 +1,14 @@
-import { FC, memo } from "react";
+import { memo } from "react";
 
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 
-import { LibraryFile } from "../../../types";
 import { LIBRARY_ITEM_ICONS } from "../../../constants";
 import { FilePreview } from "./file-preview";
+import { SingleFileComponent } from "./types";
+import { FileEdit } from "./file-edit";
 
-type SingleFileSectionProps = {
-  file: LibraryFile;
-};
-
-const SingleFileSection: FC<SingleFileSectionProps> = ({ file }) => {
+const SingleFileSection: SingleFileComponent = ({ file }) => {
   const Icon = LIBRARY_ITEM_ICONS.get(file.type);
 
   return (
@@ -21,6 +18,7 @@ const SingleFileSection: FC<SingleFileSectionProps> = ({ file }) => {
         <Typography noWrap>{file.label}</Typography>
       </Stack>
       <FilePreview file={file} />
+      <FileEdit file={file} />
     </Stack>
   );
 };

@@ -5,10 +5,10 @@ import Box from "@mui/material/Box";
 
 import { formatSize } from "../../../../../helpers";
 import { LIBRARY_FILE_TYPE } from "../../../../../enums";
-import { TypedPreviewComponent } from "../types";
+import { SingleFileComponent } from "../../types";
 import { StatisticsContainer } from "../statistics-container";
 
-const ImagePreview: TypedPreviewComponent<LIBRARY_FILE_TYPE.IMAGE> = ({
+const ImagePreview: SingleFileComponent<LIBRARY_FILE_TYPE.IMAGE> = ({
   file,
 }) => (
   <StatisticsContainer
