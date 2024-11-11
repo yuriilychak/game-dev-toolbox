@@ -1,4 +1,4 @@
-import { LIBRARY_FILE_TYPE } from "./enums";
+import { IMAGE_TYPE, LIBRARY_FILE_TYPE } from "./enums";
 
 export type ImageResolution = { width: number; height: number };
 
@@ -7,6 +7,10 @@ export type LibraryImageData = {
   extension: string;
   size: number;
   resolution: ImageResolution;
+  type: IMAGE_TYPE;
+  polygon: number[];
+  triangles: number[];
+  triangleCount: number;
 };
 
 export type LibraryTextureAtlasData = {

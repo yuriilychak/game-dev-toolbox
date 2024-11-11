@@ -93,7 +93,7 @@ const ImageEdit: SingleFileComponent<LIBRARY_FILE_TYPE.IMAGE> = ({ file }) => {
                   ref={canvasRef}
                 />
               </Box>
-              <Stack width={256} height="100%">
+              <Stack width={256} height="100%" paddingX={2}>
                 Props
               </Stack>
             </Stack>

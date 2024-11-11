@@ -99,6 +99,8 @@ export default class BoundEditor {
         screenHeight,
       );
     }
+
+    this.drawTriangles();
   }
 
   private drawCheckers(): void {
@@ -166,6 +168,45 @@ export default class BoundEditor {
 
   private worldToScreenY(worldY: number): number {
     return this.worldY + worldY * this.scale;
+  }
+
+  private drawTriangles(): void {
+    this.context.strokeStyle = "lime";
+
+    const pointCount: number = 3;
+    const offsetX = -this.file.data.resolution.width >> 1;
+    const offsetY = -this.file.data.resolution.height >> 1;
+    let i: number = 0;
+    let j: number = 0;
+    let indexOffset: number = 0;
+    let pointIndex: number = 0;
+    let pointX: number = 0;
+    let pointY: number = 0;
+
+    for (i = 0; i < this.file.data.triangleCount; ++i) {
+      indexOffset = 3 * i;
+
+      this.context.beginPath();
+
+      for (j = 0; j < pointCount; ++j) {
+        pointIndex = this.file.data.triangles[indexOffset + j] << 1;
+        pointX = this.worldToScreenX(
+          this.file.data.polygon[pointIndex] + offsetX,
+        );
+        pointY = this.worldToScreenY(
+          this.file.data.polygon[pointIndex + 1] + offsetY,
+        );
+
+        if (j === 0) {
+          this.context.moveTo(pointX, pointY);
+        } else {
+          this.context.lineTo(pointX, pointY);
+        }
+      }
+
+      this.context.closePath();
+      this.context.stroke();
+    }
   }
 
   private addEventListeners(): void {

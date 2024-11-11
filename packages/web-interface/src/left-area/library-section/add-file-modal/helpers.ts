@@ -1,4 +1,4 @@
-import { LIBRARY_FILE_TYPE } from "../../../enums";
+import { IMAGE_TYPE, LIBRARY_FILE_TYPE } from "../../../enums";
 import { generateUUID } from "../../../helpers";
 import { LibraryFile, LibraryImageData } from "../../../types";
 
@@ -34,7 +34,16 @@ export async function filesToLibraryItem(
       img.src = src;
     });
 
-    data = { src, extension, size, resolution };
+    data = {
+      src,
+      extension,
+      size,
+      resolution,
+      type: IMAGE_TYPE.QUAD,
+      polygon: [0, 0, img.width, 0, img.width, img.height, 0, img.height],
+      triangles: [0, 1, 2, 0, 2, 3],
+      triangleCount: 2,
+    };
 
     result.push({ label, id: generateUUID(), type, data });
   }

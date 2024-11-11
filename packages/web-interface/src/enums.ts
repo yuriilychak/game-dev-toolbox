@@ -14,3 +14,9 @@ export enum LIBRARY_ACTION {
   SUBMIT,
   CANCEL,
 }
+
+export enum IMAGE_TYPE {
+  QUAD,
+  POLYGON,
+  MESH,
+}
