@@ -1,4 +1,11 @@
-import { useState, useCallback, useRef, useLayoutEffect, useMemo } from "react";
+import {
+  useState,
+  useCallback,
+  useRef,
+  useLayoutEffect,
+  useMemo,
+  useEffect,
+} from "react";
 
 import Button from "@mui/material/Button";
 import Modal from "@mui/material/Modal";
@@ -6,15 +13,36 @@ import Stack from "@mui/material/Stack";
 import Paper from "@mui/material/Paper";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
+import Slider from "@mui/material/Slider";
 
 import { LIBRARY_FILE_TYPE } from "../../../../../enums";
 import { SingleFileComponent } from "../../types";
 import BoundEditor from "./bound-editor";
 
+const marks = [
+  { value: 0.1, label: "10%" },
+  { value: 1, label: "100%" },
+  { value: 5, label: "500%" },
+];
+
+function valueText(value: number): string {
+  return `${Math.round(value * 100)}%`;
+}
+
 const ImageEdit: SingleFileComponent<LIBRARY_FILE_TYPE.IMAGE> = ({ file }) => {
   const [isModalOpen, setModalOpen] = useState(false);
+  const [scale, setScale] = useState(1);
   const canvasRef = useRef(null);
   const boundEditor = useMemo(() => new BoundEditor(), []);
+
+  const handleScaleChange = useCallback(
+    (event: Event, value: number) => setScale(value),
+    [],
+  );
+
+  useEffect(() => {
+    boundEditor.scale = scale;
+  }, [boundEditor, scale]);
 
   useLayoutEffect(() => {
     if (isModalOpen) {
@@ -27,6 +55,11 @@ const ImageEdit: SingleFileComponent<LIBRARY_FILE_TYPE.IMAGE> = ({ file }) => {
   const onOpenModal = useCallback(() => setModalOpen(true), []);
 
   const onCloseModal = useCallback(() => setModalOpen(false), []);
+
+  const onResetTransform = useCallback(() => {
+    boundEditor.resetTransform();
+    setScale(1);
+  }, [boundEditor]);
 
   return (
     <>
@@ -64,7 +97,39 @@ const ImageEdit: SingleFileComponent<LIBRARY_FILE_TYPE.IMAGE> = ({ file }) => {
                 Props
               </Stack>
             </Stack>
-            <Stack gap={1} justifyContent="end" direction="row">
+            <Stack gap={1} direction="row" height={48} alignItems="center">
+              <Stack
+                direction="row"
+                gap={1}
+                sx={{
+                  paddingBottom: 1,
+                  paddingRight: 2,
+                  width: 256,
+                  height: 48,
+                  boxSizing: "border-box",
+                }}
+              >
+                <Typography sx={{ paddingTop: 0.25 }}>Scale:</Typography>
+                <Slider
+                  size="small"
+                  min={0.1}
+                  max={5}
+                  onChange={handleScaleChange}
+                  value={scale}
+                  getAriaValueText={valueText}
+                  step={0.1}
+                  valueLabelDisplay="auto"
+                  marks={marks}
+                />
+              </Stack>
+              <Button
+                variant="contained"
+                size="small"
+                onClick={onResetTransform}
+              >
+                Reset transform
+              </Button>
+              <Box flex={1} />
               <Button variant="contained" size="small">
                 Submit
               </Button>

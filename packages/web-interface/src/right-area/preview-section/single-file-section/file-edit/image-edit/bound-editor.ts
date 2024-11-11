@@ -12,7 +12,7 @@ export default class BoundEditor {
 
   private isDragging = false;
 
-  private lastPosition: { x: number; y: number } | null = null;
+  private lastPosition: Float32Array;
 
   private image: HTMLImageElement;
 
@@ -23,6 +23,7 @@ export default class BoundEditor {
   constructor() {
     this.image = new Image();
     this.transform = new Float32Array(3);
+    this.lastPosition = new Float32Array(2);
 
     this.onMouseDown = this.onMouseDown.bind(this);
     this.onMouseUp = this.onMouseUp.bind(this);
@@ -31,6 +32,8 @@ export default class BoundEditor {
     this.onTouchStart = this.onTouchStart.bind(this);
     this.onTouchEnd = this.onTouchEnd.bind(this);
     this.onTouchMove = this.onTouchMove.bind(this);
+
+    this.transform[2] = 1;
   }
 
   public init(
@@ -63,6 +66,14 @@ export default class BoundEditor {
     }
 
     setTimeout(() => this.init(file, canvasRef), 100);
+  }
+
+  public resetTransform(): void {
+    this.transform[0] = this.canvas.width >> 1;
+    this.transform[1] = this.canvas.height >> 1;
+    this.transform[2] = 1;
+
+    this.render();
   }
 
   private render(): void {
@@ -99,15 +110,15 @@ export default class BoundEditor {
     this.context.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
     this.context.fillStyle = "#808080";
-    const columnCount =
-      Math.ceil(this.canvas.width / (BoundEditor.CHECKER_SIZE << 1)) + 1;
-    const rowCount =
-      Math.ceil(this.canvas.height / BoundEditor.CHECKER_SIZE) + 1;
+    const checkerSize: number = BoundEditor.CHECKER_SIZE * this.scale;
+    const columnCount: number =
+      Math.ceil(this.canvas.width / (checkerSize * 2)) + 1;
+    const rowCount: number = Math.ceil(this.canvas.height / checkerSize) + 1;
 
-    const worldX = Math.floor(
+    const worldX: number = Math.floor(
       this.screenToWorldX(0) / BoundEditor.CHECKER_SIZE,
     );
-    const worldY = Math.floor(
+    const worldY: number = Math.floor(
       this.screenToWorldY(0) / BoundEditor.CHECKER_SIZE,
     );
     const offsetX = this.worldToScreenX(worldX * BoundEditor.CHECKER_SIZE);
@@ -119,11 +130,10 @@ export default class BoundEditor {
     for (i = 0; i < columnCount; ++i) {
       for (j = 0; j < rowCount; ++j) {
         this.context.fillRect(
-          ((i << 1) + ((j + indexOffset) % 2)) * BoundEditor.CHECKER_SIZE +
-            offsetX,
-          j * BoundEditor.CHECKER_SIZE + offsetY,
-          BoundEditor.CHECKER_SIZE,
-          BoundEditor.CHECKER_SIZE,
+          ((i << 1) + ((j + indexOffset) % 2)) * checkerSize + offsetX,
+          j * checkerSize + offsetY,
+          checkerSize,
+          checkerSize,
         );
       }
     }
@@ -143,30 +153,26 @@ export default class BoundEditor {
   }
 
   private screenToWorldX(screenX: number): number {
-    return (screenX - this.transform[0]) / this.transform[2];
+    return (screenX - this.worldX) / this.scale;
   }
 
   private screenToWorldY(screenY: number): number {
-    return (screenY - this.transform[1]) / this.transform[2];
+    return (screenY - this.worldY) / this.scale;
   }
 
   private worldToScreenX(worldX: number): number {
-    return this.transform[0] + worldX * this.transform[2];
+    return this.worldX + worldX * this.scale;
   }
 
   private worldToScreenY(worldY: number): number {
-    return this.transform[1] + worldY * this.transform[2];
+    return this.worldY + worldY * this.scale;
   }
 
   private addEventListeners(): void {
-    if (!this.canvas) return;
-
-    // Mouse events
     this.canvas.addEventListener("mousedown", this.onMouseDown);
     document.addEventListener("mouseup", this.onMouseUp);
     document.addEventListener("mousemove", this.onMouseMove);
 
-    // Touch events
     this.canvas.addEventListener("touchstart", this.onTouchStart);
     document.addEventListener("touchend", this.onTouchEnd);
     document.addEventListener("touchmove", this.onTouchMove);
@@ -174,49 +180,45 @@ export default class BoundEditor {
 
   private onMouseDown = (event: MouseEvent): void => {
     this.isDragging = true;
-    this.lastPosition = { x: event.clientX, y: event.clientY };
+    this.lastPosition[0] = event.clientX;
+    this.lastPosition[1] = event.clientY;
   };
 
   private onMouseUp = (): void => {
     this.isDragging = false;
-    this.lastPosition = null;
   };
 
   private onMouseMove = (event: MouseEvent): void => {
-    if (this.isDragging && this.lastPosition) {
-      const dx = event.clientX - this.lastPosition.x;
-      const dy = event.clientY - this.lastPosition.y;
-
-      this.updatePatternOffset(dx, dy);
-      this.lastPosition = { x: event.clientX, y: event.clientY };
+    if (this.isDragging) {
+      this.updateWorldoffset(event.clientX, event.clientY);
     }
   };
 
   private onTouchStart = (event: TouchEvent): void => {
-    this.isDragging = true;
     const touch = event.touches[0];
-    this.lastPosition = { x: touch.clientX, y: touch.clientY };
+    this.isDragging = true;
+    this.lastPosition[0] = touch.clientX;
+    this.lastPosition[1] = touch.clientY;
   };
 
   private onTouchEnd = (): void => {
     this.isDragging = false;
-    this.lastPosition = null;
   };
 
   private onTouchMove = (event: TouchEvent): void => {
-    if (this.isDragging && this.lastPosition) {
+    if (this.isDragging) {
       const touch = event.touches[0];
-      const dx = touch.clientX - this.lastPosition.x;
-      const dy = touch.clientY - this.lastPosition.y;
 
-      this.updatePatternOffset(dx, dy);
-      this.lastPosition = { x: touch.clientX, y: touch.clientY };
+      this.updateWorldoffset(touch.clientX, touch.clientY);
     }
   };
 
-  private updatePatternOffset(dx: number, dy: number): void {
-    this.transform[0] += dx;
-    this.transform[1] += dy;
+  private updateWorldoffset(x: number, y: number): void {
+    this.worldX += x - this.lastPosition[0];
+    this.worldY += y - this.lastPosition[1];
+
+    this.lastPosition[0] = x;
+    this.lastPosition[1] = y;
     this.render();
   }
 
@@ -233,5 +235,50 @@ export default class BoundEditor {
     this.canvas.removeEventListener("touchstart", this.onTouchStart);
     document.removeEventListener("touchend", this.onTouchEnd);
     document.removeEventListener("touchmove", this.onTouchMove);
+  }
+
+  public get scale(): number {
+    return this.transform[2];
+  }
+
+  public set scale(value: number) {
+    if (this.transform[2] === value) {
+      return;
+    }
+
+    const oldScale = this.transform[2];
+
+    // Find the center of the screen in screen coordinates
+    const screenCenterX = this.canvas.width / 2;
+    const screenCenterY = this.canvas.height / 2;
+
+    // Convert the screen center to world coordinates at the old scale
+    const worldCenterX = (screenCenterX - this.worldX) / oldScale;
+    const worldCenterY = (screenCenterY - this.worldY) / oldScale;
+
+    // Update the scale
+    this.transform[2] = value;
+
+    // Convert the world center back to screen coordinates at the new scale
+    this.worldX = screenCenterX - worldCenterX * value;
+    this.worldY = screenCenterY - worldCenterY * value;
+
+    this.render();
+  }
+
+  private get worldX(): number {
+    return this.transform[0];
+  }
+
+  private set worldX(value: number) {
+    this.transform[0] = value;
+  }
+
+  private get worldY(): number {
+    return this.transform[1];
+  }
+
+  private set worldY(value: number) {
+    this.transform[1] = value;
   }
 }
