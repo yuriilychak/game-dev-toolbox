@@ -28,7 +28,7 @@ const ImagePreview: SingleFileComponent<LIBRARY_FILE_TYPE.IMAGE> = ({
         maxHeight: 128,
         height: 128,
         width: "100%",
-        backgroundImage: 'url("assets/checkerPattern.svg")',
+        backgroundImage: 'url("assets/checkerPattern32.png")',
         backgroundRepeat: "repeat",
       }}
     >

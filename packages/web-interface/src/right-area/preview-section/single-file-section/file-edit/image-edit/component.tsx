@@ -22,7 +22,7 @@ import BoundEditor from "./bound-editor";
 const marks = [
   { value: 0.1, label: "10%" },
   { value: 1, label: "100%" },
-  { value: 5, label: "500%" },
+  { value: 4, label: "400%" },
 ];
 
 function valueText(value: number): string {
@@ -113,7 +113,7 @@ const ImageEdit: SingleFileComponent<LIBRARY_FILE_TYPE.IMAGE> = ({ file }) => {
                 <Slider
                   size="small"
                   min={0.1}
-                  max={5}
+                  max={4}
                   onChange={handleScaleChange}
                   value={scale}
                   getAriaValueText={valueText}

@@ -16,14 +16,23 @@ export default class BoundEditor {
 
   private image: HTMLImageElement;
 
+  private checkerImage: HTMLImageElement;
+
   private isImageLoaded: boolean;
 
-  private static CHECKER_SIZE = 32;
+  private isPatternLoaded: boolean;
+
+  private imageOffset: Int16Array;
+
+  private checkerPattern: CanvasPattern;
+
+  private worldPatternSize: number;
 
   constructor() {
     this.image = new Image();
     this.transform = new Float32Array(3);
     this.lastPosition = new Float32Array(2);
+    this.imageOffset = new Int16Array(2);
 
     this.onMouseDown = this.onMouseDown.bind(this);
     this.onMouseUp = this.onMouseUp.bind(this);
@@ -32,6 +41,15 @@ export default class BoundEditor {
     this.onTouchStart = this.onTouchStart.bind(this);
     this.onTouchEnd = this.onTouchEnd.bind(this);
     this.onTouchMove = this.onTouchMove.bind(this);
+
+    this.checkerImage = new Image();
+    this.checkerImage.src = "assets/checkerPattern256.png";
+
+    this.checkerImage.addEventListener("load", () => {
+      this.isPatternLoaded = true;
+      this.worldPatternSize = this.checkerImage.width >> 2;
+      this.render();
+    });
 
     this.transform[2] = 1;
   }
@@ -49,12 +67,11 @@ export default class BoundEditor {
       this.canvas.width = this.canvas.offsetWidth;
       this.canvas.height = this.canvas.offsetHeight;
 
-      this.transform[0] = this.canvas.width >> 1;
-      this.transform[1] = this.canvas.height >> 1;
-      this.transform[2] = 1;
+      this.imageOffset[0] = -this.file.data.resolution.width >> 1;
+      this.imageOffset[1] = -this.file.data.resolution.height >> 1;
 
       this.addEventListeners();
-      this.render();
+      this.resetTransform();
 
       this.image.src = this.file.data.src;
       this.image.addEventListener("load", () => {
@@ -77,16 +94,21 @@ export default class BoundEditor {
   }
 
   private render(): void {
+    if (this.canvas === null || this.context === null) {
+      return;
+    }
+
     this.drawCheckers();
 
     if (this.isImageLoaded) {
       const width = this.file.data.resolution.width;
       const height = this.file.data.resolution.height;
-      const screenX = this.worldToScreenX(-width >> 1);
-      const screenY = this.worldToScreenY(-height >> 1);
-      const screenWidth = this.worldToScreenX(width - (width >> 1)) - screenX;
+      const screenX = this.worldToScreenX(this.imageOffset[0]);
+      const screenY = this.worldToScreenY(this.imageOffset[1]);
+      const screenWidth =
+        this.worldToScreenX(width + this.imageOffset[0]) - screenX;
       const screenHeight =
-        this.worldToScreenY(height - (height >> 1)) - screenY;
+        this.worldToScreenY(height + this.imageOffset[1]) - screenY;
       this.context.drawImage(
         this.image,
         0,
@@ -104,52 +126,50 @@ export default class BoundEditor {
   }
 
   private drawCheckers(): void {
-    if (!this.canvas || !this.context) return;
+    if (!this.isPatternLoaded) {
+      return;
+    }
+
+    if (!this.checkerPattern) {
+      this.checkerPattern = this.context.createPattern(
+        this.checkerImage,
+        "repeat",
+      );
+    }
 
     this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
-    this.context.fillStyle = "#707070";
-    this.context.fillRect(0, 0, this.canvas.width, this.canvas.height);
+    const scale: number = this.scale / 4;
 
-    this.context.fillStyle = "#808080";
-    const checkerSize: number = BoundEditor.CHECKER_SIZE * this.scale;
-    const columnCount: number =
-      Math.ceil(this.canvas.width / (checkerSize * 2)) + 1;
-    const rowCount: number = Math.ceil(this.canvas.height / checkerSize) + 1;
-
-    const worldX: number = Math.floor(
-      this.screenToWorldX(0) / BoundEditor.CHECKER_SIZE,
+    const offsetX: number = this.worldToScreenX(
+      Math.floor(this.screenToWorldX(0) / this.worldPatternSize) *
+        this.worldPatternSize,
     );
-    const worldY: number = Math.floor(
-      this.screenToWorldY(0) / BoundEditor.CHECKER_SIZE,
+    const offsetY: number = this.worldToScreenY(
+      Math.floor(this.screenToWorldY(0) / this.worldPatternSize) *
+        this.worldPatternSize,
     );
-    const offsetX = this.worldToScreenX(worldX * BoundEditor.CHECKER_SIZE);
-    const offsetY = this.worldToScreenY(worldY * BoundEditor.CHECKER_SIZE);
-    const indexOffset = (worldX % 2) + (worldY % 2) + 2;
-    let i: number = 0;
-    let j: number = 0;
 
-    for (i = 0; i < columnCount; ++i) {
-      for (j = 0; j < rowCount; ++j) {
-        this.context.fillRect(
-          ((i << 1) + ((j + indexOffset) % 2)) * checkerSize + offsetX,
-          j * checkerSize + offsetY,
-          checkerSize,
-          checkerSize,
-        );
-      }
-    }
-
-    this.context.fillStyle = "#000";
+    this.context.save();
+    this.context.translate(offsetX, offsetY);
+    this.context.scale(scale, scale);
+    this.context.fillStyle = this.checkerPattern;
+    this.context.fillRect(
+      0,
+      0,
+      Math.ceil((this.canvas.width - offsetX) / scale),
+      Math.ceil((this.canvas.height - offsetY) / scale),
+    );
+    this.context.restore();
 
     const coordX = this.worldToScreenX(0);
     const coordY = this.worldToScreenY(0);
 
-    if (coordX > -1 && worldX < this.canvas.width + 1) {
+    if (coordX > -1 && coordX < this.canvas.width + 1) {
       this.context.fillRect(coordX - 1, 0, 2, this.canvas.height);
     }
 
-    if (coordY > -1 && worldY < this.canvas.height + 1) {
+    if (coordY > -1 && coordY < this.canvas.height + 1) {
       this.context.fillRect(0, coordY - 1, this.canvas.width, 2);
     }
   }
@@ -174,8 +194,6 @@ export default class BoundEditor {
     this.context.strokeStyle = "lime";
 
     const pointCount: number = 3;
-    const offsetX = -this.file.data.resolution.width >> 1;
-    const offsetY = -this.file.data.resolution.height >> 1;
     let i: number = 0;
     let j: number = 0;
     let indexOffset: number = 0;
@@ -191,10 +209,10 @@ export default class BoundEditor {
       for (j = 0; j < pointCount; ++j) {
         pointIndex = this.file.data.triangles[indexOffset + j] << 1;
         pointX = this.worldToScreenX(
-          this.file.data.polygon[pointIndex] + offsetX,
+          this.file.data.polygon[pointIndex] + this.imageOffset[0],
         );
         pointY = this.worldToScreenY(
-          this.file.data.polygon[pointIndex + 1] + offsetY,
+          this.file.data.polygon[pointIndex + 1] + this.imageOffset[1],
         );
 
         if (j === 0) {
