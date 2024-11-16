@@ -1,8 +1,8 @@
 export enum LIBRARY_FILE_TYPE {
-  NONE,
-  FOLDER,
-  IMAGE,
-  TEXTURE_ATLAS,
+  NONE = 0,
+  FOLDER = 1,
+  IMAGE = 2,
+  TEXTURE_ATLAS = 3,
 }
 
 export enum LIBRARY_ACTION {
@@ -13,10 +13,4 @@ export enum LIBRARY_ACTION {
   DELETE,
   SUBMIT,
   CANCEL,
-}
-
-export enum IMAGE_TYPE {
-  QUAD,
-  POLYGON,
-  MESH,
 }

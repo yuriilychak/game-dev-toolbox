@@ -254,6 +254,7 @@ export const createTextureAtlas =
       images: [] as string[],
       placement: [] as object[],
       isGenerated: false,
-      resolution: { width: 4096, height: 4096 },
+      width: 4096,
+      height: 4096,
     },
   });

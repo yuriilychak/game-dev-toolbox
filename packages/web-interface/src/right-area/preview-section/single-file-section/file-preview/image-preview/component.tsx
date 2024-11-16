@@ -1,40 +1,62 @@
-import { memo } from "react";
+import { memo, useRef, useState, useCallback, useEffect } from "react";
 
-import Stack from "@mui/material/Stack";
 import Box from "@mui/material/Box";
 
 import { formatSize } from "../../../../../helpers";
 import { LIBRARY_FILE_TYPE } from "../../../../../enums";
 import { SingleFileComponent } from "../../types";
 import { StatisticsContainer } from "../statistics-container";
+import { PREVIEW_CHECKER } from "../../../constants";
 
 const ImagePreview: SingleFileComponent<LIBRARY_FILE_TYPE.IMAGE> = ({
   file,
-}) => (
-  <StatisticsContainer
-    messages={[
-      `Format: ${file.data.extension}`,
-      `Size: ${formatSize(file.data.size)}`,
-      `Width: ${file.data.resolution.width}px`,
-      `Height: ${file.data.resolution.height}px`,
-    ]}
-  >
-    <Stack
-      justifyContent="center"
-      alignItems="center"
-      boxSizing="border-box"
-      padding={1}
-      sx={{
-        maxHeight: 128,
-        height: 128,
-        width: "100%",
-        backgroundImage: 'url("assets/checkerPattern32.png")',
-        backgroundRepeat: "repeat",
-      }}
+}) => {
+  const [isCanvasLoaded, setCanvasLoaded] = useState(false);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  const handleCanvasStatus = useCallback(() => {
+    if (canvasRef.current === null) {
+      setTimeout(handleCanvasStatus, 100);
+    } else {
+      setCanvasLoaded(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    handleCanvasStatus();
+  }, [handleCanvasStatus]);
+
+  useEffect(() => {
+    if (isCanvasLoaded) {
+      const canvas = canvasRef.current;
+      const context = canvasRef.current.getContext("2d");
+      const imageScale = Math.min(
+        (canvas.width - 8) / file.data.width,
+        (canvas.height - 8) / file.data.height,
+      );
+      const imageWidth = Math.round(file.data.width * imageScale);
+      const imageHeight = Math.round(file.data.height * imageScale);
+      const imageX = (canvas.width - imageWidth) >> 1;
+      const imageY = (canvas.height - imageHeight) >> 1;
+
+      context.fillStyle = context.createPattern(PREVIEW_CHECKER, "repeat");
+      context.fillRect(0, 0, canvas.width, canvas.height);
+      context.drawImage(file.data.src, imageX, imageY, imageWidth, imageHeight);
+    }
+  }, [isCanvasLoaded, file.data.src]);
+
+  return (
+    <StatisticsContainer
+      messages={[
+        `Format: ${file.data.extension}`,
+        `Size: ${formatSize(file.data.size)}`,
+        `Width: ${file.data.width}px`,
+        `Height: ${file.data.height}px`,
+      ]}
     >
-      <Box component="img" src={file.data.src} sx={{ maxHeight: "100%" }} />
-    </Stack>
-  </StatisticsContainer>
-);
+      <Box component="canvas" width="100%" height={128} ref={canvasRef} />
+    </StatisticsContainer>
+  );
+};
 
 export default memo(ImagePreview);

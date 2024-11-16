@@ -1,11 +1,11 @@
 import { LIBRARY_ACTION } from "../../../enums";
 
-import SvgIcon from "@mui/material/SvgIcon";
-
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 
-export const EXPAND_ICONS: Map<boolean, typeof SvgIcon> = new Map([
+import { IconMap } from "../../../types";
+
+export const EXPAND_ICONS: IconMap<boolean> = new Map([
   [true, ExpandMoreIcon],
   [false, NavigateNextIcon],
 ]);

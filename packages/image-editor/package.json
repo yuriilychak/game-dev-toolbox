@@ -1,0 +1,21 @@
+{
+  "name": "image-editor",
+  "version": "1.0.0",
+  "main": "src/index.ts",
+  "scripts": {
+    "build": "webpack",
+    "watch": "webpack --watch --config webpack.config.mjs",
+    "test": "jest",
+    "lint": "eslint src/**/*.ts",
+    "lint:fix": "eslint src/**/*.ts --fix"
+  },
+  "description": "Image editing tools for polygon and mesh generation",
+  "devDependencies": {},
+  "keywords": [
+    "polygons",
+    "algorythm",
+    "image"
+  ],
+  "author": "yurii.lychak",
+  "license": "MIT"
+}

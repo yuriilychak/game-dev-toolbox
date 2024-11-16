@@ -1,12 +1,14 @@
-import { IMAGE_TYPE, LIBRARY_FILE_TYPE } from "./enums";
+import { IMAGE_TYPE } from "image-editor";
 
-export type ImageResolution = { width: number; height: number };
+import SvgIcon from "@mui/material/SvgIcon";
+import { LIBRARY_FILE_TYPE } from "./enums";
 
 export type LibraryImageData = {
-  src: string;
+  src: ImageBitmap;
   extension: string;
   size: number;
-  resolution: ImageResolution;
+  width: number;
+  height: number;
   type: IMAGE_TYPE;
   polygon: number[];
   triangles: number[];
@@ -17,7 +19,8 @@ export type LibraryTextureAtlasData = {
   size: number;
   images: string[];
   placement: object[];
-  resolution: ImageResolution;
+  width: number;
+  height: number;
   isGenerated: boolean;
 };
 
@@ -47,3 +50,14 @@ export type LibraryContextData = {
 export type PreviewContextData = {
   selectedFiles: LibraryFile[];
 };
+
+export interface FieldOption {
+  label: string;
+  value: string | number;
+  disabled?: boolean;
+  Icon?: typeof SvgIcon;
+}
+
+export type IconMap<T> = Map<T, typeof SvgIcon>;
+
+export type LocaleMap<T extends number> = Map<T, string>;

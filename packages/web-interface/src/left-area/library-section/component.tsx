@@ -70,7 +70,6 @@ const LibrarySection: FC = () => {
       </Paper>
       <Modal
         open={isAddModalOpen}
-        onClose={handleCloseAddModal}
         sx={{ display: "flex", alignItems: "center", justifyContent: "center" }}
       >
         <AddFileModal

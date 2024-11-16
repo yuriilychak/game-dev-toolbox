@@ -1,4 +1,3 @@
-import { SvgIcon } from "@mui/material";
 import NoteAddIcon from "@mui/icons-material/NoteAdd";
 import CreateNewFolderIcon from "@mui/icons-material/CreateNewFolder";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -7,16 +6,16 @@ import CheckIcon from "@mui/icons-material/Check";
 import CloseIcon from "@mui/icons-material/Close";
 
 import { LIBRARY_ACTION, LIBRARY_FILE_TYPE } from "../../enums";
+import { IconMap } from "../../types";
 
-export const LIBRARY_ACTION_ICONS: Map<LIBRARY_ACTION, typeof SvgIcon> =
-  new Map([
-    [LIBRARY_ACTION.ADD_FILE, NoteAddIcon],
-    [LIBRARY_ACTION.ADD_FOLDER, CreateNewFolderIcon],
-    [LIBRARY_ACTION.DELETE, DeleteIcon],
-    [LIBRARY_ACTION.RENAME, EditIcon],
-    [LIBRARY_ACTION.SUBMIT, CheckIcon],
-    [LIBRARY_ACTION.CANCEL, CloseIcon],
-  ]);
+export const LIBRARY_ACTION_ICONS: IconMap<LIBRARY_ACTION> = new Map([
+  [LIBRARY_ACTION.ADD_FILE, NoteAddIcon],
+  [LIBRARY_ACTION.ADD_FOLDER, CreateNewFolderIcon],
+  [LIBRARY_ACTION.DELETE, DeleteIcon],
+  [LIBRARY_ACTION.RENAME, EditIcon],
+  [LIBRARY_ACTION.SUBMIT, CheckIcon],
+  [LIBRARY_ACTION.CANCEL, CloseIcon],
+]);
 
 export const ROOT_ACTIONS: LIBRARY_ACTION[] = [
   LIBRARY_ACTION.ADD_FILE,

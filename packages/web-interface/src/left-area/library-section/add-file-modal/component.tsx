@@ -1,25 +1,28 @@
-import { FC, memo } from "react";
+import { FC, memo, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import Paper from "@mui/material/Paper";
-import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
 import InputLabel from "@mui/material/InputLabel";
-import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
-import Select from "@mui/material/Select";
 
 import { ADD_TYPES } from "../constants";
 import {
   LIBRARY_ITEM_ICONS,
   LIBRARY_ITEM_TYPE_LOCALES,
 } from "../../../constants";
-import { LIBRARY_FILE_TYPE } from "../../../enums";
-import { LibraryFile } from "../../../types";
+import { LIBRARY_ACTION, LIBRARY_FILE_TYPE } from "../../../enums";
+import { FieldOption, LibraryFile } from "../../../types";
 import { DnDArea } from "./dnd-area";
 import { useAddFileModal } from "./hooks";
+import {
+  ButtonGroup,
+  ButtonGroupAction,
+  SelectField,
+} from "../../../shared-components";
+import { FOOTER_ACTIONS } from "./constants";
 
 type AddFileModalProps = {
   onSubmit(items: LibraryFile[]): void;
@@ -37,9 +40,29 @@ const AddFileModal: FC<AddFileModalProps> = ({ onCancel, onSubmit }) => {
     handleChangeFiles,
     handleNameChange,
     handleRemoveFile,
-    handleSubmit,
+    handleAction,
     handleToggleLoading,
-  } = useAddFileModal(onSubmit);
+  } = useAddFileModal(onSubmit, onCancel);
+
+  const selectOptions = useMemo<FieldOption[]>(
+    () =>
+      ADD_TYPES.map((value) => ({
+        value,
+        label: t(LIBRARY_ITEM_TYPE_LOCALES.get(value)),
+        Icon: LIBRARY_ITEM_ICONS.get(value),
+      })),
+    [t],
+  );
+
+  const buttonActions: ButtonGroupAction<LIBRARY_ACTION>[] = useMemo(
+    () =>
+      FOOTER_ACTIONS.map((action) =>
+        action.action === LIBRARY_ACTION.SUBMIT
+          ? { ...action, disabled: isSubmitDisabled }
+          : action,
+      ),
+    [isSubmitDisabled],
+  );
 
   return (
     <Paper sx={{ width: 512 }}>
@@ -53,33 +76,14 @@ const AddFileModal: FC<AddFileModalProps> = ({ onCancel, onSubmit }) => {
             <InputLabel id="fileTypeLabel" required>
               {t("library.addModal.type.label")}
             </InputLabel>
-            <Select
-              required
-              size="small"
-              labelId="fileTypeLabel"
+            <SelectField
               id="fileTypeSelect"
-              value={type.toString()}
               label={t("library.addModal.type.label")}
+              required
+              value={type}
               onChange={handleAddTypeChange}
-              sx={{ "& [role='combobox']": { display: "flex", gap: 1 } }}
-            >
-              {ADD_TYPES.map((type) => {
-                const Icon = LIBRARY_ITEM_ICONS.get(type);
-
-                return (
-                  <MenuItem
-                    value={type}
-                    key={type}
-                    sx={{ display: "flex", gap: 1 }}
-                  >
-                    <Icon />
-                    <Typography>
-                      {t(LIBRARY_ITEM_TYPE_LOCALES.get(type))}
-                    </Typography>
-                  </MenuItem>
-                );
-              })}
-            </Select>
+              options={selectOptions}
+            />
           </FormControl>
           {type === LIBRARY_FILE_TYPE.TEXTURE_ATLAS && (
             <TextField
@@ -101,19 +105,12 @@ const AddFileModal: FC<AddFileModalProps> = ({ onCancel, onSubmit }) => {
               nodes={files}
             />
           )}
-          <Stack direction="row" gap={1} justifyContent="end">
-            <Button
-              variant="contained"
-              size="small"
-              disabled={isSubmitDisabled}
-              onClick={handleSubmit}
-            >
-              {t("library.action.submit")}
-            </Button>
-            <Button variant="outlined" size="small" onClick={onCancel}>
-              {t("library.action.cancel")}
-            </Button>
-          </Stack>
+          <ButtonGroup
+            width="100%"
+            actions={buttonActions}
+            dividerIndex={0}
+            onClick={handleAction}
+          />
         </Stack>
       </Stack>
     </Paper>

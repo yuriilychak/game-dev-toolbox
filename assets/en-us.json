@@ -14,8 +14,21 @@
   "library.action.addFile": "Add file(s)",
   "library.action.cancel": "Cancel",
   "library.action.submit": "Submit",
+  "preview.singleFile.edit.image.button.edit": "Edit bounds",
+  "preview.singleFile.edit.image.modal.button.reset": "Reset transform",
+  "preview.singleFile.edit.image.modal.label.scale": "Scale:",
+  "preview.singleFile.edit.image.modal.button.submit": "Submit",
+  "preview.singleFile.edit.image.modal.button.cancel": "Cancel",
+  "preview.singleFile.edit.image.modal.button.crop": "Crop",
+  "preview.singleFile.edit.image.modal.button.generate": "Generate",
+  "preview.singleFile.edit.image.modal.button.edit": "Edit",
+  "preview.singleFile.edit.image.modal.title": "Edit bounds",
+  "preview.singleFile.edit.image.modal.type.label": "Bound type",
   "fileType.image": "Image",
   "fileType.textureAtlas": "Texture atlas",
   "fileType.folder": "Folder",
-  "fileType.none": "Empty"
+  "fileType.none": "Empty",
+  "imageType.quad": "Quad",
+  "imageType.polygon": "Polygon",
+  "imageType.mesh": "Mesh"
 }

@@ -1,18 +1,21 @@
-import { ChangeEventHandler, useCallback, useState } from "react";
+import { ChangeEventHandler, useCallback, useState, useRef } from "react";
 
-import { SelectChangeEvent } from "@mui/material/Select";
-
-import { LIBRARY_FILE_TYPE } from "../../../enums";
+import { LIBRARY_ACTION, LIBRARY_FILE_TYPE } from "../../../enums";
 import { LibraryFile } from "../../../types";
 import { getSubmitDisabled } from "./helpers";
 import { createTextureAtlas } from "../helpers";
 
-export function useAddFileModal(onSubmit: (items: LibraryFile[]) => void) {
+export function useAddFileModal(
+  onSubmit: (items: LibraryFile[]) => void,
+  onCancel: () => void,
+) {
   const [files, setFiles] = useState<LibraryFile[]>([]);
   const [type, setType] = useState<LIBRARY_FILE_TYPE>(LIBRARY_FILE_TYPE.NONE);
   const [isLoading, setLoading] = useState<boolean>(false);
-
+  const filesRef = useRef(files);
   const isSubmitDisabled: boolean = isLoading || getSubmitDisabled(type, files);
+
+  filesRef.current = files;
 
   const handleChangeFiles = useCallback(
     (nodes: LibraryFile[]) =>
@@ -26,8 +29,8 @@ export function useAddFileModal(onSubmit: (items: LibraryFile[]) => void) {
     [],
   );
 
-  const handleAddTypeChange = useCallback((event: SelectChangeEvent) => {
-    const nextType = parseInt(event.target.value) as LIBRARY_FILE_TYPE;
+  const handleAddTypeChange = useCallback((rawValue: string) => {
+    const nextType = parseInt(rawValue) as LIBRARY_FILE_TYPE;
     const nextFiles: LibraryFile[] =
       nextType === LIBRARY_FILE_TYPE.TEXTURE_ATLAS
         ? [createTextureAtlas()]
@@ -50,6 +53,22 @@ export function useAddFileModal(onSubmit: (items: LibraryFile[]) => void) {
     [],
   );
 
+  const handleAction = useCallback(
+    (action: LIBRARY_ACTION) => {
+      console.log("ACTION", action);
+      switch (action) {
+        case LIBRARY_ACTION.SUBMIT:
+          onSubmit(filesRef.current);
+          break;
+        case LIBRARY_ACTION.CANCEL:
+          onCancel();
+          break;
+        default:
+      }
+    },
+    [onSubmit, onCancel],
+  );
+
   return {
     isLoading,
     isSubmitDisabled,
@@ -61,5 +80,6 @@ export function useAddFileModal(onSubmit: (items: LibraryFile[]) => void) {
     handleRemoveFile,
     handleSubmit,
     handleToggleLoading,
+    handleAction,
   };
 }

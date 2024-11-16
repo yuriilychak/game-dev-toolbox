@@ -1,4 +1,5 @@
-import { IMAGE_TYPE, LIBRARY_FILE_TYPE } from "../../../enums";
+import { IMAGE_TYPE } from "image-editor";
+import { LIBRARY_FILE_TYPE } from "../../../enums";
 import { generateUUID } from "../../../helpers";
 import { LibraryFile, LibraryImageData } from "../../../types";
 
@@ -13,7 +14,7 @@ export async function filesToLibraryItem(
   let size: number = 0;
   let src: string = "";
   let extension: string = "";
-  let resolution: { width: number; height: number } = null;
+  let resolution: { width: number; height: number; src: ImageBitmap } = null;
   let data: LibraryImageData = null;
   let labelSplit: string[] = null;
 
@@ -30,15 +31,19 @@ export async function filesToLibraryItem(
     });
 
     resolution = await new Promise((resolve) => {
-      img.onload = () => resolve({ width: img.width, height: img.height });
+      img.onload = async () =>
+        resolve({
+          width: img.width,
+          height: img.height,
+          src: await createImageBitmap(img),
+        });
       img.src = src;
     });
 
     data = {
-      src,
+      ...resolution,
       extension,
       size,
-      resolution,
       type: IMAGE_TYPE.QUAD,
       polygon: [0, 0, img.width, 0, img.width, img.height, 0, img.height],
       triangles: [0, 1, 2, 0, 2, 3],

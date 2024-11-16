@@ -1,11 +1,5 @@
-import {
-  useState,
-  useCallback,
-  useRef,
-  useLayoutEffect,
-  useMemo,
-  useEffect,
-} from "react";
+import { useMemo } from "react";
+import { useTranslation } from "react-i18next";
 
 import Button from "@mui/material/Button";
 import Modal from "@mui/material/Modal";
@@ -17,75 +11,68 @@ import Slider from "@mui/material/Slider";
 
 import { LIBRARY_FILE_TYPE } from "../../../../../enums";
 import { SingleFileComponent } from "../../types";
-import BoundEditor from "./bound-editor";
-
-const marks = [
-  { value: 0.1, label: "10%" },
-  { value: 1, label: "100%" },
-  { value: 4, label: "400%" },
-];
+import useImageEdit from "./hooks";
+import {
+  FOOTER_ACTIONS,
+  IMAGE_TYPES,
+  SCALE_MARKS,
+  STYLES,
+  TYPE_ACTIONS,
+} from "./constants";
+import { FieldOption } from "../../../../../types";
+import { ButtonGroup, SelectField } from "../../../../../shared-components";
 
 function valueText(value: number): string {
   return `${Math.round(value * 100)}%`;
 }
 
 const ImageEdit: SingleFileComponent<LIBRARY_FILE_TYPE.IMAGE> = ({ file }) => {
-  const [isModalOpen, setModalOpen] = useState(false);
-  const [scale, setScale] = useState(1);
-  const canvasRef = useRef(null);
-  const boundEditor = useMemo(() => new BoundEditor(), []);
+  const { t } = useTranslation();
+  const {
+    scale,
+    type,
+    isModalOpen,
+    canvasRef,
+    canvasWrapperRef,
+    handleOpenModal,
+    handleScaleChange,
+    handleChangeType,
+    handleAction,
+  } = useImageEdit(file);
 
-  const handleScaleChange = useCallback(
-    (event: Event, value: number) => setScale(value),
-    [],
+  const imageTypeOptions = useMemo<FieldOption[]>(
+    () => IMAGE_TYPES.map((value) => ({ ...value, label: t(value.label) })),
+    [t],
   );
 
-  useEffect(() => {
-    boundEditor.scale = scale;
-  }, [boundEditor, scale]);
-
-  useLayoutEffect(() => {
-    if (isModalOpen) {
-      boundEditor.init(file, canvasRef);
-    }
-
-    return boundEditor.destroy.bind(boundEditor);
-  }, [file, isModalOpen, boundEditor]);
-
-  const onOpenModal = useCallback(() => setModalOpen(true), []);
-
-  const onCloseModal = useCallback(() => setModalOpen(false), []);
-
-  const onResetTransform = useCallback(() => {
-    boundEditor.resetTransform();
-    setScale(1);
-  }, [boundEditor]);
+  const typeActions = TYPE_ACTIONS.get(type);
 
   return (
     <>
       <Stack justifyContent="center" alignItems="center" padding={1}>
-        <Button variant="contained" onClick={onOpenModal} size="small">
-          Edit bounds
+        <Button variant="contained" onClick={handleOpenModal} size="small">
+          {t("preview.singleFile.edit.image.button.edit")}
         </Button>
       </Stack>
-      <Modal
-        open={isModalOpen}
-        onClose={onCloseModal}
-        sx={{ display: "flex", alignItems: "center", justifyContent: "center" }}
-      >
-        <Paper
-          elevation={2}
-          sx={{
-            width: "96vw",
-            height: "96vh",
-            padding: 2,
-            boxSizing: "border-box",
-          }}
-        >
-          <Stack height="100%" width="100%" gap={1}>
-            <Typography variant="h5">Edit bounds</Typography>
-            <Stack flex={1} direction="row">
-              <Box flex={1} height="100%">
+      <Modal open={isModalOpen} sx={STYLES.MODAL}>
+        <Paper elevation={2} sx={STYLES.MODAL_ROOT}>
+          <Stack
+            height="100%"
+            width="100%"
+            gap={1}
+            maxHeight="100%"
+            overflow="hidden"
+          >
+            <Typography variant="h5">
+              {t("preview.singleFile.edit.image.modal.title")}
+            </Typography>
+            <Stack flex={1} direction="row" overflow="hidden">
+              <Box
+                flex={1}
+                height="100%"
+                overflow="hidden"
+                ref={canvasWrapperRef}
+              >
                 <Box
                   component="canvas"
                   width="100%"
@@ -93,23 +80,32 @@ const ImageEdit: SingleFileComponent<LIBRARY_FILE_TYPE.IMAGE> = ({ file }) => {
                   ref={canvasRef}
                 />
               </Box>
-              <Stack width={256} height="100%" paddingX={2}>
-                Props
+              <Stack
+                width={256}
+                height="100%"
+                paddingLeft={2}
+                paddingTop={1}
+                gap={1}
+              >
+                <SelectField
+                  label={t("preview.singleFile.edit.image.modal.type.label")}
+                  id="imageType"
+                  options={imageTypeOptions}
+                  value={type}
+                  onChange={handleChangeType}
+                />
+                <ButtonGroup
+                  actions={typeActions}
+                  onClick={handleAction}
+                  width="100%"
+                />
               </Stack>
             </Stack>
             <Stack gap={1} direction="row" height={48} alignItems="center">
-              <Stack
-                direction="row"
-                gap={1}
-                sx={{
-                  paddingBottom: 1,
-                  paddingRight: 2,
-                  width: 256,
-                  height: 48,
-                  boxSizing: "border-box",
-                }}
-              >
-                <Typography sx={{ paddingTop: 0.25 }}>Scale:</Typography>
+              <Stack direction="row" gap={1} sx={STYLES.SCALE_CONTAINER}>
+                <Typography sx={STYLES.SCALE_LABEL}>
+                  {t("preview.singleFile.edit.image.modal.label.scale")}
+                </Typography>
                 <Slider
                   size="small"
                   min={0.1}
@@ -119,23 +115,15 @@ const ImageEdit: SingleFileComponent<LIBRARY_FILE_TYPE.IMAGE> = ({ file }) => {
                   getAriaValueText={valueText}
                   step={0.1}
                   valueLabelDisplay="auto"
-                  marks={marks}
+                  marks={SCALE_MARKS}
                 />
               </Stack>
-              <Button
-                variant="contained"
-                size="small"
-                onClick={onResetTransform}
-              >
-                Reset transform
-              </Button>
-              <Box flex={1} />
-              <Button variant="contained" size="small">
-                Submit
-              </Button>
-              <Button variant="outlined" size="small" onClick={onCloseModal}>
-                Cancel
-              </Button>
+              <ButtonGroup
+                flex={1}
+                actions={FOOTER_ACTIONS}
+                onClick={handleAction}
+                dividerIndex={1}
+              />
             </Stack>
           </Stack>
         </Paper>
