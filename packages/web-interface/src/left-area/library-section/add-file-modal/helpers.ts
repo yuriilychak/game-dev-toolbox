@@ -1,56 +1,44 @@
-import { IMAGE_TYPE } from "image-editor";
+import { formatImageData } from "image-editor";
 import { LIBRARY_FILE_TYPE } from "../../../enums";
 import { generateUUID } from "../../../helpers";
-import { LibraryFile, LibraryImageData } from "../../../types";
+import { LibraryFile } from "../../../types";
+
+type FileData = {
+  buffer: ArrayBuffer;
+  type: string;
+  label: string;
+  size: number;
+  index: number;
+};
 
 export async function filesToLibraryItem(
   files: File[],
   type: LIBRARY_FILE_TYPE,
 ): Promise<LibraryFile[]> {
   const result: LibraryFile[] = [];
-  const reader: FileReader = new FileReader();
-  const img: HTMLImageElement = new Image();
-  let label: string = "";
-  let size: number = 0;
-  let src: string = "";
-  let extension: string = "";
-  let resolution: { width: number; height: number; src: ImageBitmap } = null;
-  let data: LibraryImageData = null;
-  let labelSplit: string[] = null;
+  const fileData: FileData[] = await Promise.all(
+    files.map(async (file, index) => {
+      const buffer: ArrayBuffer = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result as ArrayBuffer);
+        reader.onerror = () => reject(new Error("Failed to read file."));
+        reader.readAsArrayBuffer(file);
+      });
 
-  for (const file of files) {
-    size = file.size;
-    labelSplit = file.name.split(".");
-    extension = labelSplit.pop().toUpperCase();
-    label = labelSplit.join(".").substring(0, 32);
+      return {
+        type: file.type,
+        size: file.size,
+        label: file.name,
+        index,
+        buffer,
+      };
+    }),
+  );
 
-    src = await new Promise((resolve, reject) => {
-      reader.onload = () => resolve(reader.result as string);
-      reader.onerror = () => reject(new Error("Failed to read file."));
-      reader.readAsDataURL(file);
-    });
+  const imageData = await formatImageData(fileData);
 
-    resolution = await new Promise((resolve) => {
-      img.onload = async () =>
-        resolve({
-          width: img.width,
-          height: img.height,
-          src: await createImageBitmap(img),
-        });
-      img.src = src;
-    });
-
-    data = {
-      ...resolution,
-      extension,
-      size,
-      type: IMAGE_TYPE.QUAD,
-      polygon: [0, 0, img.width, 0, img.width, img.height, 0, img.height],
-      triangles: [0, 1, 2, 0, 2, 3],
-      triangleCount: 2,
-    };
-
-    result.push({ label, id: generateUUID(), type, data });
+  for (const data of imageData) {
+    result.push({ label: data.inputLabel, id: generateUUID(), type, data });
   }
 
   return result;

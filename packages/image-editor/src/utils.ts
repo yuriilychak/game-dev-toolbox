@@ -1,4 +1,6 @@
+import ImageCropService from "./image-crop-service";
 import { maxInt, minInt, intSign } from "./math";
+import { ImageFileData, LibraryImageData } from "./types";
 
 export function joinCoords(
   x: number,
@@ -71,4 +73,14 @@ export function formatDimension(
   result[2] = dimensionDiff - (dimensionDiff >> 1);
 
   return result;
+}
+
+export async function formatImageData(
+  fileData: ImageFileData[],
+): Promise<LibraryImageData[]> {
+  return new Promise((resolve, reject) => {
+    const workerPool = new ImageCropService();
+
+    workerPool.start(fileData, (result) => resolve(result), reject);
+  });
 }

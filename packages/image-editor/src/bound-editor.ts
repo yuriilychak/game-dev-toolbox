@@ -1,3 +1,4 @@
+import PolygonGenerator from "./polygon-generator";
 import { LibraryFile } from "./types";
 
 export default class BoundEditor {
@@ -82,6 +83,13 @@ export default class BoundEditor {
     this.transform[2] = 1;
 
     this.render();
+  }
+
+  public generatePolygon(): void {
+    const polygonGenerator = new PolygonGenerator(this.file.data.src);
+    const bounds = polygonGenerator.generate();
+
+    console.log(bounds);
   }
 
   public render(): void {
@@ -181,7 +189,8 @@ export default class BoundEditor {
   }
 
   private drawPolygon(): void {
-    const pointCount: number = this.file.data.polygon.length >> 1;
+    const polygon = new Uint16Array(this.file.data.polygon);
+    const pointCount: number = polygon.length >> 1;
     let i: number = 0;
     let pointX: number = 0;
     let pointY: number = 0;
@@ -191,12 +200,8 @@ export default class BoundEditor {
     this.context.beginPath();
 
     for (i = 0; i < pointCount; ++i) {
-      pointX = this.worldToScreenX(
-        this.file.data.polygon[i << 1] + this.imageOffset[0],
-      );
-      pointY = this.worldToScreenY(
-        this.file.data.polygon[(i << 1) + 1] + this.imageOffset[1],
-      );
+      pointX = this.worldToScreenX(polygon[i << 1] + this.imageOffset[0]);
+      pointY = this.worldToScreenY(polygon[(i << 1) + 1] + this.imageOffset[1]);
 
       if (i === 0) {
         this.context.moveTo(pointX, pointY);
@@ -210,6 +215,8 @@ export default class BoundEditor {
   }
 
   private drawTriangles(): void {
+    const triangles = new Uint8Array(this.file.data.triangles);
+    const polygon = new Uint16Array(this.file.data.polygon);
     const pointCount: number = 3;
     let i: number = 0;
     let j: number = 0;
@@ -226,12 +233,10 @@ export default class BoundEditor {
       this.context.beginPath();
 
       for (j = 0; j < pointCount; ++j) {
-        pointIndex = this.file.data.triangles[indexOffset + j] << 1;
-        pointX = this.worldToScreenX(
-          this.file.data.polygon[pointIndex] + this.imageOffset[0],
-        );
+        pointIndex = triangles[indexOffset + j] << 1;
+        pointX = this.worldToScreenX(polygon[pointIndex] + this.imageOffset[0]);
         pointY = this.worldToScreenY(
-          this.file.data.polygon[pointIndex + 1] + this.imageOffset[1],
+          polygon[pointIndex + 1] + this.imageOffset[1],
         );
 
         if (j === 0) {

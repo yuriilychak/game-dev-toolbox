@@ -1,19 +1,7 @@
-import { IMAGE_TYPE } from "image-editor";
+import type { LibraryImageData } from "image-editor";
 
 import SvgIcon from "@mui/material/SvgIcon";
 import { LIBRARY_FILE_TYPE } from "./enums";
-
-export type LibraryImageData = {
-  src: ImageBitmap;
-  extension: string;
-  size: number;
-  width: number;
-  height: number;
-  type: IMAGE_TYPE;
-  polygon: number[];
-  triangles: number[];
-  triangleCount: number;
-};
 
 export type LibraryTextureAtlasData = {
   size: number;

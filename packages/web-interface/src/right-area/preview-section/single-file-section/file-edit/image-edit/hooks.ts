@@ -73,6 +73,9 @@ export default function useImageEdit(
           boundEditor.resetTransform();
           setScale(1);
           break;
+        case IMAGE_EDITOR_ACTIONS.GENERATE:
+          boundEditor.generatePolygon();
+          break;
       }
     },
     [boundEditor],
