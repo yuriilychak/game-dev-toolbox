@@ -1,6 +1,8 @@
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 
+import { IMAGE_TYPE } from "image-editor";
+
 import Button from "@mui/material/Button";
 import Modal from "@mui/material/Modal";
 import Stack from "@mui/material/Stack";
@@ -8,6 +10,8 @@ import Paper from "@mui/material/Paper";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Slider from "@mui/material/Slider";
+import FormControlLabel from "@mui/material/FormControlLabel/FormControlLabel";
+import Switch from "@mui/material/Switch/Switch";
 
 import { LIBRARY_FILE_TYPE } from "../../../../../enums";
 import { SingleFileComponent } from "../../types";
@@ -31,6 +35,8 @@ const ImageEdit: SingleFileComponent<LIBRARY_FILE_TYPE.IMAGE> = ({ file }) => {
   const {
     scale,
     type,
+    isProcessing,
+    isFixBorder,
     isModalOpen,
     canvasRef,
     canvasWrapperRef,
@@ -38,6 +44,7 @@ const ImageEdit: SingleFileComponent<LIBRARY_FILE_TYPE.IMAGE> = ({ file }) => {
     handleScaleChange,
     handleChangeType,
     handleAction,
+    handleToggleBorder,
   } = useImageEdit(file);
 
   const imageTypeOptions = useMemo<FieldOption[]>(
@@ -93,12 +100,24 @@ const ImageEdit: SingleFileComponent<LIBRARY_FILE_TYPE.IMAGE> = ({ file }) => {
                   options={imageTypeOptions}
                   value={type}
                   onChange={handleChangeType}
+                  disabled={isProcessing}
                 />
-                <ButtonGroup
-                  actions={typeActions}
-                  onClick={handleAction}
-                  width="100%"
-                />
+                {type === IMAGE_TYPE.QUAD && (
+                  <FormControlLabel
+                    disabled={isProcessing}
+                    onClick={handleToggleBorder}
+                    control={<Switch checked={isFixBorder} />}
+                    label="Add 1px padding"
+                  />
+                )}
+                {!!typeActions.length && (
+                  <ButtonGroup
+                    disabled={isProcessing}
+                    actions={typeActions}
+                    onClick={handleAction}
+                    width="100%"
+                  />
+                )}
               </Stack>
             </Stack>
             <Stack gap={1} direction="row" height={48} alignItems="center">
@@ -120,6 +139,7 @@ const ImageEdit: SingleFileComponent<LIBRARY_FILE_TYPE.IMAGE> = ({ file }) => {
               </Stack>
               <ButtonGroup
                 flex={1}
+                disabled={isProcessing}
                 actions={FOOTER_ACTIONS}
                 onClick={handleAction}
                 dividerIndex={1}

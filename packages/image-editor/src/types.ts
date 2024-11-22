@@ -5,11 +5,10 @@ export type LibraryImageData = {
   extension: string;
   inputLabel: string;
   size: number;
-  width: number;
-  height: number;
   type: IMAGE_TYPE;
-  polygon: ArrayBuffer;
-  triangles: ArrayBuffer;
+  isFixBorder: boolean;
+  polygons: Uint16Array[];
+  triangles: Uint8Array[];
   triangleCount: number;
 };
 

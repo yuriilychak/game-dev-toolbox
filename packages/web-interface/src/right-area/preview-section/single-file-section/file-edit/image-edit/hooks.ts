@@ -17,6 +17,9 @@ export default function useImageEdit(
   const [isModalOpen, setModalOpen] = useState<boolean>(false);
   const [type, setType] = useState<IMAGE_TYPE>(file.data.type);
   const [scale, setScale] = useState<number>(1);
+  const [isChanged, setChanged] = useState<boolean>(false);
+  const [isFixBorder, setFixBorder] = useState<boolean>(false);
+  const [isProcessing, setProcessing] = useState<boolean>(false);
   const canvasWrapperRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const boundEditor = useMemo(() => new BoundEditor(), []);
@@ -53,6 +56,8 @@ export default function useImageEdit(
     [],
   );
 
+  const handleProcessFinish = useCallback(() => setProcessing(false), []);
+
   const handleOpenModal = useCallback(() => setModalOpen(true), []);
 
   const handleChangeType = useCallback(
@@ -81,8 +86,26 @@ export default function useImageEdit(
     [boundEditor],
   );
 
+  const handleToggleBorder = useCallback(
+    () =>
+      setFixBorder((prevFixBorder) => {
+        const nextFixBorder = !prevFixBorder;
+
+        setProcessing(true);
+        setChanged(file.data.isFixBorder !== nextFixBorder);
+
+        boundEditor.fixQuadBorder(nextFixBorder, handleProcessFinish);
+
+        return nextFixBorder;
+      }),
+    [boundEditor, file, handleProcessFinish],
+  );
+
   return {
+    isChanged,
+    isFixBorder,
     isModalOpen,
+    isProcessing,
     canvasRef,
     canvasWrapperRef,
     scale,
@@ -91,5 +114,6 @@ export default function useImageEdit(
     handleOpenModal,
     handleChangeType,
     handleAction,
+    handleToggleBorder,
   };
 }

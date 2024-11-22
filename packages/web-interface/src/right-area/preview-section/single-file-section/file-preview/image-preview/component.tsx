@@ -31,11 +31,11 @@ const ImagePreview: SingleFileComponent<LIBRARY_FILE_TYPE.IMAGE> = ({
       const canvas = canvasRef.current;
       const context = canvasRef.current.getContext("2d");
       const imageScale = Math.min(
-        (canvas.width - 8) / file.data.width,
-        (canvas.height - 8) / file.data.height,
+        (canvas.width - 8) / file.data.src.width,
+        (canvas.height - 8) / file.data.src.height,
       );
-      const imageWidth = Math.round(file.data.width * imageScale);
-      const imageHeight = Math.round(file.data.height * imageScale);
+      const imageWidth = Math.round(file.data.src.width * imageScale);
+      const imageHeight = Math.round(file.data.src.height * imageScale);
       const imageX = (canvas.width - imageWidth) >> 1;
       const imageY = (canvas.height - imageHeight) >> 1;
 
@@ -50,8 +50,8 @@ const ImagePreview: SingleFileComponent<LIBRARY_FILE_TYPE.IMAGE> = ({
       messages={[
         `Format: ${file.data.extension}`,
         `Size: ${formatSize(file.data.size)}`,
-        `Width: ${file.data.width}px`,
-        `Height: ${file.data.height}px`,
+        `Width: ${file.data.src.width}px`,
+        `Height: ${file.data.src.height}px`,
       ]}
     >
       <Box component="canvas" width="100%" height={128} ref={canvasRef} />

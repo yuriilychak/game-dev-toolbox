@@ -12,6 +12,7 @@ type SelectFieldProps = {
   required?: boolean;
   value: number | string;
   options: FieldOption[];
+  disabled?: boolean;
   onChange(value: string, id: string): void;
 };
 
@@ -21,6 +22,7 @@ const SelectField: FC<SelectFieldProps> = ({
   value,
   options,
   required = false,
+  disabled = false,
   onChange,
 }) => {
   const handleChange = useCallback(
@@ -36,6 +38,7 @@ const SelectField: FC<SelectFieldProps> = ({
       id={id}
       value={value}
       label={label}
+      disabled={disabled}
       onChange={handleChange}
       sx={{ "& [role='combobox']": { display: "flex", gap: 1 } }}
     >

@@ -1,8 +1,11 @@
+import { IMAGE_TYPE } from "./enums";
 import PolygonGenerator from "./polygon-generator";
-import { LibraryFile } from "./types";
+import { LibraryFile, LibraryImageData } from "./types";
 
 export default class BoundEditor {
   private file: LibraryFile;
+
+  private imageData: LibraryImageData;
 
   private canvas: HTMLCanvasElement;
 
@@ -24,7 +27,13 @@ export default class BoundEditor {
 
   private worldPatternSize: number;
 
+  private offscreenCanvas: OffscreenCanvas;
+
+  private offscreenCanvasContext: OffscreenCanvasRenderingContext2D;
+
   constructor() {
+    this.offscreenCanvas = new OffscreenCanvas(2048, 2048);
+    this.offscreenCanvasContext = this.offscreenCanvas.getContext("2d");
     this.transform = new Float32Array(3);
     this.lastPosition = new Float32Array(2);
     this.imageOffset = new Int16Array(2);
@@ -43,7 +52,7 @@ export default class BoundEditor {
       .then((bitmap) => {
         this.isPatternLoaded = true;
         this.checkerBitmap = bitmap;
-        this.worldPatternSize = bitmap.width >> 2;
+        this.worldPatternSize = bitmap.width / BoundEditor.MAX_SCALE;
       });
 
     this.transform[2] = 1;
@@ -55,14 +64,15 @@ export default class BoundEditor {
   ): void {
     if (canvasRef.current) {
       this.file = file as LibraryFile;
+      this.imageData = { ...this.file.data };
       this.canvas = canvasRef.current;
       this.context = this.canvas.getContext("2d") as CanvasRenderingContext2D;
 
       this.canvas.width = this.canvas.offsetWidth;
       this.canvas.height = this.canvas.offsetHeight;
 
-      this.imageOffset[0] = -this.file.data.width >> 1;
-      this.imageOffset[1] = -this.file.data.height >> 1;
+      this.imageOffset[0] = -this.imageData.src.width >> 1;
+      this.imageOffset[1] = -this.imageData.src.height >> 1;
 
       this.addEventListeners();
       this.resetTransform();
@@ -78,18 +88,55 @@ export default class BoundEditor {
       return;
     }
 
-    this.transform[0] = this.canvas.width >> 1;
-    this.transform[1] = this.canvas.height >> 1;
+    this.transform[0] = this.sceneWidth >> 1;
+    this.transform[1] = this.sceneHeight >> 1;
     this.transform[2] = 1;
 
     this.render();
   }
 
-  public generatePolygon(): void {
-    const polygonGenerator = new PolygonGenerator(this.file.data.src);
-    const bounds = polygonGenerator.generate();
+  public async generatePolygon(): Promise<void> {
+    this.imageData.type = IMAGE_TYPE.POLYGON;
 
-    console.log(bounds);
+    if (this.imageData.isFixBorder) {
+      await this.fixQuadBorderWithoutRerender(false);
+    }
+
+    const polygonGenerator = new PolygonGenerator(
+      this.imageData.src,
+      this.offscreenCanvasContext,
+    );
+    const polygonData = polygonGenerator.generate();
+
+    const sizing = polygonData[0];
+    const triangleCount = sizing >> 5;
+    const pointCount = sizing - (triangleCount << 5);
+    const bounds = polygonData.slice(1, 5);
+    const contours = polygonData.slice(5, (pointCount << 1) + 5);
+    const triangles = polygonData.slice((pointCount << 1) + 5);
+
+    this.imageData.polygons = [contours];
+    // this.imageData.triangles = [triangles];
+
+    this.offscreenCanvasContext.clearRect(0, 0, bounds[2], bounds[3]);
+    this.offscreenCanvasContext.drawImage(
+      this.imageData.src,
+      bounds[0],
+      bounds[1],
+    );
+
+    this.imageData.src = await createImageBitmap(
+      this.offscreenCanvas,
+      0,
+      0,
+      bounds[2],
+      bounds[3],
+    );
+
+    this.imageOffset[0] = -this.imageData.src.width >> 1;
+    this.imageOffset[1] = -this.imageData.src.height >> 1;
+
+    this.render();
   }
 
   public render(): void {
@@ -102,9 +149,42 @@ export default class BoundEditor {
     this.drawPolygon();
   }
 
+  public async fixQuadBorder(
+    isFixBorder: boolean,
+    onSuccess: () => void,
+  ): Promise<void> {
+    await this.fixQuadBorderWithoutRerender(isFixBorder);
+
+    this.render();
+
+    onSuccess();
+  }
+
+  private async fixQuadBorderWithoutRerender(
+    isFixBorder: boolean,
+  ): Promise<void> {
+    const offset: number = isFixBorder ? 1 : -1;
+    const newWidth: number = this.imageData.src.width + (offset << 1);
+    const newHeight: number = this.imageData.src.height + (offset << 1);
+
+    this.offscreenCanvasContext.clearRect(0, 0, newWidth, newHeight);
+    this.offscreenCanvasContext.drawImage(this.imageData.src, offset, offset);
+
+    this.imageData.isFixBorder = isFixBorder;
+    this.imageData.src = await createImageBitmap(
+      this.offscreenCanvas,
+      0,
+      0,
+      newWidth,
+      newHeight,
+    );
+    this.imageOffset[0] = -this.imageData.src.width >> 1;
+    this.imageOffset[1] = -this.imageData.src.height >> 1;
+  }
+
   private drawImage(): void {
-    const width: number = this.file.data.width;
-    const height: number = this.file.data.height;
+    const width: number = this.imageData.src.width;
+    const height: number = this.imageData.src.height;
     const screenX: number = this.worldToScreenX(this.imageOffset[0]);
     const screenY: number = this.worldToScreenY(this.imageOffset[1]);
     const screenWidth: number =
@@ -112,7 +192,7 @@ export default class BoundEditor {
     const screenHeight: number =
       this.worldToScreenY(height + this.imageOffset[1]) - screenY;
     this.context.drawImage(
-      this.file.data.src,
+      this.imageData.src,
       0,
       0,
       width,
@@ -138,7 +218,7 @@ export default class BoundEditor {
 
     this.context.clearRect(0, 0, this.sceneWidth, this.sceneHeight);
 
-    const scale: number = this.scale / 4;
+    const scale: number = this.scale / BoundEditor.MAX_SCALE;
     const offsetX: number = this.worldToScreenX(
       Math.floor(this.screenToWorldX(0) / this.worldPatternSize) *
         this.worldPatternSize,
@@ -163,11 +243,11 @@ export default class BoundEditor {
     const coordX: number = this.worldToScreenX(0);
     const coordY: number = this.worldToScreenY(0);
 
-    if (coordX > -1 && coordX < this.sceneWidth + 1) {
+    if (coordX > -1 && coordX < this.sceneWidth) {
       this.context.fillRect(coordX - 1, 0, 2, this.sceneHeight);
     }
 
-    if (coordY > -1 && coordY < this.sceneHeight + 1) {
+    if (coordY > -1 && coordY < this.sceneHeight) {
       this.context.fillRect(0, coordY - 1, this.sceneWidth, 2);
     }
   }
@@ -189,19 +269,23 @@ export default class BoundEditor {
   }
 
   private drawPolygon(): void {
-    const polygon = new Uint16Array(this.file.data.polygon);
+    const polygon = this.imageData.polygons[0];
     const pointCount: number = polygon.length >> 1;
     let i: number = 0;
     let pointX: number = 0;
     let pointY: number = 0;
+    let pointIndex: number = 0;
 
     this.context.strokeStyle = "lime";
 
     this.context.beginPath();
 
     for (i = 0; i < pointCount; ++i) {
-      pointX = this.worldToScreenX(polygon[i << 1] + this.imageOffset[0]);
-      pointY = this.worldToScreenY(polygon[(i << 1) + 1] + this.imageOffset[1]);
+      pointIndex = i << 1;
+      pointX = this.worldToScreenX(polygon[pointIndex] + this.imageOffset[0]);
+      pointY = this.worldToScreenY(
+        polygon[pointIndex + 1] + this.imageOffset[1],
+      );
 
       if (i === 0) {
         this.context.moveTo(pointX, pointY);
@@ -215,8 +299,8 @@ export default class BoundEditor {
   }
 
   private drawTriangles(): void {
-    const triangles = new Uint8Array(this.file.data.triangles);
-    const polygon = new Uint16Array(this.file.data.polygon);
+    const triangles = this.imageData.triangles[0];
+    const polygon = this.imageData.polygons[0];
     const pointCount: number = 3;
     let i: number = 0;
     let j: number = 0;
@@ -227,7 +311,7 @@ export default class BoundEditor {
 
     this.context.strokeStyle = "lime";
 
-    for (i = 0; i < this.file.data.triangleCount; ++i) {
+    for (i = 0; i < this.imageData.triangleCount; ++i) {
       indexOffset = 3 * i;
 
       this.context.beginPath();
@@ -332,8 +416,8 @@ export default class BoundEditor {
       return;
     }
 
-    const screenCenterX: number = this.canvas.width / 2;
-    const screenCenterY: number = this.canvas.height / 2;
+    const screenCenterX: number = this.sceneWidth >> 1;
+    const screenCenterY: number = this.sceneHeight >> 1;
     const worldCenterX: number = (screenCenterX - this.worldX) / this.scale;
     const worldCenterY: number = (screenCenterY - this.worldY) / this.scale;
 
@@ -367,4 +451,6 @@ export default class BoundEditor {
   private get sceneHeight(): number {
     return this.canvas.height;
   }
+
+  private static MAX_SCALE: number = 4;
 }

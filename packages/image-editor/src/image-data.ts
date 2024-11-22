@@ -1,5 +1,5 @@
 import { intAbs, intSign } from "./math";
-import { formatDimension, getCropData, joinCoords, splitCoords } from "./utils";
+import { joinCoords } from "./utils";
 
 export default class ImageData {
   private _data: Uint8Array;
@@ -15,31 +15,33 @@ export default class ImageData {
   private _cropHeight: number;
 
   constructor(
-    imageData: Uint8Array,
-    inputWidth: number,
-    inputHeight: number,
-    clasterSize: number,
+    imageBitmap: ImageBitmap,
+    context: OffscreenCanvasRenderingContext2D,
   ) {
-    const cropData = getCropData(imageData, inputWidth, inputHeight);
-    const cropOffset = splitCoords(cropData[0]);
-    const cropSize = splitCoords(cropData[1]);
-    const horizontalData = formatDimension(cropSize[0], clasterSize);
-    const verticalData = formatDimension(cropSize[1], clasterSize);
-    const imageByteCount = (horizontalData[0] * verticalData[0]) << 2;
+    const padding = ImageData.CLASTER_SIZE * 16;
+    this._width =
+      Math.ceil(imageBitmap.width / ImageData.CLASTER_SIZE) *
+        ImageData.CLASTER_SIZE +
+      2 * padding;
+    this._leftOffset = padding;
+    this._rightOffset = this._width - padding - imageBitmap.width;
+    this._height =
+      Math.ceil(imageBitmap.height / ImageData.CLASTER_SIZE) *
+        ImageData.CLASTER_SIZE +
+      2 * padding;
+    this._topOffset = padding;
+    this._bottomOffset = this._height - padding - imageBitmap.height;
+    this._cropX = 0;
+    this._cropY = 0;
+    this._cropWidth = imageBitmap.width;
+    this._cropHeight = imageBitmap.height;
 
-    this._width = horizontalData[0];
-    this._leftOffset = horizontalData[1];
-    this._rightOffset = horizontalData[2];
-    this._height = verticalData[0];
-    this._topOffset = verticalData[1];
-    this._bottomOffset = verticalData[2];
-    this._cropX = cropOffset[0];
-    this._cropY = cropOffset[1];
-    this._cropWidth = cropSize[0];
-    this._cropHeight = cropSize[1];
-    this._data = new Uint8Array(imageByteCount);
+    context.clearRect(0, 0, this._width, this._height);
+    context.drawImage(imageBitmap, this._leftOffset, this._rightOffset);
 
-    this._generateImageData(imageData, inputWidth);
+    const imageData = context.getImageData(0, 0, this._width, this._height);
+
+    this._data = new Uint8Array(imageData.data.buffer);
   }
 
   public getPixelAlpha(x: number, y: number): number {
@@ -95,26 +97,6 @@ export default class ImageData {
     return y * this._width + x;
   }
 
-  private _generateImageData(imageData: Uint8Array, inputWidth: number): void {
-    this._data.fill(0);
-
-    let i: number = 0;
-    let vertexIndex: number = 0;
-    const cropOffset: number = this._cropWidth << 2;
-    const rowSize: number = this._width << 2;
-    const offset: number = (this._topOffset * rowSize + this._leftOffset) << 2;
-    const vertexOffset: number = (inputWidth * this._cropY + this._cropX) << 2;
-
-    for (i = 0; i < this._cropHeight; ++i) {
-      vertexIndex = ((inputWidth * i) << 2) + vertexOffset;
-
-      this._data.set(
-        imageData.slice(vertexIndex, vertexIndex + cropOffset),
-        i * rowSize + offset,
-      );
-    }
-  }
-
   public get width(): number {
     return this._width;
   }
@@ -160,4 +142,6 @@ export default class ImageData {
 
     return result;
   }
+
+  private static CLASTER_SIZE: number = 4;
 }

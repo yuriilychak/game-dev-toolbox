@@ -65,14 +65,6 @@ export const FOOTER_ACTIONS: ButtonGroupAction<IMAGE_EDITOR_ACTIONS>[] = [
   },
 ];
 
-const QUAD_ACTIONS: ButtonGroupAction<IMAGE_EDITOR_ACTIONS>[] = [
-  {
-    action: IMAGE_EDITOR_ACTIONS.CROP,
-    locale: "preview.singleFile.edit.image.modal.button.crop",
-    variant: "contained",
-  },
-];
-
 const POLYGON_ACTIONS: ButtonGroupAction<IMAGE_EDITOR_ACTIONS>[] = [
   {
     action: IMAGE_EDITOR_ACTIONS.GENERATE,
@@ -90,7 +82,7 @@ export const TYPE_ACTIONS: Map<
   IMAGE_TYPE,
   ButtonGroupAction<IMAGE_EDITOR_ACTIONS>[]
 > = new Map([
-  [IMAGE_TYPE.QUAD, QUAD_ACTIONS],
+  [IMAGE_TYPE.QUAD, []],
   [IMAGE_TYPE.POLYGON, POLYGON_ACTIONS],
   [IMAGE_TYPE.MESH, []],
   [IMAGE_TYPE.NONE, []],

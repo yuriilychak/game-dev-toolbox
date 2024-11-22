@@ -13,6 +13,7 @@ type ButtonGroupProps<T extends number> = {
   dividerIndex?: number;
   flex?: number;
   width?: string | number;
+  disabled?: boolean;
 };
 
 function ButtonGroup<T extends number>({
@@ -21,6 +22,7 @@ function ButtonGroup<T extends number>({
   dividerIndex = -1,
   flex,
   width,
+  disabled = false,
 }: ButtonGroupProps<T>) {
   const { t } = useTranslation();
   const handleClick = useCallback<MouseEventHandler<HTMLButtonElement>>(
@@ -38,7 +40,7 @@ function ButtonGroup<T extends number>({
 
   return (
     <Stack direction="row" gap={1} flex={flex} width={width}>
-      {totalActions.map(({ action, variant, locale, disabled }) =>
+      {totalActions.map(({ action, variant, locale, ...rest }) =>
         action === -1 ? (
           <Box flex={1} key="divider" />
         ) : (
@@ -47,7 +49,7 @@ function ButtonGroup<T extends number>({
             key={`button_${action}`}
             variant={variant}
             size="small"
-            disabled={disabled}
+            disabled={rest.disabled || disabled}
             onClick={handleClick}
           >
             {t(locale)}

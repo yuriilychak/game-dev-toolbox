@@ -118,7 +118,7 @@ export default function simplifyPolygon(
   let distance: number = 0;
 
   while (true) {
-    result = simplify(result, threshold);
+    result = simplify(result, threshold, true);
     threshold = threshold << 1;
     resultPointCount = result.length;
     distance = 0;
