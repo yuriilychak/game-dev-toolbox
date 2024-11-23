@@ -2,27 +2,35 @@ import {
   useCallback,
   useEffect,
   useLayoutEffect,
-  useMemo,
   useRef,
-  useState,
+  useReducer,
 } from "react";
-import { BoundEditor, IMAGE_TYPE } from "image-editor";
 import { LibraryFile } from "../../../../../types";
 import { LIBRARY_FILE_TYPE } from "../../../../../enums";
-import { IMAGE_EDITOR_ACTIONS } from "./enums";
+import { IMAGE_EDITOR_ACTION, REDUCER_ACTION } from "./enums";
+import reducer from "./reducer";
+import { INITIAL_STATE } from "./constants";
 
 export default function useImageEdit(
   file: LibraryFile<LIBRARY_FILE_TYPE.IMAGE>,
 ) {
-  const [isModalOpen, setModalOpen] = useState<boolean>(false);
-  const [type, setType] = useState<IMAGE_TYPE>(file.data.type);
-  const [scale, setScale] = useState<number>(1);
-  const [isChanged, setChanged] = useState<boolean>(false);
-  const [isFixBorder, setFixBorder] = useState<boolean>(false);
-  const [isProcessing, setProcessing] = useState<boolean>(false);
+  const [state, dispatch] = useReducer(reducer, INITIAL_STATE);
   const canvasWrapperRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const boundEditor = useMemo(() => new BoundEditor(), []);
+  const {
+    type,
+    scale,
+    boundEditor,
+    isModalOpen,
+    isChanged,
+    isFixBorder,
+    isProcessing,
+  } = state;
+
+  const handleDispatch = useCallback(
+    (type: REDUCER_ACTION, payload?: unknown) => dispatch({ type, payload }),
+    [dispatch],
+  );
 
   const handleResize = useCallback(() => {
     const { width, height } = canvasWrapperRef.current.getBoundingClientRect();
@@ -33,53 +41,53 @@ export default function useImageEdit(
     boundEditor.render();
   }, [boundEditor]);
 
+  const handleProcessFinish = useCallback(
+    () => handleDispatch(REDUCER_ACTION.FINISH_PROCESSING),
+    [handleDispatch],
+  );
+
   useEffect(() => {
     window.addEventListener("resize", handleResize);
 
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  useEffect(() => {
-    boundEditor.scale = scale;
-  }, [boundEditor, scale]);
-
   useLayoutEffect(() => {
     if (isModalOpen) {
-      boundEditor.init(file, canvasRef);
+      handleDispatch(REDUCER_ACTION.INIT, file);
+      boundEditor.init(file, canvasRef, handleProcessFinish);
     }
 
     return boundEditor.destroy.bind(boundEditor);
-  }, [file, isModalOpen, boundEditor]);
+  }, [file, isModalOpen, boundEditor, handleDispatch, handleProcessFinish]);
 
   const handleScaleChange = useCallback(
-    (event: Event, value: number) => setScale(value),
+    (event: Event, value: number) =>
+      handleDispatch(REDUCER_ACTION.CHANGE_SCALE, value),
     [],
   );
 
-  const handleProcessFinish = useCallback(() => setProcessing(false), []);
-
-  const handleOpenModal = useCallback(() => setModalOpen(true), []);
+  const handleOpenModal = useCallback(
+    () => handleDispatch(REDUCER_ACTION.OPEN_MODAL),
+    [handleDispatch],
+  );
 
   const handleChangeType = useCallback(
-    (rawValue: string) => setType(parseInt(rawValue) as IMAGE_TYPE),
-    [],
+    (rawValue: string) => handleDispatch(REDUCER_ACTION.CHANGE_TYPE, rawValue),
+    [handleDispatch],
   );
 
   const handleAction = useCallback(
-    (action: IMAGE_EDITOR_ACTIONS) => {
+    (action: IMAGE_EDITOR_ACTION) => {
       switch (action) {
-        case IMAGE_EDITOR_ACTIONS.CANCEL:
-          setModalOpen(false);
+        case IMAGE_EDITOR_ACTION.CANCEL:
+          handleDispatch(REDUCER_ACTION.CLOSE_MODAL);
           break;
-        case IMAGE_EDITOR_ACTIONS.SUBMIT:
-          setModalOpen(false);
+        case IMAGE_EDITOR_ACTION.SUBMIT:
+          handleDispatch(REDUCER_ACTION.CLOSE_MODAL);
           break;
-        case IMAGE_EDITOR_ACTIONS.RESET:
-          boundEditor.resetTransform();
-          setScale(1);
-          break;
-        case IMAGE_EDITOR_ACTIONS.GENERATE:
-          boundEditor.generatePolygon();
+        case IMAGE_EDITOR_ACTION.RESET:
+          handleDispatch(REDUCER_ACTION.RESET);
           break;
       }
     },
@@ -87,18 +95,8 @@ export default function useImageEdit(
   );
 
   const handleToggleBorder = useCallback(
-    () =>
-      setFixBorder((prevFixBorder) => {
-        const nextFixBorder = !prevFixBorder;
-
-        setProcessing(true);
-        setChanged(file.data.isFixBorder !== nextFixBorder);
-
-        boundEditor.fixQuadBorder(nextFixBorder, handleProcessFinish);
-
-        return nextFixBorder;
-      }),
-    [boundEditor, file, handleProcessFinish],
+    () => handleDispatch(REDUCER_ACTION.TOGGLE_FIX_BORDER),
+    [handleDispatch],
   );
 
   return {

@@ -1,5 +1,5 @@
 import ImageCropService from "./image-crop-service";
-import { maxInt, minInt, intSign } from "./math";
+import { intSign } from "./math";
 import { ImageFileData, LibraryImageData } from "./types";
 
 export function joinCoords(
@@ -8,53 +8,6 @@ export function joinCoords(
   clasterSize: number = 16,
 ): number {
   return x + (y << clasterSize);
-}
-
-export function splitCoords(coordData: number): Uint16Array {
-  const result = new Uint16Array(2);
-
-  result[1] = coordData >> 16;
-  result[0] = coordData - (result[1] << 16);
-
-  return result;
-}
-
-export function getCropData(
-  imageData: Uint8Array,
-  width: number,
-  height: number,
-): Uint32Array {
-  let minX: number = width;
-  let maxX: number = 0;
-  let minY: number = height;
-  let maxY: number = 0;
-
-  let i: number = 0;
-  let j: number = 0;
-  let vertexIndex: number = 0;
-  let rowOffset: number = 0;
-
-  for (i = 0; i < height; ++i) {
-    rowOffset = width * i;
-
-    for (j = 0; j < width; ++j) {
-      vertexIndex = rowOffset + j;
-
-      if (imageData[(vertexIndex << 2) + 3] !== 0) {
-        minX = minInt(j, minX);
-        maxX = maxInt(j, maxX);
-        minY = minInt(i, minY);
-        maxY = maxInt(i, maxY);
-      }
-    }
-  }
-
-  const result = new Uint32Array(2);
-
-  result[0] = joinCoords(minX, minY);
-  result[1] = joinCoords(maxX - minX, maxY - minY);
-
-  return result;
 }
 
 export function formatDimension(
@@ -83,4 +36,132 @@ export async function formatImageData(
 
     workerPool.start(fileData, (result) => resolve(result), reject);
   });
+}
+
+function getIndex(x: number, y: number, width: number) {
+  return ((y * width + x) << 2) + 3;
+}
+
+export async function cropImageBitmap(
+  inputImageBitmap: ImageBitmap,
+  type: string,
+  context: OffscreenCanvasRenderingContext2D,
+): Promise<ImageBitmap> {
+  if (type.includes("jpeg")) {
+    return inputImageBitmap;
+  }
+
+  const bitmapSize: Uint16Array = new Uint16Array([
+    inputImageBitmap.width,
+    inputImageBitmap.height,
+  ]);
+  context.clearRect(0, 0, bitmapSize[0], bitmapSize[0]);
+  context.drawImage(inputImageBitmap, 0, 0);
+
+  const { data }: ImageData = context.getImageData(
+    0,
+    0,
+    bitmapSize[0],
+    bitmapSize[1],
+  );
+  const last: Uint16Array = new Uint16Array([
+    bitmapSize[0] - 1,
+    bitmapSize[1] - 1,
+  ]);
+  const min: Int16Array = new Int16Array([-1, -1]);
+  const max: Int16Array = new Int16Array([-1, -1]);
+  const indices: Uint32Array = new Uint32Array([0, 0]);
+  let y: number = 0;
+  let x: number = 0;
+
+  for (y = 0; y < bitmapSize[1]; ++y) {
+    if (min[1] !== -1 && max[1] !== -1) {
+      break;
+    }
+
+    for (x = 0; x < bitmapSize[0]; ++x) {
+      indices[0] = getIndex(x, y, bitmapSize[0]);
+      indices[1] = getIndex(x, last[1] - y, bitmapSize[0]);
+
+      if (data[indices[0]] > 0 && min[1] === -1) {
+        min[1] = y;
+      }
+
+      if (data[indices[1]] > 0 && max[1] === -1) {
+        max[1] = last[1] - y;
+      }
+
+      if (min[1] !== -1 && max[1] !== -1) {
+        break;
+      }
+    }
+  }
+
+  for (x = 0; x < bitmapSize[0]; ++x) {
+    if (min[0] !== -1 && max[0] !== -1) {
+      break;
+    }
+
+    for (y = min[1]; y <= max[1]; ++y) {
+      indices[0] = getIndex(x, y, bitmapSize[0]);
+      indices[1] = getIndex(last[0] - x, y, bitmapSize[0]);
+
+      if (data[indices[0]] > 0 && min[0] === -1) {
+        min[0] = x;
+      }
+
+      if (data[indices[1]] > 0 && max[0] === -1) {
+        max[0] = last[0] - x;
+      }
+
+      if (min[0] !== -1 && max[0] !== -1) {
+        break;
+      }
+    }
+  }
+
+  if (
+    min[0] == -1 ||
+    (min[0] === 0 && min[1] === 0 && max[0] === last[0] && max[1] === last[1])
+  ) {
+    return inputImageBitmap;
+  }
+
+  bitmapSize[0] = max[0] - min[0] + 1;
+  bitmapSize[1] = max[1] - min[1] + 1;
+
+  const widthOffset: number = bitmapSize[0] << 2;
+  const croppedData = new Uint8ClampedArray(widthOffset * bitmapSize[1]);
+  let sourceStart: number = 0;
+  let targetStart: number = 0;
+
+  for (y = 0; y < bitmapSize[1]; ++y) {
+    sourceStart = ((min[1] + y) * inputImageBitmap.width + min[0]) << 2;
+    targetStart = y * widthOffset;
+    croppedData.set(
+      data.subarray(sourceStart, sourceStart + widthOffset),
+      targetStart,
+    );
+  }
+
+  const croppedImageData = new ImageData(
+    croppedData,
+    bitmapSize[0],
+    bitmapSize[1],
+  );
+
+  return await createImageBitmap(croppedImageData);
+}
+
+export function getQuadPolygon(imageBitmap: ImageBitmap): Uint16Array {
+  return new Uint16Array([
+    0,
+    0,
+    imageBitmap.width,
+    0,
+    imageBitmap.width,
+    imageBitmap.height,
+    0,
+    imageBitmap.height,
+  ]);
 }

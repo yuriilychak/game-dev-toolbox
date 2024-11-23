@@ -107,6 +107,10 @@ function simplify(
 export default function simplifyPolygon(
   initialPoints: Array<Point>,
 ): Array<Point> {
+  if (initialPoints.length <= 4) {
+    return initialPoints.map((point) => point.clone());
+  }
+
   let result: Array<Point> = initialPoints;
   let threshold: number = 2;
   let i: number = 0;

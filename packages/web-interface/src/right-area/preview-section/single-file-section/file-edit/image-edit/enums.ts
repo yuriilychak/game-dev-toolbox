@@ -1,9 +1,20 @@
-export enum IMAGE_EDITOR_ACTIONS {
+export enum IMAGE_EDITOR_ACTION {
   NONE = 0,
   CANCEL = 1,
   SUBMIT = 2,
   CROP = 3,
   GENERATE = 4,
   EDIT = 5,
-  RESET = 6
+  RESET = 6,
+}
+
+export enum REDUCER_ACTION {
+  INIT,
+  CHANGE_TYPE,
+  FINISH_PROCESSING,
+  OPEN_MODAL,
+  CLOSE_MODAL,
+  RESET,
+  CHANGE_SCALE,
+  TOGGLE_FIX_BORDER,
 }

@@ -16,13 +16,7 @@ import Switch from "@mui/material/Switch/Switch";
 import { LIBRARY_FILE_TYPE } from "../../../../../enums";
 import { SingleFileComponent } from "../../types";
 import useImageEdit from "./hooks";
-import {
-  FOOTER_ACTIONS,
-  IMAGE_TYPES,
-  SCALE_MARKS,
-  STYLES,
-  TYPE_ACTIONS,
-} from "./constants";
+import { FOOTER_ACTIONS, IMAGE_TYPES, SCALE_MARKS, STYLES } from "./constants";
 import { FieldOption } from "../../../../../types";
 import { ButtonGroup, SelectField } from "../../../../../shared-components";
 
@@ -51,8 +45,6 @@ const ImageEdit: SingleFileComponent<LIBRARY_FILE_TYPE.IMAGE> = ({ file }) => {
     () => IMAGE_TYPES.map((value) => ({ ...value, label: t(value.label) })),
     [t],
   );
-
-  const typeActions = TYPE_ACTIONS.get(type);
 
   return (
     <>
@@ -108,14 +100,6 @@ const ImageEdit: SingleFileComponent<LIBRARY_FILE_TYPE.IMAGE> = ({ file }) => {
                     onClick={handleToggleBorder}
                     control={<Switch checked={isFixBorder} />}
                     label="Add 1px padding"
-                  />
-                )}
-                {!!typeActions.length && (
-                  <ButtonGroup
-                    disabled={isProcessing}
-                    actions={typeActions}
-                    onClick={handleAction}
-                    width="100%"
                   />
                 )}
               </Stack>

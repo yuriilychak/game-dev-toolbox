@@ -12,6 +12,7 @@ export default class Polygon {
 
   constructor(imageData: ImageData) {
     const contour = marchSquare(imageData, 0);
+    console.log(contour);
     const simplifiedPolygon = simplifyPolygon(contour);
     const extendedPolygon = extend(simplifiedPolygon, contour, imageData);
 

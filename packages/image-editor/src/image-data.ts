@@ -1,5 +1,4 @@
 import { intAbs, intSign } from "./math";
-import { joinCoords } from "./utils";
 
 export default class ImageData {
   private _data: Uint8Array;
@@ -9,10 +8,6 @@ export default class ImageData {
   private _rightOffset: number;
   private _topOffset: number;
   private _bottomOffset: number;
-  private _cropX: number;
-  private _cropY: number;
-  private _cropWidth: number;
-  private _cropHeight: number;
 
   constructor(
     imageBitmap: ImageBitmap,
@@ -31,10 +26,6 @@ export default class ImageData {
       2 * padding;
     this._topOffset = padding;
     this._bottomOffset = this._height - padding - imageBitmap.height;
-    this._cropX = 0;
-    this._cropY = 0;
-    this._cropWidth = imageBitmap.width;
-    this._cropHeight = imageBitmap.height;
 
     context.clearRect(0, 0, this._width, this._height);
     context.drawImage(imageBitmap, this._leftOffset, this._rightOffset);
@@ -127,20 +118,6 @@ export default class ImageData {
 
   public get totalPixels(): number {
     return this._width * this._height;
-  }
-
-  public get dimensionData(): Uint32Array {
-    const result = new Uint32Array(4);
-
-    result[0] = joinCoords(this._width, this._height);
-    result[1] = joinCoords(
-      joinCoords(this._leftOffset, this._rightOffset, 8),
-      joinCoords(this._topOffset, this._bottomOffset, 8),
-    );
-    result[2] = joinCoords(this._cropWidth, this._cropHeight);
-    result[3] = joinCoords(this._cropX, this._cropY);
-
-    return result;
   }
 
   private static CLASTER_SIZE: number = 4;

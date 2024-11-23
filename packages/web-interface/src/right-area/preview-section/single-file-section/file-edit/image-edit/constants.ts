@@ -1,11 +1,12 @@
-import { IMAGE_TYPE } from "image-editor";
+import { BoundEditor, IMAGE_TYPE } from "image-editor";
 
 import type { Mark } from "@mui/material/Slider/useSlider.types";
 import { SxProps, Theme } from "@mui/material/styles";
 
 import type { ButtonGroupAction } from "../../../../../shared-components";
 import type { FieldOption } from "../../../../../types";
-import { IMAGE_EDITOR_ACTIONS } from "./enums";
+import { IMAGE_EDITOR_ACTION } from "./enums";
+import { ReducerState } from "./types";
 import { IMAGE_TYPE_ICONS, IMAGE_TYPE_LOCALES } from "../../../../../constants";
 
 export const SCALE_MARKS: Mark[] = [
@@ -47,43 +48,30 @@ export const IMAGE_TYPES: FieldOption[] = [
   disabled: DISABLED_TYPES.includes(value),
 }));
 
-export const FOOTER_ACTIONS: ButtonGroupAction<IMAGE_EDITOR_ACTIONS>[] = [
+export const FOOTER_ACTIONS: ButtonGroupAction<IMAGE_EDITOR_ACTION>[] = [
   {
-    action: IMAGE_EDITOR_ACTIONS.RESET,
+    action: IMAGE_EDITOR_ACTION.RESET,
     locale: "preview.singleFile.edit.image.modal.button.reset",
     variant: "contained",
   },
   {
-    action: IMAGE_EDITOR_ACTIONS.SUBMIT,
+    action: IMAGE_EDITOR_ACTION.SUBMIT,
     locale: "preview.singleFile.edit.image.modal.button.submit",
     variant: "contained",
   },
   {
-    action: IMAGE_EDITOR_ACTIONS.CANCEL,
+    action: IMAGE_EDITOR_ACTION.CANCEL,
     locale: "preview.singleFile.edit.image.modal.button.cancel",
     variant: "outlined",
   },
 ];
 
-const POLYGON_ACTIONS: ButtonGroupAction<IMAGE_EDITOR_ACTIONS>[] = [
-  {
-    action: IMAGE_EDITOR_ACTIONS.GENERATE,
-    locale: "preview.singleFile.edit.image.modal.button.generate",
-    variant: "contained",
-  },
-  {
-    action: IMAGE_EDITOR_ACTIONS.EDIT,
-    locale: "preview.singleFile.edit.image.modal.button.edit",
-    variant: "contained",
-  },
-];
-
-export const TYPE_ACTIONS: Map<
-  IMAGE_TYPE,
-  ButtonGroupAction<IMAGE_EDITOR_ACTIONS>[]
-> = new Map([
-  [IMAGE_TYPE.QUAD, []],
-  [IMAGE_TYPE.POLYGON, POLYGON_ACTIONS],
-  [IMAGE_TYPE.MESH, []],
-  [IMAGE_TYPE.NONE, []],
-]);
+export const INITIAL_STATE: ReducerState = {
+  isModalOpen: false,
+  type: IMAGE_TYPE.NONE,
+  scale: 1,
+  isChanged: false,
+  isFixBorder: false,
+  isProcessing: false,
+  boundEditor: new BoundEditor(),
+};
