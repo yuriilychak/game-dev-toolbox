@@ -21,7 +21,7 @@ self.onmessage = async function (e: MessageEvent<ImageFileData>) {
   const extension = labelSplit.pop().toUpperCase();
   const inputLabel = labelSplit.join(".").substring(0, 32);
   const polygon: Uint16Array = getQuadPolygon(imageBitmap);
-  const triangles: Uint8Array = QUAD_TRIANGLES.slice();
+  const triangles: Uint16Array = QUAD_TRIANGLES.slice();
   const result: LibraryImageData = {
     src: imageBitmap,
     isFixBorder: false,

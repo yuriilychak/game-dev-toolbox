@@ -70,7 +70,7 @@ export default class ImageTransform {
     const triangles = polygonData.slice((pointCount << 1) + 5);
 
     this.imageData.polygons = [contours];
-    // this.imageData.triangles = [triangles];
+    this.imageData.triangles = [triangles];
 
     this.offscreenCanvasContext.clearRect(0, 0, bounds[2], bounds[3]);
     this.offscreenCanvasContext.drawImage(
@@ -111,7 +111,7 @@ export default class ImageTransform {
     return this.imageData.polygons[index];
   }
 
-  public trianglesAt(index: number): Uint8Array {
+  public trianglesAt(index: number): Uint16Array {
     return this.imageData.triangles[index];
   }
 

@@ -8,7 +8,7 @@ export type LibraryImageData = {
   type: IMAGE_TYPE;
   isFixBorder: boolean;
   polygons: Uint16Array[];
-  triangles: Uint8Array[];
+  triangles: Uint16Array[];
   triangleCount: number;
 };
 

@@ -2,7 +2,6 @@ import { BoundEditor, IMAGE_TYPE } from "image-editor";
 import { REDUCER_ACTION } from "./enums";
 
 export type ReducerState = {
-  isModalOpen: boolean;
   type: IMAGE_TYPE;
   scale: number;
   isChanged: boolean;

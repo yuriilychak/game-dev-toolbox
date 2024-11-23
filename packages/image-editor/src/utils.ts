@@ -165,3 +165,21 @@ export function getQuadPolygon(imageBitmap: ImageBitmap): Uint16Array {
     imageBitmap.height,
   ]);
 }
+
+const FIVE_BIT_MASK: number = 0b11111;
+
+export function serializeTriangleIndices(
+  index1: number,
+  index2: number,
+  index3: number,
+): number {
+  return (
+    (index1 & FIVE_BIT_MASK) |
+    ((index2 & FIVE_BIT_MASK) << 5) |
+    ((index3 & FIVE_BIT_MASK) << 10)
+  );
+}
+
+export function getTriangleIndex(source: number, index: number): number {
+  return (source >> (index * 5)) & FIVE_BIT_MASK;
+}

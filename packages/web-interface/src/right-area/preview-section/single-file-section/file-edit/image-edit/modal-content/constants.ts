@@ -3,20 +3,25 @@ import { BoundEditor, IMAGE_TYPE } from "image-editor";
 import type { Mark } from "@mui/material/Slider/useSlider.types";
 import { SxProps, Theme } from "@mui/material/styles";
 
-import type { ButtonGroupAction } from "../../../../../shared-components";
-import type { FieldOption } from "../../../../../types";
-import { IMAGE_EDITOR_ACTION } from "./enums";
+import type { ButtonGroupAction } from "../../../../../../shared-components";
+import type { FieldOption } from "../../../../../../types";
+import { IMAGE_EDITOR_ACTION, SCALE_VALUE } from "./enums";
 import { ReducerState } from "./types";
-import { IMAGE_TYPE_ICONS, IMAGE_TYPE_LOCALES } from "../../../../../constants";
+import {
+  IMAGE_TYPE_ICONS,
+  IMAGE_TYPE_LOCALES,
+} from "../../../../../../constants";
 
 export const SCALE_MARKS: Mark[] = [
-  { value: 0.1, label: "10%" },
-  { value: 1, label: "100%" },
-  { value: 4, label: "400%" },
-];
+  SCALE_VALUE.MIN,
+  SCALE_VALUE.DEFAULT,
+  SCALE_VALUE.MAX,
+].map((value) => ({
+  value,
+  label: `${value * 100}%`,
+}));
 
 export const STYLES: Record<string, SxProps<Theme>> = {
-  MODAL: { display: "flex", alignItems: "center", justifyContent: "center" },
   MODAL_ROOT: {
     width: "96vw",
     height: "96vh",
@@ -67,11 +72,12 @@ export const FOOTER_ACTIONS: ButtonGroupAction<IMAGE_EDITOR_ACTION>[] = [
 ];
 
 export const INITIAL_STATE: ReducerState = {
-  isModalOpen: false,
   type: IMAGE_TYPE.NONE,
-  scale: 1,
+  scale: SCALE_VALUE.DEFAULT,
   isChanged: false,
   isFixBorder: false,
   isProcessing: false,
   boundEditor: new BoundEditor(),
 };
+
+export const ZOOM_STEP: number = 0.1;

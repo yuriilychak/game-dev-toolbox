@@ -1,6 +1,7 @@
 import { IMAGE_TYPE } from "./enums";
 import ImageTransform from "./image-transform";
 import { LibraryFile } from "./types";
+import { getTriangleIndex } from "./utils";
 
 export default class BoundEditor {
   private file: LibraryFile;
@@ -17,7 +18,7 @@ export default class BoundEditor {
 
   private checkerBitmap: ImageBitmap;
 
-  private isPatternLoaded: boolean;
+  private isPatternLoaded: boolean = false;
 
   private imageOffset: Int16Array;
 
@@ -27,7 +28,7 @@ export default class BoundEditor {
 
   private imageTransform: ImageTransform;
 
-  private onSuccess: () => void;
+  private onSuccess: () => void = null;
 
   constructor() {
     this.imageTransform = new ImageTransform();
@@ -105,6 +106,7 @@ export default class BoundEditor {
     this.drawCheckers();
     this.drawImage();
     this.drawPolygon();
+    this.drawTriangles();
   }
 
   public async updateType(type: IMAGE_TYPE): Promise<void> {
@@ -248,11 +250,10 @@ export default class BoundEditor {
   private drawTriangles(): void {
     const triangles = this.imageTransform.trianglesAt(0);
     const polygon = this.imageTransform.polgonAt(0);
-    const triangleCount: number = triangles.length / 3;
+    const triangleCount: number = triangles.length;
     const pointCount: number = 3;
     let i: number = 0;
     let j: number = 0;
-    let indexOffset: number = 0;
     let pointIndex: number = 0;
     let pointX: number = 0;
     let pointY: number = 0;
@@ -260,12 +261,10 @@ export default class BoundEditor {
     this.context.strokeStyle = "lime";
 
     for (i = 0; i < triangleCount; ++i) {
-      indexOffset = 3 * i;
-
       this.context.beginPath();
 
       for (j = 0; j < pointCount; ++j) {
-        pointIndex = triangles[indexOffset + j] << 1;
+        pointIndex = getTriangleIndex(triangles[i], j) << 1;
         pointX = this.worldToScreenX(polygon[pointIndex] + this.imageOffset[0]);
         pointY = this.worldToScreenY(
           polygon[pointIndex + 1] + this.imageOffset[1],
@@ -353,6 +352,11 @@ export default class BoundEditor {
     this.canvas.removeEventListener("touchstart", this.onTouchStart);
     document.removeEventListener("touchend", this.onTouchEnd);
     document.removeEventListener("touchmove", this.onTouchMove);
+
+    this.canvas = null;
+    this.context = null;
+    this.file = null;
+    this.onSuccess = null;
   }
 
   public get scale(): number {

@@ -1,9 +1,10 @@
 import { IMAGE_TYPE } from "image-editor";
 
-import { LIBRARY_FILE_TYPE } from "../../../../../enums";
-import { LibraryFile } from "../../../../../types";
-import { REDUCER_ACTION } from "./enums";
+import { LIBRARY_FILE_TYPE } from "../../../../../../enums";
+import { LibraryFile } from "../../../../../../types";
+import { REDUCER_ACTION, SCALE_VALUE } from "./enums";
 import { ReducerAction, ReducerMiddleware, ReducerState } from "./types";
+import { ZOOM_STEP } from "./constants";
 
 const REDUCER = new Map<REDUCER_ACTION, ReducerMiddleware>([
   [
@@ -15,21 +16,7 @@ const REDUCER = new Map<REDUCER_ACTION, ReducerMiddleware>([
       ...prevState,
       type: file.data.type,
       isFixBorder: file.data.isFixBorder,
-      scale: 1,
-    }),
-  ],
-  [
-    REDUCER_ACTION.OPEN_MODAL,
-    (prevState: ReducerState): ReducerState => ({
-      ...prevState,
-      isModalOpen: true,
-    }),
-  ],
-  [
-    REDUCER_ACTION.CLOSE_MODAL,
-    (prevState: ReducerState): ReducerState => ({
-      ...prevState,
-      isModalOpen: false,
+      scale: SCALE_VALUE.DEFAULT,
     }),
   ],
   [
@@ -39,7 +26,7 @@ const REDUCER = new Map<REDUCER_ACTION, ReducerMiddleware>([
 
       boundEditor.resetTransform();
 
-      return { ...prevState, scale: 1 };
+      return { ...prevState, scale: SCALE_VALUE.DEFAULT };
     },
   ],
   [
@@ -50,6 +37,21 @@ const REDUCER = new Map<REDUCER_ACTION, ReducerMiddleware>([
       boundEditor.scale = scale;
 
       return { ...prevState, scale };
+    },
+  ],
+  [
+    REDUCER_ACTION.MOUSE_ZOOM,
+    (prevState: ReducerState, wheelOffset: number): ReducerState => {
+      const { boundEditor, scale } = prevState;
+
+      const nextScale = Math.min(
+        Math.max(scale - Math.sign(wheelOffset) * ZOOM_STEP, SCALE_VALUE.MIN),
+        SCALE_VALUE.MAX,
+      );
+
+      boundEditor.scale = nextScale;
+
+      return { ...prevState, scale: nextScale };
     },
   ],
   [
@@ -72,7 +74,7 @@ const REDUCER = new Map<REDUCER_ACTION, ReducerMiddleware>([
   ],
   [
     REDUCER_ACTION.TOGGLE_FIX_BORDER,
-    (prevState: ReducerState, rawType: string): ReducerState => {
+    (prevState: ReducerState): ReducerState => {
       const { boundEditor, isFixBorder } = prevState;
       const nextFixBorder = !isFixBorder;
 
