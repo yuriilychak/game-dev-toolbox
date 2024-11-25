@@ -105,8 +105,8 @@ export default class BoundEditor {
 
     this.drawCheckers();
     this.drawImage();
-    this.drawPolygon();
     this.drawTriangles();
+    this.drawPolygon();
   }
 
   public async updateType(type: IMAGE_TYPE): Promise<void> {
@@ -192,6 +192,8 @@ export default class BoundEditor {
     const coordX: number = this.worldToScreenX(0);
     const coordY: number = this.worldToScreenY(0);
 
+    this.context.fillStyle = "black";
+
     if (coordX > -1 && coordX < this.sceneWidth) {
       this.context.fillRect(coordX - 1, 0, 2, this.sceneHeight);
     }
@@ -245,6 +247,18 @@ export default class BoundEditor {
 
     this.context.closePath();
     this.context.stroke();
+
+    this.context.fillStyle = "yellow";
+
+    for (i = 0; i < pointCount; ++i) {
+      pointIndex = i << 1;
+      pointX = this.worldToScreenX(polygon[pointIndex] + this.imageOffset[0]);
+      pointY = this.worldToScreenY(
+        polygon[pointIndex + 1] + this.imageOffset[1],
+      );
+
+      this.context.fillRect(pointX - 2, pointY - 2, 5, 5);
+    }
   }
 
   private drawTriangles(): void {

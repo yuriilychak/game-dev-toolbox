@@ -55,7 +55,6 @@ export function useAddFileModal(
 
   const handleAction = useCallback(
     (action: LIBRARY_ACTION) => {
-      console.log("ACTION", action);
       switch (action) {
         case LIBRARY_ACTION.SUBMIT:
           onSubmit(filesRef.current);

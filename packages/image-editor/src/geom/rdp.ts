@@ -73,7 +73,7 @@ function simplifyDouglasPeucker(
   return simplified;
 }
 
-function findIndex(points: Array<Point>, point: Point): number {
+function findIndex(points: Point[], point: Point): number {
   let i: number = 0;
   const size: number = points.length;
 
@@ -86,8 +86,32 @@ function findIndex(points: Array<Point>, point: Point): number {
   return size;
 }
 
+function removeCollinearPoints(points: Point[]): Point[] {
+  const result: Point[] = [points[0]];
+  let i: number = 0;
+  let area: number = 0;
+  let A: Point = null;
+  let B: Point = null;
+  let C: Point = null;
+
+  for (i = 1; i < points.length - 1; ++i) {
+    A = result[result.length - 1];
+    B = points[i];
+    C = points[i + 1];
+    area = (B.x - A.x) * (C.y - A.y) - (B.y - A.y) * (C.x - A.x);
+
+    if (Math.abs(area) > 2) {
+      result.push(B);
+    }
+  }
+
+  result.push(points[points.length - 1]);
+
+  return result;
+}
+
 function simplify(
-  inputPoints: Array<Point>,
+  inputPoints: Point[],
   tolerance: number = -1,
   highestQuality: boolean = false,
 ): Array<Point> {
@@ -96,12 +120,13 @@ function simplify(
   }
 
   const sqTolerance: number = tolerance > 0 ? tolerance * tolerance : 1;
-
   const points = highestQuality
     ? inputPoints
     : simplifyRadialDist(inputPoints, sqTolerance);
 
-  return simplifyDouglasPeucker(points, sqTolerance);
+  const colinearPoints = removeCollinearPoints(points);
+
+  return simplifyDouglasPeucker(colinearPoints, sqTolerance);
 }
 
 export default function simplifyPolygon(
@@ -123,7 +148,7 @@ export default function simplifyPolygon(
 
   while (true) {
     result = simplify(result, threshold, true);
-    threshold = threshold << 1;
+    threshold = threshold + 1;
     resultPointCount = result.length;
     distance = 0;
 

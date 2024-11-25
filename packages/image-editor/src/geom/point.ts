@@ -36,6 +36,10 @@ export default class Point {
     this._data[1] += point.y;
   }
 
+  public dot(point: Point): number {
+    return this.x * point.x + this.y * point.y;
+  }
+
   public get x(): number {
     return this._data[0];
   }
@@ -50,6 +54,10 @@ export default class Point {
 
   public set y(value: number) {
     this._data[1] = value;
+  }
+
+  public get length(): number {
+    return Math.sqrt(this.x * this.x + this.y * this.y);
   }
 
   private static getOffsetX(offset: number): number {

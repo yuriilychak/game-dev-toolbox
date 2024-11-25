@@ -1,9 +1,12 @@
+//@ts-expect-error
+import poly2tri from "poly2tri";
+
 import ImageData from "../image-data";
 import Point from "./point";
 import marchSquare from "./marching-squares";
 import extend from "./extend";
 import simplifyPolygon from "./rdp";
-import triangulate from "./triangulate";
+import { serializeTriangleIndices } from "../utils";
 
 export default class Polygon {
   private _polygon: Uint16Array;
@@ -15,9 +18,26 @@ export default class Polygon {
     const simplifiedPolygon = simplifyPolygon(contour);
     const extendedPolygon = extend(simplifiedPolygon, contour, imageData);
 
+    const contourP = extendedPolygon.map(
+      (point) => new poly2tri.Point(point.x, point.y),
+    );
+    const swctx = new poly2tri.SweepContext(contourP);
+
+    this._triangles = new Uint16Array(
+      swctx
+        .triangulate()
+        .getTriangles()
+        .map((triangle: { points_: Point[] }) => {
+          const indices = triangle.points_.map((vertex: Point) =>
+            extendedPolygon.findIndex((point) => point.getEqual(vertex)),
+          );
+
+          return serializeTriangleIndices(indices[0], indices[1], indices[2]);
+        }),
+    );
+
     this._bounds = new Uint16Array(4);
     this._polygon = this.exportPoints(extendedPolygon, imageData);
-    this._triangles = triangulate(extendedPolygon);
   }
 
   public export(): Uint16Array {
@@ -27,7 +47,7 @@ export default class Polygon {
 
     const result: Uint16Array = new Uint16Array(pointSize + triangleCount + 5);
 
-    result[0] = pointCount + (triangleCount << 5);
+    result[0] = pointCount + (triangleCount << 16);
     result.set(this._bounds, 1);
     result.set(this._polygon, 5);
     result.set(this._triangles, pointSize + 5);

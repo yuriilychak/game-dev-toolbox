@@ -63,8 +63,8 @@ export default class ImageTransform {
     const polygonData = polygon.export();
 
     const sizing = polygonData[0];
-    const triangleCount = sizing >> 5;
-    const pointCount = sizing - (triangleCount << 5);
+    const triangleCount = sizing >> 16;
+    const pointCount = sizing - (triangleCount << 16);
     const bounds = polygonData.slice(1, 5);
     const contours = polygonData.slice(5, (pointCount << 1) + 5);
     const triangles = polygonData.slice((pointCount << 1) + 5);
