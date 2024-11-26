@@ -32,3 +32,27 @@ export function generateTriangle(
     findIndex(points, a)
   );
 }
+
+export function getCountourBounds(contour: Point[]): Uint16Array {
+  const result = new Uint16Array(4);
+  const pointCount: number = contour.length;
+  let minX = 2048;
+  let maxX = 0;
+  let minY = 2048;
+  let maxY = 0;
+  let i = 0;
+
+  for (i = 0; i < pointCount; ++i) {
+    minX = Math.min(contour[i].x, minX);
+    maxX = Math.max(contour[i].x, maxX);
+    minY = Math.min(contour[i].y, minY);
+    maxY = Math.max(contour[i].y, maxY);
+  }
+
+  result[0] = minX;
+  result[1] = minY;
+  result[2] = maxX - minX;
+  result[3] = maxY - minY;
+
+  return result;
+}

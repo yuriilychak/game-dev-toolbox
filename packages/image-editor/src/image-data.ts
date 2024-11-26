@@ -1,3 +1,4 @@
+import { Point } from "./geom";
 import { intAbs, intSign } from "./math";
 
 export default class ImageData {
@@ -74,6 +75,41 @@ export default class ImageData {
     return false;
   }
 
+  public clearContour(points: Point[]): void {
+    const minY = points.reduce(
+      (result, p) => Math.min(p.y, result),
+      points[0].y,
+    );
+    const maxY = points.reduce(
+      (result, p) => Math.max(p.y, result),
+      points[0].y,
+    );
+
+    for (let y = minY; y <= maxY; y++) {
+      const intersections = ImageData.getIntersections(points, y);
+      for (let i = 0; i < intersections.length; i += 2) {
+        const xStart = intersections[i];
+        const xEnd = intersections[i + 1];
+        for (let x = xStart; x <= xEnd; ++x) {
+          this.clearPixel(x, y);
+        }
+      }
+    }
+  }
+
+  private clearPixel(x: number, y: number): void {
+    if (x < 0 || y < 0 || x >= this._width || y >= this._height) {
+      return;
+    }
+
+    const index = (y * this._width + x) * 4;
+
+    this._data[index] = 0;
+    this._data[index + 1] = 0;
+    this._data[index + 2] = 0;
+    this._data[index + 3] = 0;
+  }
+
   public getFilled(x: number, y: number): number {
     const alpha = intSign(this.getPixelAlpha(x, y));
 
@@ -118,6 +154,40 @@ export default class ImageData {
 
   public get totalPixels(): number {
     return this._width * this._height;
+  }
+
+  public get isEmpty(): boolean {
+    const totalPixels = this.totalPixels;
+
+    for (let i = 0; i < totalPixels; i++) {
+      const alphaIndex = i * 4 + 3;
+      if (this._data[alphaIndex] !== 0) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  private static getIntersections(points: Point[], y: number): number[] {
+    const intersections: number[] = [];
+    for (let i = 0; i < points.length; ++i) {
+      const p1 = points[i];
+      const p2 = points[(i + 1) % points.length];
+
+      if (p1.y === p2.y) {
+        continue;
+      }
+
+      const [yMin, yMax] = [p1.y, p2.y].sort((a, b) => a - b);
+
+      if (y >= yMin && y < yMax) {
+        const x = p1.x + ((y - p1.y) * (p2.x - p1.x)) / (p2.y - p1.y);
+        intersections.push(Math.round(x));
+      }
+    }
+
+    return intersections.sort((a, b) => a - b);
   }
 
   private static CLASTER_SIZE: number = 4;

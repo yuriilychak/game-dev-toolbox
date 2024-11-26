@@ -62,29 +62,27 @@ export default class ImageTransform {
 
     const polygonData = polygon.export();
 
-    const sizing = polygonData[0];
-    const triangleCount = sizing >> 16;
-    const pointCount = sizing - (triangleCount << 16);
-    const bounds = polygonData.slice(1, 5);
-    const contours = polygonData.slice(5, (pointCount << 1) + 5);
-    const triangles = polygonData.slice((pointCount << 1) + 5);
+    this.imageData.polygons = polygonData.polygons;
+    this.imageData.triangles = polygonData.triangles;
 
-    this.imageData.polygons = [contours];
-    this.imageData.triangles = [triangles];
-
-    this.offscreenCanvasContext.clearRect(0, 0, bounds[2], bounds[3]);
+    this.offscreenCanvasContext.clearRect(
+      0,
+      0,
+      polygonData.resultBounds[2],
+      polygonData.resultBounds[3],
+    );
     this.offscreenCanvasContext.drawImage(
       this.imageData.src,
-      bounds[0],
-      bounds[1],
+      polygonData.resultBounds[0],
+      polygonData.resultBounds[1],
     );
 
     this.imageData.src = await createImageBitmap(
       this.offscreenCanvas,
       0,
       0,
-      bounds[2],
-      bounds[3],
+      polygonData.resultBounds[2],
+      polygonData.resultBounds[3],
     );
   }
 

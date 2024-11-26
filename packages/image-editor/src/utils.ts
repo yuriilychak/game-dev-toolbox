@@ -153,6 +153,19 @@ export async function cropImageBitmap(
   return await createImageBitmap(croppedImageData);
 }
 
+export function getQuadPolygonFromRect(rect: Uint16Array): Uint16Array {
+  return new Uint16Array([
+    rect[0],
+    rect[1],
+    rect[0] + rect[2],
+    rect[1],
+    rect[0] + rect[2],
+    rect[1] + rect[3],
+    rect[0],
+    rect[1] + rect[3],
+  ]);
+}
+
 export function getQuadPolygon(imageBitmap: ImageBitmap): Uint16Array {
   return new Uint16Array([
     0,
@@ -182,4 +195,59 @@ export function serializeTriangleIndices(
 
 export function getTriangleIndex(source: number, index: number): number {
   return (source >> (index * 5)) & FIVE_BIT_MASK;
+}
+
+export function isRectangle(points: Uint16Array): boolean {
+  return (
+    points.length === 8 &&
+    points[0] === points[6] &&
+    points[1] === points[3] &&
+    points[2] === points[4] &&
+    points[5] === points[7]
+  );
+}
+
+function rectangleArea(rect: Uint16Array): number {
+  const [x0, y0, x1, y1, x2, y2, x3, y3] = rect;
+  const width = Math.max(x0, x1, x2, x3) - Math.min(x0, x1, x2, x3);
+  const height = Math.max(y0, y1, y2, y3) - Math.min(y0, y1, y2, y3);
+  return width * height;
+}
+
+export function getBoundingBox(
+  rect1: Uint16Array,
+  rect2: Uint16Array,
+): Uint16Array {
+  const [x0a, y0a, x1a, y1a, x2a, y2a, x3a, y3a] = rect1;
+  const [x0b, y0b, x1b, y1b, x2b, y2b, x3b, y3b] = rect2;
+  const xMin = Math.min(
+    Math.min(x0a, x1a, x2a, x3a),
+    Math.min(x0b, x1b, x2b, x3b),
+  );
+  const xMax = Math.max(
+    Math.max(x0a, x1a, x2a, x3a),
+    Math.max(x0b, x1b, x2b, x3b),
+  );
+  const yMin = Math.min(
+    Math.min(y0a, y1a, y2a, y3a),
+    Math.min(y0b, y1b, y2b, y3b),
+  );
+  const yMax = Math.max(
+    Math.max(y0a, y1a, y2a, y3a),
+    Math.max(y0b, y1b, y2b, y3b),
+  );
+
+  return new Uint16Array([xMin, yMin, xMax - xMin, yMax - yMin]);
+}
+
+export function differenceBetweenBoundingBoxAndArea(
+  rect1: Uint16Array,
+  rect2: Uint16Array,
+): number {
+  const area1 = rectangleArea(rect1);
+  const area2 = rectangleArea(rect2);
+  const boundBox = getBoundingBox(rect1, rect2);
+  const boundingBox = boundBox[2] * boundBox[3];
+
+  return boundingBox - area1 - area2;
 }

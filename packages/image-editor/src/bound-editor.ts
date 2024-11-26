@@ -105,8 +105,8 @@ export default class BoundEditor {
 
     this.drawCheckers();
     this.drawImage();
-    this.drawTriangles();
-    this.drawPolygon();
+    this.drawAllTriangles();
+    this.drawPolygons();
   }
 
   public async updateType(type: IMAGE_TYPE): Promise<void> {
@@ -219,8 +219,17 @@ export default class BoundEditor {
     return this.worldY + worldY * this.scale;
   }
 
-  private drawPolygon(): void {
-    const polygon = this.imageTransform.polgonAt(0);
+  private drawPolygons(): void {
+    const polygonCount: number = this.imageTransform.polygonCount;
+    let i: number = 0;
+
+    for (i = 0; i < polygonCount; ++i) {
+      this.drawPolygon(i);
+    }
+  }
+
+  private drawPolygon(index: number): void {
+    const polygon: Uint16Array = this.imageTransform.polgonAt(index);
     const pointCount: number = polygon.length >> 1;
     let i: number = 0;
     let pointX: number = 0;
@@ -261,9 +270,18 @@ export default class BoundEditor {
     }
   }
 
-  private drawTriangles(): void {
-    const triangles = this.imageTransform.trianglesAt(0);
-    const polygon = this.imageTransform.polgonAt(0);
+  private drawAllTriangles(): void {
+    const polygonCount: number = this.imageTransform.polygonCount;
+    let i: number = 0;
+
+    for (i = 0; i < polygonCount; ++i) {
+      this.drawTriangles(i);
+    }
+  }
+
+  private drawTriangles(index: number): void {
+    const triangles = this.imageTransform.trianglesAt(index);
+    const polygon = this.imageTransform.polgonAt(index);
     const triangleCount: number = triangles.length;
     const pointCount: number = 3;
     let i: number = 0;
@@ -358,7 +376,6 @@ export default class BoundEditor {
       return;
     }
 
-    // Remove event listeners when the component is unmounted or the instance is destroyed
     this.canvas.removeEventListener("mousedown", this.onMouseDown);
     document.removeEventListener("mouseup", this.onMouseUp);
     document.removeEventListener("mousemove", this.onMouseMove);

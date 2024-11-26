@@ -85,6 +85,7 @@ export default function marchSquare(
   let sv: number = 0;
   let it: number = 0;
   const _points: Array<Point> = new Array<Point>();
+
   do {
     sv = getSquareValue(curx, cury, imageData, threshold);
     switch (sv) {
