@@ -1,6 +1,6 @@
 import { QUAD_TRIANGLES } from "./constants";
 import { IMAGE_TYPE } from "./enums";
-import { Polygon } from "./geom";
+import { marchSquare, Point, Polygon } from "./geom";
 import ImageData from "./image-data";
 import { LibraryImageData } from "./types";
 import { cropImageBitmap, getQuadPolygon } from "./utils";
@@ -58,31 +58,74 @@ export default class ImageTransform {
       this.imageData.src,
       this.offscreenCanvasContext,
     );
-    const polygon = new Polygon(imageData);
+    const polygons: Polygon[] = [];
+    let contour: Point[] = null;
+    let polygon: Polygon = null;
+    let index: number = 0;
+    let i: number = 0;
 
-    const polygonData = polygon.export();
+    while (!imageData.isEmpty) {
+      contour = marchSquare(imageData, 0);
+      polygon = new Polygon(contour, imageData);
+
+      if (!polygon.isBroken) {
+        polygons.push(polygon);
+      }
+
+      imageData.clearContour(contour);
+    }
+
+    while (index !== -1) {
+      for (i = 0; i < polygons.length; ++i) {
+        index = polygons[i].unite(polygons, i);
+
+        if (index !== -1) {
+          polygons.splice(index, 1);
+          break;
+        }
+      }
+    }
+
+    const bounds = polygons.reduce(
+      (result, polygon) => result.union(polygon.bounds, true),
+      polygons[0].bounds.clone(),
+    );
+
+    const polygonData = polygons.reduce(
+      (result, polygon, index) => {
+        const [polygonData, trianglesData] = polygon.export(
+          bounds.left,
+          bounds.top,
+        );
+
+        result.polygons.push(polygonData);
+        result.triangles.push(trianglesData);
+
+        if (index === polygons.length - 1) {
+          bounds.offset(imageData.leftOffset, imageData.topOffset);
+        }
+
+        return result;
+      },
+      { polygons: [], triangles: [] },
+    );
 
     this.imageData.polygons = polygonData.polygons;
     this.imageData.triangles = polygonData.triangles;
 
-    this.offscreenCanvasContext.clearRect(
-      0,
-      0,
-      polygonData.resultBounds[2],
-      polygonData.resultBounds[3],
-    );
+    this.offscreenCanvasContext.clearRect(0, 0, bounds.width, bounds.height);
     this.offscreenCanvasContext.drawImage(
       this.imageData.src,
-      polygonData.resultBounds[0],
-      polygonData.resultBounds[1],
+      bounds.left,
+      bounds.top,
     );
 
     this.imageData.src = await createImageBitmap(
       this.offscreenCanvas,
       0,
       0,
-      polygonData.resultBounds[2],
-      polygonData.resultBounds[3],
+      bounds.width,
+      bounds.height,
     );
   }
 

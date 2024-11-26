@@ -1,4 +1,3 @@
-import { joinCoords } from "../utils";
 import { intAbs } from "../math";
 
 export default class Point {
@@ -12,10 +11,6 @@ export default class Point {
   public set(point: Point): void {
     this._data[0] = point.x;
     this._data[1] = point.y;
-  }
-
-  public export(): number {
-    return joinCoords(this._data[0], this._data[1]);
   }
 
   public clone(): Point {
