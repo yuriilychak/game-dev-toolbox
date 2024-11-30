@@ -12,7 +12,7 @@ const TopArea: FC = () => (
       borderBottom: "1px solid #666",
     }}
   >
-    <Box component="img" src="assets/icon.svg" height={16} width={16} />
+    <Box component="img" src="assets/logo.svg" height={12} width={128} />
   </Paper>
 );
 

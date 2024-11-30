@@ -35,6 +35,16 @@ export default class Point {
     return this.x * point.x + this.y * point.y;
   }
 
+  public lineDistance(line: Int32Array): number {
+    const a = line[0];
+    const b = line[1];
+    const c = line[2];
+    const numerator = Math.abs(a * this.x + b * this.y + c);
+    const denominator = Math.sqrt(a * a + b * b);
+
+    return numerator / denominator;
+  }
+
   public get x(): number {
     return this._data[0];
   }

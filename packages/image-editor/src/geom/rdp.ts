@@ -1,34 +1,6 @@
 import Point from "./point";
+import { getContourDirection, getLineEquation } from "./utils";
 import Vector from "./vector";
-
-function simplifyRadialDist(
-  points: Array<Point>,
-  sqTolerance: number,
-): Array<Point> {
-  let i: number = 0;
-
-  const pointCount: number = points.length;
-  const result: Array<Point> = [points[0]];
-  let prevPoint: Point = points[0];
-  let currentPoint: Point = points[0];
-
-  for (i = 1; i < pointCount; ++i) {
-    currentPoint = points[i];
-
-    if (Point.getSqDist(currentPoint, prevPoint) <= sqTolerance) {
-      continue;
-    }
-
-    result.push(new Point(currentPoint.x, currentPoint.y));
-    prevPoint = currentPoint;
-  }
-
-  if (!prevPoint.getEqual(currentPoint)) {
-    result.push(new Point(currentPoint.x, currentPoint.y));
-  }
-
-  return result;
-}
 
 function simplifyDPStep(
   points: Array<Point>,
@@ -58,6 +30,13 @@ function simplifyDPStep(
     if (last - index > 1)
       simplifyDPStep(points, index, last, sqTolerance, simplified);
   }
+}
+
+function distanceBetweenPoints(point1: Point, point2: Point): number {
+  const dx = point2.x - point1.x;
+  const dy = point2.y - point1.y;
+
+  return Math.sqrt(dx * dx + dy * dy);
 }
 
 function simplifyDouglasPeucker(
@@ -100,7 +79,7 @@ function removeCollinearPoints(points: Point[]): Point[] {
     C = points[i + 1];
     area = (B.x - A.x) * (C.y - A.y) - (B.y - A.y) * (C.x - A.x);
 
-    if (Math.abs(area) > 2) {
+    if (Math.abs(area) !== 0) {
       result.push(B);
     }
   }
@@ -110,32 +89,18 @@ function removeCollinearPoints(points: Point[]): Point[] {
   return result;
 }
 
-function simplify(
-  inputPoints: Point[],
-  tolerance: number = -1,
-  highestQuality: boolean = false,
-): Array<Point> {
+function simplify(inputPoints: Point[], tolerance: number = -1): Array<Point> {
   if (inputPoints.length <= 2) {
     return inputPoints;
   }
 
   const sqTolerance: number = tolerance > 0 ? tolerance * tolerance : 1;
-  const points = highestQuality
-    ? inputPoints
-    : simplifyRadialDist(inputPoints, sqTolerance);
-
-  const colinearPoints = removeCollinearPoints(points);
+  const colinearPoints = removeCollinearPoints(inputPoints);
 
   return simplifyDouglasPeucker(colinearPoints, sqTolerance);
 }
 
-export default function simplifyPolygon(
-  initialPoints: Array<Point>,
-): Array<Point> {
-  if (initialPoints.length <= 4) {
-    return initialPoints.map((point) => point.clone());
-  }
-
+function iterativeSimplify(initialPoints: Point[]): Point[] {
   let result: Array<Point> = initialPoints;
   let threshold: number = 2;
   let i: number = 0;
@@ -147,7 +112,7 @@ export default function simplifyPolygon(
   let distance: number = 0;
 
   while (true) {
-    result = simplify(result, threshold, true);
+    result = simplify(result, threshold);
     threshold = threshold + 1;
     resultPointCount = result.length;
     distance = 0;
@@ -168,4 +133,75 @@ export default function simplifyPolygon(
       }
     }
   }
+}
+
+export default function simplifyPolygon(initialPoints: Point[]): Point[] {
+  if (initialPoints.length <= 4) {
+    return initialPoints.map((point) => point.clone());
+  }
+
+  const contourSize: number = initialPoints.length;
+  const result: Array<Point> = iterativeSimplify(initialPoints);
+  let line: Int32Array = null;
+  let i: number = 0;
+  let j: number = 0;
+  let isRestored: boolean = true;
+  let pointCount: number = 0;
+  let point1: Point = null;
+  let point2: Point = null;
+  let startIndex: number = 0;
+  let endIndex: number = 0;
+  let maxDistance: number = 0;
+  let maxIndex: number = 0;
+  let distance: number = 0;
+
+  const direction = getContourDirection(initialPoints);
+
+  if (direction === -1) {
+    initialPoints.reverse();
+    result.reverse();
+  }
+
+  while (isRestored) {
+    isRestored = false;
+
+    pointCount = result.length;
+
+    for (i = 0; i < pointCount - 1; ++i) {
+      point1 = result[i];
+      point2 = result[i + 1];
+      startIndex = initialPoints.findIndex((p) => p.getEqual(point1));
+      endIndex = initialPoints.findIndex((p) => p.getEqual(point2));
+      endIndex = startIndex > endIndex ? endIndex + contourSize : endIndex;
+      line = getLineEquation(point1, point2);
+
+      maxDistance = 0;
+
+      for (j = startIndex + 1; j <= endIndex - 1; ++j) {
+        const point = initialPoints[j % contourSize];
+        const value = line[0] * point.x + line[1] * point.y + line[2];
+
+        if (value > 0) {
+          distance = point.lineDistance(line);
+
+          if (distance > maxDistance) {
+            maxDistance = distance;
+            maxIndex = j;
+          }
+        }
+      }
+
+      if (maxDistance > 8) {
+        result.splice(i + 1, 0, initialPoints[maxIndex].clone());
+        isRestored = true;
+        break;
+      }
+    }
+  }
+
+  if (distanceBetweenPoints(result[0], result[result.length - 1]) < 4) {
+    result.pop();
+  }
+
+  return result;
 }

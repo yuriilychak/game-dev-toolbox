@@ -1,19 +1,19 @@
 // @ts-expect-error
 import poly2tri from "poly2tri";
 
-import ImageData from "../image-data";
 import BoundRect from "./bound-rect";
 import extend from "./extend";
 import Point from "./point";
 import simplifyPolygon from "./rdp";
 import { serializeTriangleIndices } from "../utils";
+import { getContourDirection } from "./utils";
 
 export default class Polygon {
   private _polygon: Point[];
 
   private _boundRect: BoundRect;
 
-  constructor(contour: Point[], imageData: ImageData) {
+  constructor(contour: Point[]) {
     this._boundRect = new BoundRect();
     this._boundRect.fromPoints(contour);
 
@@ -21,10 +21,13 @@ export default class Polygon {
       this._boundRect.width <= Polygon.QUAD_TRASHOLD ||
       this._boundRect.height <= Polygon.QUAD_TRASHOLD
     ) {
+      this._boundRect.extend();
       this._polygon = this._boundRect.exportPolygon();
     } else {
       const simplifiedPolygon = simplifyPolygon(contour);
-      this._polygon = extend(simplifiedPolygon, contour, imageData);
+
+      this._polygon = extend(contour, simplifiedPolygon);
+
       this._boundRect.fromPoints(this._polygon);
     }
   }
@@ -107,6 +110,10 @@ export default class Polygon {
           this._polygon[0].x === this._polygon[3].x &&
           this._polygon[1].x === this._polygon[2].x))
     );
+  }
+
+  public get polygon(): Point[] {
+    return this._polygon;
   }
 
   public get isBroken(): boolean {

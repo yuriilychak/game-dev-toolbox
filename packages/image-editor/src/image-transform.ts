@@ -66,13 +66,13 @@ export default class ImageTransform {
 
     while (!imageData.isEmpty) {
       contour = marchSquare(imageData, 0);
-      polygon = new Polygon(contour, imageData);
+      polygon = new Polygon(contour);
 
       if (!polygon.isBroken) {
         polygons.push(polygon);
       }
 
-      imageData.clearContour(contour);
+      imageData.clearContour(polygon.polygon);
     }
 
     while (index !== -1) {
@@ -92,7 +92,7 @@ export default class ImageTransform {
     );
 
     const polygonData = polygons.reduce(
-      (result, polygon, index) => {
+      (result, polygon) => {
         const [polygonData, trianglesData] = polygon.export(
           bounds.left,
           bounds.top,
@@ -100,10 +100,6 @@ export default class ImageTransform {
 
         result.polygons.push(polygonData);
         result.triangles.push(trianglesData);
-
-        if (index === polygons.length - 1) {
-          bounds.offset(imageData.leftOffset, imageData.topOffset);
-        }
 
         return result;
       },
@@ -116,8 +112,8 @@ export default class ImageTransform {
     this.offscreenCanvasContext.clearRect(0, 0, bounds.width, bounds.height);
     this.offscreenCanvasContext.drawImage(
       this.imageData.src,
-      bounds.left,
-      bounds.top,
+      imageData.leftOffset - bounds.left,
+      imageData.topOffset - bounds.top,
     );
 
     this.imageData.src = await createImageBitmap(

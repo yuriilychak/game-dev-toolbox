@@ -67,13 +67,11 @@ export default class BoundRect {
     return unionRect.square - this.square - boundRect.square;
   }
 
-  public offset(left: number, top: number): void {
-    const width = this.data[2] - this.data[0];
-    const height = this.data[3] - this.data[1];
-    this.data[0] = left - this.data[0];
-    this.data[1] = top - this.data[1];
-    this.data[2] = this.data[0] + width;
-    this.data[3] = this.data[1] + height;
+  public extend(): void {
+    this.data[0] -= 1;
+    this.data[1] -= 1;
+    this.data[2] += 1;
+    this.data[3] += 1;
   }
 
   public clone(): BoundRect {

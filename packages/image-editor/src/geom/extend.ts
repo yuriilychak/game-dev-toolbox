@@ -1,251 +1,85 @@
-import ImageData from "../image-data";
 import Point from "./point";
-import ScreenLine from "./screen-line";
+import simplifyPolygon from "./rdp";
+import { getLineEquation } from "./utils";
 
-function alignIndex(index: number, size: number): number {
-  return (index + size) % size;
-}
+function findIntersection(line1: Int32Array, line2: Int32Array): Point | null {
+  const [a1, b1, c1] = line1;
+  const [a2, b2, c2] = line2;
 
-function simplifyBound(
-  startIndex: number,
-  endIndex: number,
-  spliceIndex: number,
-  points: Point[],
-  bound: ScreenLine,
-): void {
-  const pointCount: number = points.length;
-  points[alignIndex(startIndex, pointCount)] = bound.getIntersectPoint(
-    new ScreenLine(
-      points[alignIndex(startIndex, pointCount)],
-      points[alignIndex(endIndex, pointCount)],
-      [],
-    ),
-  );
+  const denominator = a1 * b2 - a2 * b1;
 
-  points.splice(alignIndex(spliceIndex, pointCount), 1);
-}
-
-function checkBound(
-  points: Point[],
-  bound: ScreenLine,
-  index: number,
-  upData: number,
-  downData: number,
-  threshold: number = 16,
-): boolean {
-  if (upData < threshold) {
-    simplifyBound(index - 1, index - 2, index, points, bound);
-    return true;
+  // Перевіряємо, чи лінії не паралельні (детермінант != 0)
+  if (denominator === 0) {
+    return null; // Лінії паралельні, перетину немає
   }
 
-  if (downData < threshold) {
-    simplifyBound(index + 2, index + 3, index + 1, points, bound);
-    return true;
+  // Знаходимо точку перетину
+  const x = -(b2 * c1 - b1 * c2) / denominator;
+  const y = -(a1 * c2 - a2 * c1) / denominator;
+
+  return new Point(x, y);
+}
+
+function findIntersections(lines: Int32Array[]): Point[] {
+  const intersections: Point[] = [];
+
+  for (let i = 0; i < lines.length; i++) {
+    const intersection = findIntersection(
+      lines[i],
+      lines[(i + 1) % lines.length],
+    );
+
+    if (intersection) {
+      intersections.push(intersection);
+    }
   }
 
-  return false;
+  return intersections;
 }
 
 export default function extend(
-  polygon: Array<Point>,
-  contour: Array<Point>,
-  imageData: ImageData,
-): Array<Point> {
+  originalContour: Point[],
+  simplifiedContour: Point[],
+): Point[] {
+  const lines: Int32Array[] = [];
+  const contourSize: number = originalContour.length;
+  const polygonSize: number = simplifiedContour.length;
+  let line: Int32Array = null;
+  let point1: Point = null;
+  let point2: Point = null;
+  let startIndex: number = 0;
+  let endIndex: number = 0;
+  let isLineInvalid: boolean = false;
   let i: number = 0;
-  const size: number = polygon.length - 1;
-  const lines: Array<ScreenLine> = new Array<ScreenLine>();
+  let j: number = 0;
 
-  for (i = 0; i < size; ++i) {
-    lines.push(new ScreenLine(polygon[i], polygon[i + 1], contour));
-  }
+  for (i = 0; i < polygonSize; ++i) {
+    point1 = simplifiedContour[i];
+    point2 = simplifiedContour[(i + 1) % polygonSize];
+    startIndex = originalContour.findIndex((p) => p.getEqual(point1));
+    endIndex = originalContour.findIndex((p) => p.getEqual(point2));
+    endIndex = startIndex > endIndex ? endIndex + contourSize : endIndex;
+    line = getLineEquation(point2, point1);
 
-  const result: Array<Point> = new Array<Point>();
+    isLineInvalid = true;
 
-  let point: Point;
+    while (isLineInvalid) {
+      isLineInvalid = false;
 
-  let currentLine: ScreenLine;
-  let nextLine: ScreenLine;
-  const leftBound = new ScreenLine(new Point(0, 0), new Point(0, 256), []);
-  const rightBound = new ScreenLine(
-    new Point(imageData.width - 1, 0),
-    new Point(imageData.width - 1, 256),
-    [],
-  );
-  const topBound = new ScreenLine(new Point(0, 0), new Point(256, 0), []);
-  const boottomBound = new ScreenLine(
-    new Point(0, imageData.height - 1),
-    new Point(256, imageData.height - 1),
-    [],
-  );
+      for (j = startIndex; j <= endIndex; ++j) {
+        const point = originalContour[j % contourSize];
+        const value = line[0] * point.x + line[1] * point.y + line[2];
 
-  let canSimplify: boolean = false;
-
-  for (i = 0; i < size; ++i) {
-    currentLine = lines[i];
-    nextLine = lines[(i + 1) % size];
-
-    point = currentLine.getIntersectPoint(nextLine);
-
-    if (point.x <= 0) {
-      result.push(currentLine.getIntersectPoint(leftBound));
-      result.push(nextLine.getIntersectPoint(leftBound));
-      canSimplify = true;
-    } else if (point.y <= 0) {
-      result.push(currentLine.getIntersectPoint(topBound));
-      result.push(nextLine.getIntersectPoint(topBound));
-      canSimplify = true;
-    } else if (point.x - imageData.width >= 0) {
-      result.push(currentLine.getIntersectPoint(rightBound));
-      result.push(nextLine.getIntersectPoint(rightBound));
-      canSimplify = true;
-    } else if (point.y - imageData.height >= 0) {
-      result.push(currentLine.getIntersectPoint(boottomBound));
-      result.push(nextLine.getIntersectPoint(boottomBound));
-      canSimplify = true;
-    } else {
-      result.push(point);
-    }
-  }
-
-  let pointCount: number = 0;
-  let currentPoint: Point;
-  let nextPoint: Point;
-  let beginPoint: Point;
-  let endPoint: Point;
-
-  while (canSimplify) {
-    canSimplify = false;
-
-    pointCount = result.length;
-
-    for (i = 0; i < pointCount; ++i) {
-      beginPoint = result[(i - 1 + pointCount) % pointCount];
-      currentPoint = result[i];
-      nextPoint = result[(i + 1) % pointCount];
-      endPoint = result[(i + 2) % pointCount];
-
-      if (currentPoint.x === 0 && nextPoint.x === 0) {
-        canSimplify = checkBound(
-          result,
-          leftBound,
-          i,
-          beginPoint.x,
-          endPoint.x,
-        );
-
-        if (canSimplify) {
-          break;
-        }
-      }
-
-      if (
-        currentPoint.x === imageData.width - 1 &&
-        nextPoint.x === imageData.width - 1
-      ) {
-        canSimplify = checkBound(
-          result,
-          rightBound,
-          i,
-          imageData.width - 1 - beginPoint.x,
-          imageData.width - 1 - endPoint.x,
-        );
-
-        if (canSimplify) {
-          break;
-        }
-      }
-
-      if (currentPoint.y === 0 && nextPoint.y === 0) {
-        canSimplify = checkBound(result, topBound, i, beginPoint.y, endPoint.y);
-
-        if (canSimplify) {
-          break;
-        }
-      }
-
-      if (
-        currentPoint.y === imageData.height - 1 &&
-        nextPoint.y === imageData.height - 1
-      ) {
-        canSimplify = checkBound(
-          result,
-          boottomBound,
-          i,
-          imageData.height - 1 - beginPoint.y,
-          imageData.height - 1 - endPoint.y,
-        );
-
-        if (canSimplify) {
+        if (value <= 0 || point.lineDistance(line) < 1) {
+          line[2] += 1;
+          isLineInvalid = true;
           break;
         }
       }
     }
+
+    lines.push(line);
   }
 
-  pointCount = result.length;
-
-  for (i = 0; i < pointCount; ++i) {
-    beginPoint = result[(i - 1 + pointCount) % pointCount];
-    currentPoint = result[i];
-    nextPoint = result[(i + 1) % pointCount];
-    endPoint = result[(i + 2) % pointCount];
-
-    if (currentPoint.x === 0 && nextPoint.x === 0) {
-      currentLine = new ScreenLine(beginPoint, currentPoint);
-      nextLine = new ScreenLine(
-        new Point(imageData.leftOffset, 0),
-        new Point(imageData.leftOffset, 256),
-      );
-
-      result[i] = currentLine.getIntersectPoint(nextLine);
-
-      currentLine = new ScreenLine(nextPoint, endPoint);
-
-      result[(i + 1) % pointCount] = currentLine.getIntersectPoint(nextLine);
-    } else if (currentPoint.y === 0 && nextPoint.y === 0) {
-      currentLine = new ScreenLine(beginPoint, currentPoint);
-      nextLine = new ScreenLine(
-        new Point(0, imageData.topOffset),
-        new Point(256, imageData.topOffset),
-      );
-
-      result[i] = currentLine.getIntersectPoint(nextLine);
-
-      currentLine = new ScreenLine(nextPoint, endPoint);
-
-      result[(i + 1) % pointCount] = currentLine.getIntersectPoint(nextLine);
-    } else if (
-      currentPoint.y === imageData.height - 1 &&
-      nextPoint.y === imageData.height - 1
-    ) {
-      currentLine = new ScreenLine(beginPoint, currentPoint);
-      nextLine = new ScreenLine(
-        new Point(0, imageData.height - 1 - imageData.bottomOffset),
-        new Point(256, imageData.height - 1 - imageData.bottomOffset),
-      );
-
-      result[i] = currentLine.getIntersectPoint(nextLine);
-
-      currentLine = new ScreenLine(nextPoint, endPoint);
-
-      result[(i + 1) % pointCount] = currentLine.getIntersectPoint(nextLine);
-    } else if (
-      currentPoint.x === imageData.width - 1 &&
-      nextPoint.x === imageData.width - 1
-    ) {
-      currentLine = new ScreenLine(beginPoint, currentPoint);
-      nextLine = new ScreenLine(
-        new Point(imageData.width - 1 - imageData.rightOffset, 0),
-        new Point(imageData.width - 1 - imageData.rightOffset, 256),
-      );
-
-      result[i] = currentLine.getIntersectPoint(nextLine);
-
-      currentLine = new ScreenLine(nextPoint, endPoint);
-
-      result[(i + 1) % pointCount] = currentLine.getIntersectPoint(nextLine);
-    }
-  }
-
-  return result;
+  return findIntersections(lines);
 }
