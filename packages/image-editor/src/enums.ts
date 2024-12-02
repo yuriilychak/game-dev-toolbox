@@ -4,3 +4,10 @@ export enum IMAGE_TYPE {
   POLYGON = 2,
   MESH = 3,
 }
+
+export enum BOUND {
+  LEFT = 0,
+  TOP = 1,
+  RIGHT = 2,
+  BOTTOM = 3,
+}

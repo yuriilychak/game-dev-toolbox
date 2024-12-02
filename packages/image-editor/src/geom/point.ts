@@ -1,7 +1,7 @@
 import { intAbs } from "../math";
 
 export default class Point {
-  private _data: Int16Array = new Int16Array(2);
+  private _data: Int32Array = new Int32Array(2);
 
   constructor(x: number = 0, y: number = 0) {
     this._data[0] = x;

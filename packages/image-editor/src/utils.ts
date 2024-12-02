@@ -11,6 +11,14 @@ export async function formatImageData(
   });
 }
 
+export function cycleIndex(
+  index: number,
+  size: number,
+  offset: number,
+): number {
+  return (index + size + offset) % size;
+}
+
 function getIndex(x: number, y: number, width: number) {
   return ((y * width + x) << 2) + 3;
 }

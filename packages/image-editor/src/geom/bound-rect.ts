@@ -1,3 +1,4 @@
+import { BOUND } from "../enums";
 import Point from "./point";
 
 export default class BoundRect {
@@ -9,46 +10,46 @@ export default class BoundRect {
     right: number = 0,
     bottom: number = 0,
   ) {
-    this.data = new Uint16Array(4);
+    this.data = new Uint16Array(BoundRect.BOUND_COUNT);
 
-    this.data[0] = left;
-    this.data[1] = top;
-    this.data[2] = right;
-    this.data[3] = bottom;
+    this.left = left;
+    this.top = top;
+    this.right = right;
+    this.bottom = bottom;
   }
 
   public fromPoints(points: Point[]): void {
     const pointCount: number = points.length;
     let i = 0;
 
-    this.data[0] = 2048;
-    this.data[1] = 2048;
-    this.data[2] = 0;
-    this.data[3] = 0;
+    this.left = points[0].x;
+    this.top = points[0].y;
+    this.right = points[0].x;
+    this.bottom = points[0].y;
 
-    for (i = 0; i < pointCount; ++i) {
-      this.data[0] = Math.min(points[i].x, this.data[0]);
-      this.data[1] = Math.min(points[i].y, this.data[1]);
-      this.data[2] = Math.max(points[i].x, this.data[2]);
-      this.data[3] = Math.max(points[i].y, this.data[3]);
+    for (i = 1; i < pointCount; ++i) {
+      this.left = Math.min(points[i].x, this.left);
+      this.top = Math.min(points[i].y, this.top);
+      this.right = Math.max(points[i].x, this.right);
+      this.bottom = Math.max(points[i].y, this.bottom);
     }
   }
 
   public exportPolygon(): Point[] {
     return [
-      new Point(this.data[0], this.data[1]),
-      new Point(this.data[2], this.data[1]),
-      new Point(this.data[2], this.data[3]),
-      new Point(this.data[0], this.data[3]),
+      new Point(this.left, this.top),
+      new Point(this.right, this.top),
+      new Point(this.right, this.bottom),
+      new Point(this.left, this.bottom),
     ];
   }
 
   public union(boundRect: BoundRect, isIn: boolean = false): BoundRect {
     if (isIn) {
-      this.data[0] = Math.min(this.left, boundRect.left);
-      this.data[1] = Math.min(this.top, boundRect.top);
-      this.data[2] = Math.max(this.right, boundRect.right);
-      this.data[3] = Math.max(this.bottom, boundRect.bottom);
+      this.left = Math.min(this.left, boundRect.left);
+      this.top = Math.min(this.top, boundRect.top);
+      this.right = Math.max(this.right, boundRect.right);
+      this.bottom = Math.max(this.bottom, boundRect.bottom);
 
       return this;
     }
@@ -61,53 +62,213 @@ export default class BoundRect {
     );
   }
 
+  public contains(point: Point): boolean {
+    return (
+      point.x >= this.left &&
+      point.x <= this.right &&
+      point.y >= this.top &&
+      point.y <= this.bottom
+    );
+  }
+
+  public getClosestBoundary(point: Point): BOUND {
+    let result: number = BOUND.LEFT;
+    let minDistance: number = this.getDistance(point, BOUND.LEFT);
+    let distance: number = 0;
+    let i: BOUND = BOUND.LEFT;
+
+    for (i = BOUND.TOP; i < BoundRect.BOUND_COUNT; ++i) {
+      distance = this.getDistance(point, i);
+
+      if (distance < minDistance) {
+        result = i;
+        minDistance = distance;
+      }
+    }
+
+    return result;
+  }
+
+  public getDistance(point: Point, bound: BOUND): number {
+    const value: number = BoundRect.getHorizontal(bound) ? point.x : point.y;
+
+    return Math.abs(value - this.data[bound]);
+  }
+
+  public getIntersection(p1: Point, p2: Point, bound: BOUND): Point | null {
+    switch (bound) {
+      case BOUND.LEFT:
+        return BoundRect.getLineIntersection(
+          p1,
+          p2,
+          new Point(this.left, this.top),
+          new Point(this.left, this.bottom),
+        );
+      case BOUND.TOP:
+        return BoundRect.getLineIntersection(
+          p1,
+          p2,
+          new Point(this.left, this.top),
+          new Point(this.right, this.top),
+        );
+      case BOUND.RIGHT:
+        return BoundRect.getLineIntersection(
+          p1,
+          p2,
+          new Point(this.right, this.top),
+          new Point(this.right, this.bottom),
+        );
+      case BOUND.BOTTOM:
+        return BoundRect.getLineIntersection(
+          p1,
+          p2,
+          new Point(this.left, this.bottom),
+          new Point(this.right, this.bottom),
+        );
+      default:
+        return null;
+    }
+  }
+
   public unionSqaureDiff(boundRect: BoundRect): number {
     const unionRect = this.union(boundRect);
 
     return unionRect.square - this.square - boundRect.square;
   }
 
-  public extend(): void {
-    this.data[0] -= 1;
-    this.data[1] -= 1;
-    this.data[2] += 1;
-    this.data[3] += 1;
+  public extend(offset: number = 1): void {
+    this.left -= offset;
+    this.top -= offset;
+    this.right += offset;
+    this.bottom += offset;
+  }
+
+  public getClosestBound(p1: Point, p2: Point): BOUND {
+    const distances = [
+      Math.abs(this.left - p1.x) + Math.abs(this.left - p2.x),
+      Math.abs(this.top - p1.y) + Math.abs(this.top - p2.y),
+      Math.abs(this.right - p1.x) + Math.abs(this.right - p2.x),
+      Math.abs(this.bottom - p1.y) + Math.abs(this.bottom - p2.y),
+    ];
+
+    let closestBound = 0;
+    let minDistance = distances[0];
+
+    for (let i = 1; i < distances.length; i++) {
+      if (distances[i] < minDistance) {
+        minDistance = distances[i];
+        closestBound = i;
+      }
+    }
+
+    return closestBound as BOUND;
+  }
+
+  public getSegmentIntersectBounds(p1: Point, p2: Point): BOUND[] {
+    const result: BOUND[] = [];
+    let intersection: Point = null;
+    let i: BOUND = BOUND.LEFT;
+
+    for (i = BOUND.LEFT; i < BoundRect.BOUND_COUNT; ++i) {
+      intersection = this.getIntersection(p1, p2, i);
+
+      if (intersection !== null && this.contains(intersection)) {
+        result.push(i);
+      }
+    }
+
+    return result;
   }
 
   public clone(): BoundRect {
-    return new BoundRect(
-      this.data[0],
-      this.data[1],
-      this.data[2],
-      this.data[3],
-    );
+    return new BoundRect(this.left, this.top, this.right, this.bottom);
   }
 
   public get left(): number {
-    return this.data[0];
+    return this.data[BOUND.LEFT];
+  }
+
+  private set left(value: number) {
+    this.data[BOUND.LEFT] = value;
   }
 
   public get top(): number {
-    return this.data[1];
+    return this.data[BOUND.TOP];
+  }
+
+  private set top(value: number) {
+    this.data[BOUND.TOP] = value;
   }
 
   public get right(): number {
-    return this.data[2];
+    return this.data[BOUND.RIGHT];
+  }
+
+  private set right(value: number) {
+    this.data[BOUND.RIGHT] = value;
   }
 
   public get bottom(): number {
-    return this.data[3];
+    return this.data[BOUND.BOTTOM];
+  }
+
+  private set bottom(value: number) {
+    this.data[BOUND.BOTTOM] = value;
   }
 
   public get width(): number {
-    return this.data[2] - this.data[0];
+    return this.right - this.left;
   }
 
   public get height(): number {
-    return this.data[3] - this.data[1];
+    return this.bottom - this.top;
   }
 
   public get square(): number {
     return this.width * this.height;
+  }
+
+  public static fromPoints(points: Point[]): BoundRect {
+    const result = new BoundRect();
+
+    result.fromPoints(points);
+
+    return result;
+  }
+
+  public static getHorizontal(bound: BOUND): boolean {
+    return bound === BOUND.LEFT || bound === BOUND.RIGHT;
+  }
+
+  public static readonly BOUND_COUNT: number = 4;
+
+  public static getLineIntersection(
+    p1: Point,
+    p2: Point,
+    p3: Point,
+    p4: Point,
+  ): Point | null {
+    // Координати точок
+    const a1 = p2.y - p1.y;
+    const b1 = p1.x - p2.x;
+    const c1 = a1 * p1.x + b1 * p1.y;
+
+    const a2 = p4.y - p3.y;
+    const b2 = p3.x - p4.x;
+    const c2 = a2 * p3.x + b2 * p3.y;
+
+    // Визначник
+    const determinant = a1 * b2 - a2 * b1;
+
+    // Якщо визначник дорівнює 0, прямі паралельні або співпадають
+    if (determinant === 0) {
+      return null;
+    }
+
+    // Обчислення координат точки перетину
+    const x = (b2 * c1 - b1 * c2) / determinant;
+    const y = (a1 * c2 - a2 * c1) / determinant;
+
+    return new Point(x, y);
   }
 }

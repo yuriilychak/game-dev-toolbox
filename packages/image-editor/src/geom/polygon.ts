@@ -6,7 +6,6 @@ import extend from "./extend";
 import Point from "./point";
 import simplifyPolygon from "./rdp";
 import { serializeTriangleIndices } from "../utils";
-import { getContourDirection } from "./utils";
 
 export default class Polygon {
   private _polygon: Point[];
