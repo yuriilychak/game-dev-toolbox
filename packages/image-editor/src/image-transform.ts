@@ -65,6 +65,7 @@ export default class ImageTransform {
     let i: number = 0;
 
     while (!imageData.isEmpty) {
+      console.log("NEW POLYGON");
       contour = marchSquare(imageData, 0);
       polygon = new Polygon(contour);
 

@@ -12,10 +12,11 @@ type SqareResult = {
   neighboar: Point | null;
 };
 
+const MIN_SQUARE_DIFF: number = -256;
+
 function getSeqareCriterias(
   points: Point[],
   boundRect: BoundRect,
-  cropRect: BoundRect,
   index: number,
   offset: number,
   threshold: number,
@@ -32,12 +33,12 @@ function getSeqareCriterias(
     neighboar1,
     neighboar3,
   );
-  const bounds = cropRect.getSegmentIntersectBounds(current, neighboar1);
+  const bounds = boundRect.getSegmentIntersectBounds(current, neighboar1);
   const bondCount: number = bounds.length;
   const result: SqareResult = {
     index,
     neighboarIndex,
-    squareDiff: 0,
+    squareDiff: MIN_SQUARE_DIFF,
     current: null,
     neighboar: null,
   };
@@ -50,12 +51,15 @@ function getSeqareCriterias(
   for (i = 0; i < bondCount; ++i) {
     bound = bounds[i];
 
-    if (boundRect.getDistance(neighboar1, bound) > threshold) {
+    if (
+      boundRect.contains(neighboar1) &&
+      boundRect.getDistance(neighboar1, bound) > threshold
+    ) {
       continue;
     }
 
-    newCurrent = cropRect.getIntersection(current, neighboar2, bound);
-    newNeighboar = cropRect.getIntersection(neighboar1, neighboar3, bound);
+    newCurrent = boundRect.getIntersection(current, neighboar2, bound);
+    newNeighboar = boundRect.getIntersection(neighboar1, neighboar3, bound);
 
     if (newCurrent === null || newNeighboar === null) {
       continue;
@@ -83,45 +87,58 @@ function optimizeSimplifiedContour(
   original: Point[],
   threshold: number,
 ): Point[] {
-  if (simplified.length < 4) {
+  if (simplified.length <= 4) {
     return simplified;
   }
+
   const boundRect: BoundRect = BoundRect.fromPoints(original);
-  const outerRect: BoundRect = boundRect.clone();
-  const innerRect: BoundRect = outerRect.clone();
   const pointCount: number = simplified.length;
   let currPoint: Point = null;
   let i: number = 0;
 
-  innerRect.extend(2);
-  outerRect.extend(-threshold);
+  boundRect.extend(1);
 
   for (i = 0; i < pointCount; ++i) {
     currPoint = simplified[i];
 
-    if (!innerRect.contains(currPoint)) {
+    if (!boundRect.contains(currPoint)) {
       const criteria1 = getSeqareCriterias(
         simplified,
-        outerRect,
-        innerRect,
+        boundRect,
         i,
         1,
         threshold,
       );
       const criteria2 = getSeqareCriterias(
         simplified,
-        outerRect,
-        innerRect,
+        boundRect,
         i,
         -1,
         threshold,
       );
 
-      if (criteria1.squareDiff === 0 && criteria2.squareDiff === 0) {
+      if (
+        criteria1.squareDiff === MIN_SQUARE_DIFF &&
+        criteria2.squareDiff === MIN_SQUARE_DIFF
+      ) {
         continue;
       }
 
-      if (criteria1.squareDiff > criteria2.squareDiff) {
+      if (
+        criteria1.squareDiff !== MIN_SQUARE_DIFF &&
+        criteria2.squareDiff !== MIN_SQUARE_DIFF
+      ) {
+        simplified[i].x =
+          criteria1.current.x === criteria1.neighboar.x
+            ? criteria1.current.x
+            : criteria2.current.x;
+        simplified[i].y =
+          criteria1.current.y === criteria1.neighboar.y
+            ? criteria1.current.y
+            : criteria2.current.y;
+        simplified[criteria1.neighboarIndex] = criteria1.neighboar;
+        simplified[criteria2.neighboarIndex] = criteria2.neighboar;
+      } else if (criteria1.squareDiff > criteria2.squareDiff) {
         simplified[i] = criteria1.current;
         simplified[criteria1.neighboarIndex] = criteria1.neighboar;
       } else {

@@ -71,24 +71,6 @@ export default class BoundRect {
     );
   }
 
-  public getClosestBoundary(point: Point): BOUND {
-    let result: number = BOUND.LEFT;
-    let minDistance: number = this.getDistance(point, BOUND.LEFT);
-    let distance: number = 0;
-    let i: BOUND = BOUND.LEFT;
-
-    for (i = BOUND.TOP; i < BoundRect.BOUND_COUNT; ++i) {
-      distance = this.getDistance(point, i);
-
-      if (distance < minDistance) {
-        result = i;
-        minDistance = distance;
-      }
-    }
-
-    return result;
-  }
-
   public getDistance(point: Point, bound: BOUND): number {
     const value: number = BoundRect.getHorizontal(bound) ? point.x : point.y;
 
@@ -141,27 +123,6 @@ export default class BoundRect {
     this.top -= offset;
     this.right += offset;
     this.bottom += offset;
-  }
-
-  public getClosestBound(p1: Point, p2: Point): BOUND {
-    const distances = [
-      Math.abs(this.left - p1.x) + Math.abs(this.left - p2.x),
-      Math.abs(this.top - p1.y) + Math.abs(this.top - p2.y),
-      Math.abs(this.right - p1.x) + Math.abs(this.right - p2.x),
-      Math.abs(this.bottom - p1.y) + Math.abs(this.bottom - p2.y),
-    ];
-
-    let closestBound = 0;
-    let minDistance = distances[0];
-
-    for (let i = 1; i < distances.length; i++) {
-      if (distances[i] < minDistance) {
-        minDistance = distances[i];
-        closestBound = i;
-      }
-    }
-
-    return closestBound as BOUND;
   }
 
   public getSegmentIntersectBounds(p1: Point, p2: Point): BOUND[] {
