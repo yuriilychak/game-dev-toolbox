@@ -3,7 +3,7 @@ import { cycleIndex } from "../utils";
 import BoundRect from "./bound-rect";
 import { MAX_SIMPLIFY_DISTANCE, MIN_SQUARE_DIFF } from "./constants";
 import Point from "./point";
-import { getQuadrilateralArea } from "./utils";
+import { getPointIndex, getQuadrilateralArea } from "./utils";
 
 type SqareResult = {
   index: number;
@@ -187,8 +187,8 @@ export default function extend(
   for (i = 0; i < polygonSize; ++i) {
     point1 = simplifiedContour[i];
     point2 = simplifiedContour[(i + 1) % polygonSize];
-    startIndex = originalContour.findIndex((p) => p.getEqual(point1));
-    endIndex = originalContour.findIndex((p) => p.getEqual(point2));
+    startIndex = getPointIndex(originalContour, point1);
+    endIndex = getPointIndex(originalContour, point2);
     endIndex = startIndex > endIndex ? endIndex + contourSize : endIndex;
     Point.getLineEquation(point2, point1, line);
 

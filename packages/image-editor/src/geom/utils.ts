@@ -1,6 +1,6 @@
 import Point from "./point";
 
-export function findIndex(points: Point[], point: Point): number {
+export function getPointIndex(points: Point[], point: Point): number {
   let i: number = 0;
   const size: number = points.length;
 
@@ -10,7 +10,7 @@ export function findIndex(points: Point[], point: Point): number {
     }
   }
 
-  return size;
+  return -1;
 }
 
 export function getContourDirection(contour: Point[]): number {
