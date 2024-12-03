@@ -1,6 +1,7 @@
 import { BOUND } from "../enums";
 import { cycleIndex } from "../utils";
 import BoundRect from "./bound-rect";
+import { MAX_SIMPLIFY_DISTANCE, MIN_SQUARE_DIFF } from "./constants";
 import Point from "./point";
 import { getQuadrilateralArea } from "./utils";
 
@@ -11,8 +12,6 @@ type SqareResult = {
   current: Point | null;
   neighboar: Point | null;
 };
-
-const MIN_SQUARE_DIFF: number = -256;
 
 function getSeqareCriterias(
   points: Point[],
@@ -229,5 +228,9 @@ export default function extend(
     result.push(intersection);
   }
 
-  return optimizeSimplifiedContour(result, originalContour, 8);
+  return optimizeSimplifiedContour(
+    result,
+    originalContour,
+    MAX_SIMPLIFY_DISTANCE,
+  );
 }

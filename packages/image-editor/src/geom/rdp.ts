@@ -1,3 +1,4 @@
+import { MAX_POINT_COUNT, MAX_SIMPLIFY_DISTANCE } from "./constants";
 import Point from "./point";
 import { getContourDirection } from "./utils";
 import Vector from "./vector";
@@ -121,7 +122,10 @@ function iterativeSimplify(initialPoints: Point[]): Point[] {
         distance = Math.max(vector.getDistance(initialPoints[j]), distance);
       }
 
-      if (resultPointCount <= 32 && distance > 8) {
+      if (
+        resultPointCount <= MAX_POINT_COUNT &&
+        distance > MAX_SIMPLIFY_DISTANCE
+      ) {
         return result;
       }
     }
@@ -184,7 +188,7 @@ export default function simplifyPolygon(initialPoints: Point[]): Point[] {
         }
       }
 
-      if (maxDistance > 8) {
+      if (maxDistance > MAX_SIMPLIFY_DISTANCE) {
         result.splice(i + 1, 0, initialPoints[maxIndex].clone());
         isRestored = true;
         break;
