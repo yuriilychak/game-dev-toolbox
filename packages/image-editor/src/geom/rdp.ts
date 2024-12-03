@@ -188,7 +188,10 @@ export default function simplifyPolygon(initialPoints: Point[]): Point[] {
         }
       }
 
-      if (maxDistance > MAX_SIMPLIFY_DISTANCE) {
+      if (
+        maxDistance > MAX_SIMPLIFY_DISTANCE &&
+        result.length < MAX_POINT_COUNT
+      ) {
         result.splice(i + 1, 0, initialPoints[maxIndex].clone());
         isRestored = true;
         break;

@@ -1,4 +1,4 @@
-// @ts-expect-error
+// @ts-expect-error no ts-defintion
 import poly2tri from "poly2tri";
 
 import BoundRect from "./bound-rect";
@@ -6,6 +6,7 @@ import extend from "./extend";
 import Point from "./point";
 import simplifyPolygon from "./rdp";
 import { serializeTriangleIndices } from "../utils";
+import { getPointIndex } from "./utils";
 
 export default class Polygon {
   private _polygon: Point[];
@@ -70,23 +71,13 @@ export default class Polygon {
       polygon[indexOffset + 1] = this._polygon[i].y - offsetY;
     }
 
+    let triangles: Uint16Array = null;
+
     const contour = this._polygon.map(
       (point) => new poly2tri.Point(point.x, point.y),
     );
-    const sweepContext = new poly2tri.SweepContext(contour);
 
-    const triangles = new Uint16Array(
-      sweepContext
-        .triangulate()
-        .getTriangles()
-        .map((triangle: { points_: Point[] }) => {
-          const indices = triangle.points_.map((vertex: Point) =>
-            this._polygon.findIndex((point) => point.getEqual(vertex)),
-          );
-
-          return serializeTriangleIndices(indices[0], indices[1], indices[2]);
-        }),
-    );
+    triangles = new Uint16Array(this.triangulate(contour));
 
     return [polygon, triangles];
   }
@@ -94,6 +85,19 @@ export default class Polygon {
   private union(polygon: Polygon): void {
     this._boundRect = this._boundRect.union(polygon._boundRect);
     this._polygon = this._boundRect.exportPolygon();
+  }
+
+  private triangulate(convexPolygon: Point[]): number {
+    const sweepContext = new poly2tri.SweepContext(convexPolygon);
+    const triangulation = sweepContext.triangulate().getTriangles();
+
+    return triangulation.map((triangle: { points_: Point[] }) => {
+      const indices = triangle.points_.map((vertex: Point) =>
+        getPointIndex(this._polygon, vertex),
+      );
+
+      return serializeTriangleIndices(indices[0], indices[1], indices[2]);
+    });
   }
 
   public get isRectangle(): boolean {
@@ -110,12 +114,49 @@ export default class Polygon {
     );
   }
 
+  public get isConvex(): boolean {
+    const pointCount: number = this._polygon.length;
+
+    if (pointCount < 4) {
+      return true;
+    }
+
+    let sign: number = 0;
+    let currentSign: number = 0;
+    let i: number = 0;
+
+    for (i = 0; i < pointCount; ++i) {
+      currentSign = Math.sign(
+        Point.crossProduct(
+          this._polygon[i],
+          this._polygon[(i + 1) % pointCount],
+          this._polygon[(i + 2) % pointCount],
+        ),
+      );
+
+      if (currentSign === 0) {
+        continue;
+      }
+
+      if (sign === -currentSign) {
+        return false;
+      }
+
+      sign = currentSign;
+    }
+
+    return true;
+  }
+
   public get polygon(): Point[] {
     return this._polygon;
   }
 
   public get isBroken(): boolean {
-    return this._boundRect.width < 3 && this._boundRect.height < 3;
+    return (
+      this._polygon.length < 3 ||
+      (this._boundRect.width < 3 && this._boundRect.height < 3)
+    );
   }
 
   public get bounds(): BoundRect {

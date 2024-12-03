@@ -100,6 +100,10 @@ export default class Point {
     return Math.sqrt(this.getSqDist(point1, point2));
   }
 
+  public static crossProduct(p1: Point, p2: Point, p3: Point): number {
+    return (p2.x - p1.x) * (p3.y - p1.y) - (p2.y - p1.y) * (p3.x - p1.x);
+  }
+
   public static getLineEquation(
     point1: Point,
     point2: Point,
