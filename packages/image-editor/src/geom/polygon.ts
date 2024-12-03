@@ -13,8 +13,7 @@ export default class Polygon {
   private _boundRect: BoundRect;
 
   constructor(contour: Point[]) {
-    this._boundRect = new BoundRect();
-    this._boundRect.fromPoints(contour);
+    this._boundRect = BoundRect.fromPoints(contour);
 
     if (
       this._boundRect.width <= Polygon.QUAD_TRASHOLD ||
@@ -27,7 +26,7 @@ export default class Polygon {
 
       this._polygon = extend(contour, simplifiedPolygon);
 
-      this._boundRect.fromPoints(this._polygon);
+      this._boundRect = BoundRect.fromPoints(this._polygon);
     }
   }
 

@@ -4,11 +4,11 @@ import Point from "./point";
 export default class BoundRect {
   private data: Uint16Array;
 
-  constructor(
-    left: number = 0,
-    top: number = 0,
-    right: number = 0,
-    bottom: number = 0,
+  private constructor(
+    left: number,
+    top: number,
+    right: number,
+    bottom: number,
   ) {
     this.data = new Uint16Array(BoundRect.BOUND_COUNT);
 
@@ -16,23 +16,6 @@ export default class BoundRect {
     this.top = top;
     this.right = right;
     this.bottom = bottom;
-  }
-
-  public fromPoints(points: Point[]): void {
-    const pointCount: number = points.length;
-    let i = 0;
-
-    this.left = points[0].x;
-    this.top = points[0].y;
-    this.right = points[0].x;
-    this.bottom = points[0].y;
-
-    for (i = 1; i < pointCount; ++i) {
-      this.left = Math.min(points[i].x, this.left);
-      this.top = Math.min(points[i].y, this.top);
-      this.right = Math.max(points[i].x, this.right);
-      this.bottom = Math.max(points[i].y, this.bottom);
-    }
   }
 
   public exportPolygon(): Point[] {
@@ -176,12 +159,31 @@ export default class BoundRect {
     return this.width * this.height;
   }
 
+  public create(
+    left: number = 0,
+    top: number = 0,
+    right: number = 0,
+    bottom: number = 0,
+  ): BoundRect {
+    return new BoundRect(left, top, right, bottom);
+  }
+
   public static fromPoints(points: Point[]): BoundRect {
-    const result = new BoundRect();
+    const pointCount: number = points.length;
+    let left = points[0].x;
+    let top = points[0].y;
+    let right = points[0].x;
+    let bottom = points[0].y;
+    let i = 0;
 
-    result.fromPoints(points);
+    for (i = 1; i < pointCount; ++i) {
+      left = Math.min(points[i].x, left);
+      top = Math.min(points[i].y, top);
+      right = Math.max(points[i].x, right);
+      bottom = Math.max(points[i].y, bottom);
+    }
 
-    return result;
+    return new BoundRect(left, top, right, bottom);
   }
 
   public static getHorizontal(bound: BOUND): boolean {

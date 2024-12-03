@@ -97,9 +97,6 @@ export default class Point {
   }
 
   public static getDistance(point1: Point, point2: Point): number {
-    const dx = point2.x - point1.x;
-    const dy = point2.y - point1.y;
-
     return Math.sqrt(this.getSqDist(point1, point2));
   }
 
