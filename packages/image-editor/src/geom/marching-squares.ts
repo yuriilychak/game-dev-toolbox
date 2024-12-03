@@ -1,30 +1,6 @@
 import ImageData from "../image-data";
 import Point from "./point";
 
-function findFirstNoneTransparentPixel(
-  imageData: ImageData,
-  threshold: number,
-): Point {
-  let i: number = 0;
-  let j: number = 0;
-  const height: number = imageData.height;
-  const width: number = imageData.width;
-
-  for (i = 0; i < height; ++i) {
-    for (j = 0; j < width; ++j) {
-      if (imageData.getPixelAlpha(j, i) > threshold) {
-        return new Point(j, i);
-      }
-    }
-  }
-
-  return new Point();
-}
-
-function inBounds(x: number, y: number, imageData: ImageData): boolean {
-  return x > 0 && x < imageData.width - 1 && y > 0 && y < imageData.height - 1;
-}
-
 function checkNeigboar(
   x: number,
   y: number,
@@ -32,7 +8,7 @@ function checkNeigboar(
   threshold: number,
   value: number,
 ): number {
-  return inBounds(x, y, imageData) && imageData.getPixelAlpha(x, y) > threshold
+  return imageData.inBounds(x, y) && imageData.getPixelAlpha(x, y) > threshold
     ? value
     : 0;
 }
@@ -68,7 +44,7 @@ export default function marchSquare(
   imageData: ImageData,
   threshold: number,
 ): Array<Point> {
-  const start = findFirstNoneTransparentPixel(imageData, threshold);
+  const start = imageData.getFirstNoneTransparentPixel(threshold);
   let stepx: number = 0;
   let stepy: number = 0;
   let prevx: number = 0;

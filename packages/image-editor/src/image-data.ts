@@ -124,6 +124,27 @@ export default class ImageData {
     return y * this._width + x;
   }
 
+  public inBounds(x: number, y: number): boolean {
+    return x > 0 && x < this.width - 1 && y > 0 && y < this.height - 1;
+  }
+
+  public getFirstNoneTransparentPixel(threshold: number): Point {
+    let i: number = 0;
+    let j: number = 0;
+    const height: number = this.height;
+    const width: number = this.width;
+
+    for (i = 0; i < height; ++i) {
+      for (j = 0; j < width; ++j) {
+        if (this.getPixelAlpha(j, i) > threshold) {
+          return new Point(j, i);
+        }
+      }
+    }
+
+    return new Point();
+  }
+
   public get width(): number {
     return this._width;
   }
