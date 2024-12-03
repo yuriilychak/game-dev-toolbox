@@ -1,13 +1,13 @@
 import Point from "./point";
-import { getContourDirection, getLineEquation } from "./utils";
+import { getContourDirection } from "./utils";
 import Vector from "./vector";
 
 function simplifyDPStep(
-  points: Array<Point>,
+  points: Point[],
   first: number,
   last: number,
   sqTolerance: number,
-  simplified: Array<Point>,
+  simplified: Point[],
 ): void {
   let maxSqDist: number = sqTolerance;
   let index: number = 0;
@@ -24,28 +24,21 @@ function simplifyDPStep(
   }
 
   if (maxSqDist > sqTolerance) {
-    if (index - first > 1)
+    if (index - first > 1) {
       simplifyDPStep(points, first, index, sqTolerance, simplified);
+    }
     simplified.push(points[index]);
-    if (last - index > 1)
+
+    if (last - index > 1) {
       simplifyDPStep(points, index, last, sqTolerance, simplified);
+    }
   }
 }
 
-function distanceBetweenPoints(point1: Point, point2: Point): number {
-  const dx = point2.x - point1.x;
-  const dy = point2.y - point1.y;
-
-  return Math.sqrt(dx * dx + dy * dy);
-}
-
-function simplifyDouglasPeucker(
-  points: Array<Point>,
-  sqTolerance: number,
-): Array<Point> {
+function simplifyDouglasPeucker(points: Point[], sqTolerance: number): Point[] {
   var last: number = points.length - 1;
 
-  const simplified: Array<Point> = [points[0]];
+  const simplified: Point[] = [points[0]];
   simplifyDPStep(points, 0, last, sqTolerance, simplified);
   simplified.push(points[last]);
 
@@ -89,7 +82,7 @@ function removeCollinearPoints(points: Point[]): Point[] {
   return result;
 }
 
-function simplify(inputPoints: Point[], tolerance: number = -1): Array<Point> {
+function simplify(inputPoints: Point[], tolerance: number = -1): Point[] {
   if (inputPoints.length <= 2) {
     return inputPoints;
   }
@@ -101,7 +94,7 @@ function simplify(inputPoints: Point[], tolerance: number = -1): Array<Point> {
 }
 
 function iterativeSimplify(initialPoints: Point[]): Point[] {
-  let result: Array<Point> = initialPoints;
+  let result: Point[] = initialPoints;
   let threshold: number = 2;
   let i: number = 0;
   let resultPointCount: number = initialPoints.length;
@@ -141,8 +134,8 @@ export default function simplifyPolygon(initialPoints: Point[]): Point[] {
   }
 
   const contourSize: number = initialPoints.length;
-  const result: Array<Point> = iterativeSimplify(initialPoints);
-  let line: Int32Array = null;
+  const result: Point[] = iterativeSimplify(initialPoints);
+  let line: Int32Array = new Int32Array(3);
   let i: number = 0;
   let j: number = 0;
   let isRestored: boolean = true;
@@ -173,7 +166,7 @@ export default function simplifyPolygon(initialPoints: Point[]): Point[] {
       startIndex = initialPoints.findIndex((p) => p.getEqual(point1));
       endIndex = initialPoints.findIndex((p) => p.getEqual(point2));
       endIndex = startIndex > endIndex ? endIndex + contourSize : endIndex;
-      line = getLineEquation(point1, point2);
+      Point.getLineEquation(point1, point2, line);
 
       maxDistance = 0;
 
@@ -199,7 +192,7 @@ export default function simplifyPolygon(initialPoints: Point[]): Point[] {
     }
   }
 
-  if (distanceBetweenPoints(result[0], result[result.length - 1]) < 4) {
+  if (Point.getDistance(result[0], result[result.length - 1]) < 4) {
     result.pop();
   }
 

@@ -13,15 +13,6 @@ export function findIndex(points: Point[], point: Point): number {
   return size;
 }
 
-export function getLineEquation(point1: Point, point2: Point): Int32Array {
-  const result = new Int32Array(3);
-  result[0] = point2.y - point1.y;
-  result[1] = point1.x - point2.x;
-  result[2] = -(result[0] * point1.x + result[1] * point1.y);
-
-  return result;
-}
-
 export function getContourDirection(contour: Point[]): number {
   const pointCount: number = contour.length;
   let area: number = 0;

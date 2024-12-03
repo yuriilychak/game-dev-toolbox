@@ -2,7 +2,7 @@ import { BOUND } from "../enums";
 import { cycleIndex } from "../utils";
 import BoundRect from "./bound-rect";
 import Point from "./point";
-import { getQuadrilateralArea, getLineEquation } from "./utils";
+import { getQuadrilateralArea } from "./utils";
 
 type SqareResult = {
   index: number;
@@ -166,31 +166,17 @@ function findIntersection(line1: Int32Array, line2: Int32Array): Point | null {
   return new Point(x, y);
 }
 
-function findIntersections(lines: Int32Array[]): Point[] {
-  const intersections: Point[] = [];
-
-  for (let i = 0; i < lines.length; i++) {
-    const intersection = findIntersection(
-      lines[i],
-      lines[(i + 1) % lines.length],
-    );
-
-    if (intersection) {
-      intersections.push(intersection);
-    }
-  }
-
-  return intersections;
-}
-
 export default function extend(
   originalContour: Point[],
   simplifiedContour: Point[],
 ): Point[] {
-  const lines: Int32Array[] = [];
   const contourSize: number = originalContour.length;
   const polygonSize: number = simplifiedContour.length;
-  let line: Int32Array = null;
+  const firstLine: Int32Array = new Int32Array(3);
+  const prevLine: Int32Array = new Int32Array(3);
+  const line: Int32Array = new Int32Array(3);
+  const result: Point[] = [];
+  let intersection: Point = null;
   let point1: Point = null;
   let point2: Point = null;
   let startIndex: number = 0;
@@ -205,7 +191,7 @@ export default function extend(
     startIndex = originalContour.findIndex((p) => p.getEqual(point1));
     endIndex = originalContour.findIndex((p) => p.getEqual(point2));
     endIndex = startIndex > endIndex ? endIndex + contourSize : endIndex;
-    line = getLineEquation(point2, point1);
+    Point.getLineEquation(point2, point1, line);
 
     isLineInvalid = true;
 
@@ -224,14 +210,24 @@ export default function extend(
       }
     }
 
-    lines.push(line);
+    if (i === 0) {
+      firstLine.set(line);
+    } else {
+      intersection = findIntersection(prevLine, line);
+
+      if (intersection) {
+        result.push(intersection);
+      }
+    }
+
+    prevLine.set(line);
   }
 
-  const result = optimizeSimplifiedContour(
-    findIntersections(lines),
-    originalContour,
-    8,
-  );
+  intersection = findIntersection(firstLine, line);
 
-  return result;
+  if (intersection) {
+    result.push(intersection);
+  }
+
+  return optimizeSimplifiedContour(result, originalContour, 8);
 }

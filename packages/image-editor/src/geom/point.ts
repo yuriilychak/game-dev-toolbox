@@ -96,6 +96,23 @@ export default class Point {
     return dx * dx + dy * dy;
   }
 
+  public static getDistance(point1: Point, point2: Point): number {
+    const dx = point2.x - point1.x;
+    const dy = point2.y - point1.y;
+
+    return Math.sqrt(this.getSqDist(point1, point2));
+  }
+
+  public static getLineEquation(
+    point1: Point,
+    point2: Point,
+    result: Int32Array,
+  ): void {
+    result[0] = point2.y - point1.y;
+    result[1] = point1.x - point2.x;
+    result[2] = -(result[0] * point1.x + result[1] * point1.y);
+  }
+
   public static getSqSegDist(p: Point, p1: Point, p2: Point): number {
     let localX = p1.x;
     let localY = p1.y;
