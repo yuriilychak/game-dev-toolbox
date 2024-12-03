@@ -77,41 +77,6 @@ export default class BoundRect {
     return Math.abs(value - this.data[bound]);
   }
 
-  public getIntersection(p1: Point, p2: Point, bound: BOUND): Point | null {
-    switch (bound) {
-      case BOUND.LEFT:
-        return BoundRect.getLineIntersection(
-          p1,
-          p2,
-          new Point(this.left, this.top),
-          new Point(this.left, this.bottom),
-        );
-      case BOUND.TOP:
-        return BoundRect.getLineIntersection(
-          p1,
-          p2,
-          new Point(this.left, this.top),
-          new Point(this.right, this.top),
-        );
-      case BOUND.RIGHT:
-        return BoundRect.getLineIntersection(
-          p1,
-          p2,
-          new Point(this.right, this.top),
-          new Point(this.right, this.bottom),
-        );
-      case BOUND.BOTTOM:
-        return BoundRect.getLineIntersection(
-          p1,
-          p2,
-          new Point(this.left, this.bottom),
-          new Point(this.right, this.bottom),
-        );
-      default:
-        return null;
-    }
-  }
-
   public unionSqaureDiff(boundRect: BoundRect): number {
     const unionRect = this.union(boundRect);
 
@@ -123,6 +88,28 @@ export default class BoundRect {
     this.top -= offset;
     this.right += offset;
     this.bottom += offset;
+  }
+
+  public getIntersection(p1: Point, p2: Point, bound: BOUND): Point | null {
+    const offsetX = p2.x - p1.x;
+    const offsetY = p2.y - p1.y;
+    const value = this.data[bound];
+
+    if (!BoundRect.getHorizontal(bound)) {
+      return offsetY === 0
+        ? null
+        : new Point(
+            p1.x + Math.round(((value - p1.y) * offsetX) / offsetY),
+            value,
+          );
+    }
+
+    return offsetX === 0
+      ? null
+      : new Point(
+          value,
+          p1.y + Math.round(((value - p1.x) * offsetY) / offsetX),
+        );
   }
 
   public getSegmentIntersectBounds(p1: Point, p2: Point): BOUND[] {
@@ -202,34 +189,4 @@ export default class BoundRect {
   }
 
   public static readonly BOUND_COUNT: number = 4;
-
-  public static getLineIntersection(
-    p1: Point,
-    p2: Point,
-    p3: Point,
-    p4: Point,
-  ): Point | null {
-    // Координати точок
-    const a1 = p2.y - p1.y;
-    const b1 = p1.x - p2.x;
-    const c1 = a1 * p1.x + b1 * p1.y;
-
-    const a2 = p4.y - p3.y;
-    const b2 = p3.x - p4.x;
-    const c2 = a2 * p3.x + b2 * p3.y;
-
-    // Визначник
-    const determinant = a1 * b2 - a2 * b1;
-
-    // Якщо визначник дорівнює 0, прямі паралельні або співпадають
-    if (determinant === 0) {
-      return null;
-    }
-
-    // Обчислення координат точки перетину
-    const x = (b2 * c1 - b1 * c2) / determinant;
-    const y = (a1 * c2 - a2 * c1) / determinant;
-
-    return new Point(x, y);
-  }
 }
