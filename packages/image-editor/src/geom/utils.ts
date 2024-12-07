@@ -1,5 +1,22 @@
 import Point from "./point";
 
+export function contourToBuffer(contour: Point[]): ArrayBuffer {
+  return contour.reduce<Uint32Array>((result, point, index) => {
+    result[index] = (point.x << 16) | point.y;
+
+    return result;
+  }, new Uint32Array(contour.length)).buffer;
+}
+export function bufferToContour(buffer: ArrayBuffer): Point[] {
+  const rawPolygon = new Uint32Array(buffer);
+
+  return rawPolygon.reduce((result, rawPoint, index) => {
+    result[index] = new Point(rawPoint >> 16, rawPoint & 0xffff);
+
+    return result;
+  }, new Array<Point>(rawPolygon.length));
+}
+
 export function getPointIndex(points: Point[], point: Point): number {
   let i: number = 0;
   const size: number = points.length;

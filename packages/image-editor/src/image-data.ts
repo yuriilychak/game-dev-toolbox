@@ -1,4 +1,5 @@
 import { Point } from "./geom";
+import BoundRect from "./geom/bound-rect";
 import { intAbs, intSign } from "./math";
 
 export default class ImageData {
@@ -15,16 +16,10 @@ export default class ImageData {
     context: OffscreenCanvasRenderingContext2D,
   ) {
     const padding = ImageData.CLASTER_SIZE * 16;
-    this._width =
-      Math.ceil(imageBitmap.width / ImageData.CLASTER_SIZE) *
-        ImageData.CLASTER_SIZE +
-      2 * padding;
+    this._width = imageBitmap.width + 2 * padding;
     this._leftOffset = padding;
     this._rightOffset = this._width - padding - imageBitmap.width;
-    this._height =
-      Math.ceil(imageBitmap.height / ImageData.CLASTER_SIZE) *
-        ImageData.CLASTER_SIZE +
-      2 * padding;
+    this._height = imageBitmap.height + 2 * padding;
     this._topOffset = padding;
     this._bottomOffset = this._height - padding - imageBitmap.height;
 
@@ -75,34 +70,52 @@ export default class ImageData {
     return false;
   }
 
-  public clearContour(points: Point[]): void {
-    const minY = points.reduce(
-      (result, p) => Math.min(p.y, result),
-      points[0].y,
-    );
-    const maxY = points.reduce(
-      (result, p) => Math.max(p.y, result),
-      points[0].y,
-    );
+  public clearShape(contour: Point[]): void {
+    const boundRect: BoundRect = BoundRect.fromPoints(contour);
 
-    for (let y = minY; y <= maxY; y++) {
-      const intersections = ImageData.getIntersections(points, y);
-      for (let i = 0; i < intersections.length; i += 2) {
-        const xStart = intersections[i];
-        const xEnd = intersections[i + 1];
-        for (let x = xStart; x <= xEnd; ++x) {
-          this.clearPixel(x, y);
+    this.floodFill(contour[0].x, contour[0].y, boundRect);
+  }
+
+  private floodFill(x: number, y: number, boundRect: BoundRect): void {
+    const visited = new Set<number>();
+    const stack: Point[] = [new Point(x, y)];
+    const offsets: Point[] = [
+      new Point(1, 0),
+      new Point(-1, 0),
+      new Point(0, 1),
+      new Point(0, -1),
+    ];
+    const neighboarCount: number = offsets.length;
+    const nextPoint: Point = new Point();
+    let currPoint: Point = null;
+    let i: number = 0;
+
+    while (stack.length > 0) {
+      currPoint = stack.pop();
+      visited.add((currPoint.x << 16) | currPoint.y);
+
+      this.clearPixel(currPoint);
+
+      for (i = 0; i < neighboarCount; ++i) {
+        nextPoint.set(currPoint).add(offsets[i]);
+
+        if (
+          !visited.has((nextPoint.x << 16) | nextPoint.y) &&
+          boundRect.contains(nextPoint) &&
+          this.getFilled(nextPoint)
+        ) {
+          stack.push(nextPoint.clone());
         }
       }
     }
   }
 
-  private clearPixel(x: number, y: number): void {
-    if (x < 0 || y < 0 || x >= this._width || y >= this._height) {
+  private clearPixel(point: Point): void {
+    if (!this.contains(point)) {
       return;
     }
 
-    const index = (y * this._width + x) * 4;
+    const index = (point.y * this._width + point.x) * 4;
 
     this._data[index] = 0;
     this._data[index + 1] = 0;
@@ -110,8 +123,8 @@ export default class ImageData {
     this._data[index + 3] = 0;
   }
 
-  public getFilled(x: number, y: number): number {
-    const alpha = intSign(this.getPixelAlpha(x, y));
+  public getFilled(point: Point): number {
+    const alpha = intSign(this.getPixelAlpha(point.x, point.y));
 
     return (3 * alpha * alpha + alpha - 2) >> 1;
   }
@@ -122,6 +135,15 @@ export default class ImageData {
 
   public getIndexFromPos(x: number, y: number): number {
     return y * this._width + x;
+  }
+
+  public contains(point: Point): boolean {
+    return (
+      point.x >= 0 &&
+      point.x <= this.width - 1 &&
+      point.y >= 0 &&
+      point.y <= this.height - 1
+    );
   }
 
   public inBounds(x: number, y: number): boolean {
@@ -188,27 +210,6 @@ export default class ImageData {
     }
 
     return true;
-  }
-
-  private static getIntersections(points: Point[], y: number): number[] {
-    const intersections: number[] = [];
-    for (let i = 0; i < points.length; ++i) {
-      const p1 = points[i];
-      const p2 = points[(i + 1) % points.length];
-
-      if (p1.y === p2.y) {
-        continue;
-      }
-
-      const [yMin, yMax] = [p1.y, p2.y].sort((a, b) => a - b);
-
-      if (y >= yMin && y < yMax) {
-        const x = p1.x + ((y - p1.y) * (p2.x - p1.x)) / (p2.y - p1.y);
-        intersections.push(Math.round(x));
-      }
-    }
-
-    return intersections.sort((a, b) => a - b);
   }
 
   private static CLASTER_SIZE: number = 4;

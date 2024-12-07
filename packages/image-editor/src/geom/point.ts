@@ -8,9 +8,18 @@ export default class Point {
     this._data[1] = y;
   }
 
-  public set(point: Point): void {
+  public set(point: Point): Point {
     this._data[0] = point.x;
     this._data[1] = point.y;
+
+    return this;
+  }
+
+  public add(point: Point): Point {
+    this._data[0] += point.x;
+    this._data[1] += point.y;
+
+    return this;
   }
 
   public clone(): Point {
@@ -43,6 +52,41 @@ export default class Point {
     const denominator = Math.sqrt(a * a + b * b);
 
     return numerator / denominator;
+  }
+
+  public distanceSquaredTo(other: Point): number {
+    const dx = this.x - other.x;
+    const dy = this.y - other.y;
+    return dx * dx + dy * dy;
+  }
+
+  public segmentDistance(p1: Point, p2: Point): number {
+    const lengthSquared = p1.distanceSquaredTo(p2);
+
+    if (lengthSquared === 0) {
+      // p1 і p2 співпадають, повертаємо відстань до однієї точки
+      return Math.sqrt(this.distanceSquaredTo(p1));
+    }
+
+    // Проекція точки на лінію, нормалізована до [0, 1]
+    const t = Math.max(
+      0,
+      Math.min(
+        1,
+        ((this.x - p1.x) * (p2.x - p1.x) + (this.y - p1.y) * (p2.y - p1.y)) /
+          lengthSquared,
+      ),
+    );
+
+    // Обчислюємо проєктовану точку
+    const projX = p1.x + t * (p2.x - p1.x);
+    const projY = p1.y + t * (p2.y - p1.y);
+
+    // Відстань до проєктованої точки
+    const dx = this.x - projX;
+    const dy = this.y - projY;
+
+    return Math.sqrt(dx * dx + dy * dy);
   }
 
   public get x(): number {

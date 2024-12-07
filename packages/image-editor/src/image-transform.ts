@@ -68,11 +68,13 @@ export default class ImageTransform {
       contour = marchSquare(imageData, 0);
       polygon = new Polygon(contour);
 
+      await polygon.optimize();
+
       if (!polygon.isBroken) {
         polygons.push(polygon);
       }
 
-      imageData.clearContour(polygon.polygon);
+      imageData.clearShape(contour);
     }
 
     while (index !== -1) {

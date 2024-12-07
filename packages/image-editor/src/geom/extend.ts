@@ -1,7 +1,11 @@
 import { BOUND } from "../enums";
 import { cycleIndex } from "../utils";
 import BoundRect from "./bound-rect";
-import { MAX_SIMPLIFY_DISTANCE, MIN_SQUARE_DIFF } from "./constants";
+import {
+  EXTEND_SIZE,
+  MAX_SIMPLIFY_DISTANCE,
+  MIN_SQUARE_DIFF,
+} from "./constants";
 import Point from "./point";
 import { getPointIndex, getQuadrilateralArea } from "./utils";
 
@@ -95,7 +99,7 @@ function optimizeSimplifiedContour(
   let currPoint: Point = null;
   let i: number = 0;
 
-  boundRect.extend(1);
+  boundRect.extend(EXTEND_SIZE);
 
   for (i = 0; i < pointCount; ++i) {
     currPoint = simplified[i];
@@ -159,8 +163,8 @@ function findIntersection(line1: Int32Array, line2: Int32Array): Point | null {
     return null;
   }
 
-  const x = -(b2 * c1 - b1 * c2) / denominator;
-  const y = -(a1 * c2 - a2 * c1) / denominator;
+  const x = -Math.round((b2 * c1 - b1 * c2) / denominator);
+  const y = -Math.round((a1 * c2 - a2 * c1) / denominator);
 
   return new Point(x, y);
 }
@@ -201,7 +205,7 @@ export default function extend(
         const point = originalContour[j % contourSize];
         const value = line[0] * point.x + line[1] * point.y + line[2];
 
-        if (value <= 0 || point.lineDistance(line) < 1) {
+        if (value < 0 || point.lineDistance(line) < EXTEND_SIZE) {
           line[2] += 1;
           isLineInvalid = true;
           break;
@@ -228,9 +232,11 @@ export default function extend(
     result.push(intersection);
   }
 
-  return optimizeSimplifiedContour(
+  const res = optimizeSimplifiedContour(
     result,
     originalContour,
     MAX_SIMPLIFY_DISTANCE,
   );
+
+  return res;
 }
