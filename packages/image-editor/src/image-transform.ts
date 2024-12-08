@@ -1,7 +1,5 @@
 import { QUAD_TRIANGLES } from "./constants";
 import { IMAGE_TYPE } from "./enums";
-import { marchSquare, Point, Polygon } from "./geom";
-import ImageData from "./image-data";
 import { LibraryImageData } from "./types";
 import { cropImageBitmap, getQuadPolygon } from "./utils";
 
@@ -48,83 +46,28 @@ export default class ImageTransform {
   }
 
   private async generatePolygon(): Promise<void> {
+    const { data } = await new Promise<
+      MessageEvent<{
+        src: ImageBitmap;
+        polygons: Uint16Array[];
+        triangles: Uint16Array[];
+      }>
+    >((resolve, reject) => {
+      const worker = new Worker(new URL("../polygon.worker", import.meta.url), {
+        type: "module",
+      });
+
+      worker.onmessage = resolve;
+      worker.onerror = reject;
+
+      worker.postMessage(this.imageData.src, [this.imageData.src]);
+    });
+
+    this.imageData.src = data.src;
     this.imageData.type = IMAGE_TYPE.POLYGON;
-
-    if (this.imageData.isFixBorder) {
-      await this.fixQuadBorder(false);
-    }
-
-    const imageData = new ImageData(
-      this.imageData.src,
-      this.offscreenCanvasContext,
-    );
-    const polygons: Polygon[] = [];
-    let contour: Point[] = null;
-    let polygon: Polygon = null;
-    let index: number = 0;
-    let i: number = 0;
-
-    while (!imageData.isEmpty) {
-      contour = marchSquare(imageData, 0);
-      polygon = new Polygon(contour);
-
-      await polygon.optimize();
-
-      if (!polygon.isBroken) {
-        polygons.push(polygon);
-      }
-
-      imageData.clearShape(contour);
-    }
-
-    while (index !== -1) {
-      for (i = 0; i < polygons.length; ++i) {
-        index = polygons[i].unite(polygons, i);
-
-        if (index !== -1) {
-          polygons.splice(index, 1);
-          break;
-        }
-      }
-    }
-
-    const bounds = polygons.reduce(
-      (result, polygon) => result.union(polygon.bounds, true),
-      polygons[0].bounds.clone(),
-    );
-
-    const polygonData = polygons.reduce(
-      (result, polygon) => {
-        const [polygonData, trianglesData] = polygon.export(
-          bounds.left,
-          bounds.top,
-        );
-
-        result.polygons.push(polygonData);
-        result.triangles.push(trianglesData);
-
-        return result;
-      },
-      { polygons: [], triangles: [] },
-    );
-
-    this.imageData.polygons = polygonData.polygons;
-    this.imageData.triangles = polygonData.triangles;
-
-    this.offscreenCanvasContext.clearRect(0, 0, bounds.width, bounds.height);
-    this.offscreenCanvasContext.drawImage(
-      this.imageData.src,
-      imageData.leftOffset - bounds.left,
-      imageData.topOffset - bounds.top,
-    );
-
-    this.imageData.src = await createImageBitmap(
-      this.offscreenCanvas,
-      0,
-      0,
-      bounds.width,
-      bounds.height,
-    );
+    this.imageData.isFixBorder = false;
+    this.imageData.polygons = data.polygons;
+    this.imageData.triangles = data.triangles;
   }
 
   public async fixQuadBorder(isFixBorder: boolean): Promise<void> {

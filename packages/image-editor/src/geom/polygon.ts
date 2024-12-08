@@ -7,6 +7,7 @@ import Point from "./point";
 import simplifyPolygon from "./simplify";
 import { serializeTriangleIndices } from "../utils";
 import { bufferToContour, contourToBuffer, getPointIndex } from "./utils";
+import { optimizeSimplifiedPolygon } from "./optimization";
 
 export default class Polygon {
   private _contour: Point[];
@@ -33,31 +34,12 @@ export default class Polygon {
     }
   }
 
-  public async optimize(): Promise<void> {
+  public optimize(): void {
     if (this.isRectangle) {
       return;
     }
 
-    const polygon = await new Promise<MessageEvent<ArrayBuffer>>(
-      (resolve, reject) => {
-        const worker = new Worker(
-          new URL("./optimize.worker", import.meta.url),
-          {
-            type: "module",
-          },
-        );
-
-        worker.onmessage = resolve;
-        worker.onerror = reject;
-
-        const polygon = contourToBuffer(this._polygon);
-        const contour = contourToBuffer(this._contour);
-
-        worker.postMessage({ polygon, contour }, [polygon, contour]);
-      },
-    );
-
-    this._polygon = bufferToContour(polygon.data);
+    this._polygon = optimizeSimplifiedPolygon(this._polygon, this._contour);
     this._boundRect = BoundRect.fromPoints(this._polygon);
   }
 
