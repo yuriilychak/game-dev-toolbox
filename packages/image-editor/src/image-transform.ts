@@ -53,9 +53,12 @@ export default class ImageTransform {
         triangles: Uint16Array[];
       }>
     >((resolve, reject) => {
-      const worker = new Worker(new URL("../polygon.worker", import.meta.url), {
-        type: "module",
-      });
+      const worker = new Worker(
+        new URL("./geom/polygon.worker", import.meta.url),
+        {
+          type: "module",
+        },
+      );
 
       worker.onmessage = resolve;
       worker.onerror = reject;

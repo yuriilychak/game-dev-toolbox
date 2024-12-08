@@ -6,7 +6,7 @@ import extend from "./extend";
 import Point from "./point";
 import simplifyPolygon from "./simplify";
 import { serializeTriangleIndices } from "../utils";
-import { bufferToContour, contourToBuffer, getPointIndex } from "./utils";
+import { getPointIndex } from "./utils";
 import { optimizeSimplifiedPolygon } from "./optimization";
 
 export default class Polygon {
