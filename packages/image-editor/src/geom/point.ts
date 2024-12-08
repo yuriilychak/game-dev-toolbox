@@ -1,47 +1,55 @@
 import { intAbs } from "../math";
 
 export default class Point {
-  private _data: Int32Array = new Int32Array(2);
+  private data: Int32Array = new Int32Array(2);
 
   constructor(x: number = 0, y: number = 0) {
-    this._data[0] = x;
-    this._data[1] = y;
+    this.data[0] = x;
+    this.data[1] = y;
   }
 
   public set(point: Point): Point {
-    this._data[0] = point.x;
-    this._data[1] = point.y;
+    this.x = point.x;
+    this.y = point.y;
 
     return this;
   }
 
   public add(point: Point): Point {
-    this._data[0] += point.x;
-    this._data[1] += point.y;
+    this.x += point.x;
+    this.y += point.y;
+
+    return this;
+  }
+
+  public sub(point: Point): Point {
+    this.x -= point.x;
+    this.y -= point.y;
 
     return this;
   }
 
   public clone(): Point {
-    return new Point(this._data[0], this._data[1]);
+    return new Point(this.x, this.y);
   }
 
   public getEqual(point: Point): boolean {
-    return this._data[0] == point.x && this._data[1] == point.y;
-  }
-
-  public setWithOffset(vertex: Point, offset: number): void {
-    this._data[0] = vertex.x + Point.getOffsetX(offset);
-    this._data[1] = vertex.y + Point.getOffsetY(offset);
-  }
-
-  public addIn(point: Point): void {
-    this._data[0] += point.x;
-    this._data[1] += point.y;
+    return this.x == point.x && this.y == point.y;
   }
 
   public dot(point: Point): number {
     return this.x * point.x + this.y * point.y;
+  }
+
+  public cross(point: Point): number {
+    return this.y * point.x - this.x * point.y;
+  }
+
+  public distance(point1: Point, point2: Point): number {
+    const offset1 = point2.clone().sub(point1);
+    const offset2 = this.clone().sub(point1);
+
+    return intAbs(offset1.cross(offset2)) / offset1.length;
   }
 
   public lineDistance(line: Int32Array): number {
@@ -54,94 +62,50 @@ export default class Point {
     return numerator / denominator;
   }
 
-  public distanceSquaredTo(other: Point): number {
-    const dx = this.x - other.x;
-    const dy = this.y - other.y;
-    return dx * dx + dy * dy;
-  }
+  public segmentDistance(point1: Point, point2: Point): number {
+    const offset1: Point = point2.clone().sub(point1);
+    const offset2: Point = this.clone().sub(point1);
 
-  public segmentDistance(p1: Point, p2: Point): number {
-    const lengthSquared = p1.distanceSquaredTo(p2);
-
-    if (lengthSquared === 0) {
-      // p1 і p2 співпадають, повертаємо відстань до однієї точки
-      return Math.sqrt(this.distanceSquaredTo(p1));
+    if (offset1.length2 === 0) {
+      return offset2.length;
     }
 
-    // Проекція точки на лінію, нормалізована до [0, 1]
-    const t = Math.max(
+    const t: number = Math.max(
       0,
-      Math.min(
-        1,
-        ((this.x - p1.x) * (p2.x - p1.x) + (this.y - p1.y) * (p2.y - p1.y)) /
-          lengthSquared,
-      ),
+      Math.min(1, offset2.dot(offset1) / offset1.length2),
     );
-
-    // Обчислюємо проєктовану точку
-    const projX = p1.x + t * (p2.x - p1.x);
-    const projY = p1.y + t * (p2.y - p1.y);
-
-    // Відстань до проєктованої точки
-    const dx = this.x - projX;
-    const dy = this.y - projY;
+    const dx: number = offset2.x - t * offset1.x;
+    const dy: number = offset2.y - t * offset1.y;
 
     return Math.sqrt(dx * dx + dy * dy);
   }
 
   public get x(): number {
-    return this._data[0];
+    return this.data[0];
   }
 
   public set x(value: number) {
-    this._data[0] = value;
+    this.data[0] = value;
   }
 
   public get y(): number {
-    return this._data[1];
+    return this.data[1];
   }
 
   public set y(value: number) {
-    this._data[1] = value;
+    this.data[1] = value;
+  }
+
+  public get length2(): number {
+    return this.x * this.x + this.y * this.y;
   }
 
   public get length(): number {
-    return Math.sqrt(this.x * this.x + this.y * this.y);
-  }
-
-  private static getOffsetX(offset: number): number {
-    return (offset % 3) - 1;
-  }
-
-  private static getOffsetY(offset: number): number {
-    return (((offset % 9) / 3) << 0) - 1;
-  }
-
-  public static mult(point: Point, multiplier: number): Point {
-    return new Point(point.x * multiplier, point.y * multiplier);
-  }
-
-  public static add(point1: Point, point2: Point): Point {
-    return new Point(point2.x + point1.x, point2.y + point1.y);
-  }
-
-  public static abs(point: Point): Point {
-    return new Point(intAbs(point.x), intAbs(point.y));
+    return Math.sqrt(this.length2);
   }
 
   public static sub(point1: Point, point2: Point): Point {
     return new Point(point2.x - point1.x, point2.y - point1.y);
-  }
-
-  public static getSqDist(point1: Point, point2: Point): number {
-    const dx: number = point1.x - point2.x;
-    const dy: number = point1.y - point2.y;
-
-    return dx * dx + dy * dy;
-  }
-
-  public static getDistance(point1: Point, point2: Point): number {
-    return Math.sqrt(this.getSqDist(point1, point2));
   }
 
   public static crossProduct(p1: Point, p2: Point, p3: Point): number {
@@ -159,11 +123,11 @@ export default class Point {
   }
 
   public static getSqSegDist(p: Point, p1: Point, p2: Point): number {
-    let localX = p1.x;
-    let localY = p1.y;
-    let dx = p2.x - p1.x;
-    let dy = p2.y - p1.y;
-    let t: number;
+    let localX: number = p1.x;
+    let localY: number = p1.y;
+    let dx: number = p2.x - p1.x;
+    let dy: number = p2.y - p1.y;
+    let t: number = 0;
 
     if (dx !== 0 || dy !== 0) {
       t = ((p.x - localX) * dx + (p.y - localY) * dy) / (dx * dx + dy * dy);
