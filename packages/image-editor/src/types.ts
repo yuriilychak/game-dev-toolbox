@@ -1,16 +1,19 @@
 import { IMAGE_TYPE } from "./enums";
 
-export type LibraryImageData = {
+export interface ImageWorkerData {
   src: ImageBitmap;
-  extension: string;
-  inputLabel: string;
-  size: number;
-  type: IMAGE_TYPE;
   isFixBorder: boolean;
   polygons: Uint16Array[];
   triangles: Uint16Array[];
-  triangleCount: number;
-};
+}
+
+export interface LibraryImageData extends ImageWorkerData {
+  extension: string;
+  inputLabel: string;
+  type: IMAGE_TYPE;
+  polygons: Uint16Array[];
+  triangles: Uint16Array[];
+}
 
 export type LibraryFile = {
   id: string;

@@ -9,7 +9,7 @@ const context: OffscreenCanvasRenderingContext2D = canvas.getContext("2d", {
 });
 
 self.onmessage = async function (e: MessageEvent<ImageFileData>) {
-  const { buffer, type, size, label } = e.data;
+  const { buffer, type, label } = e.data;
   const blob = new Blob([buffer], { type });
   const inputImageBitmap: ImageBitmap = await createImageBitmap(blob);
   const imageBitmap: ImageBitmap = await cropImageBitmap(
@@ -27,11 +27,9 @@ self.onmessage = async function (e: MessageEvent<ImageFileData>) {
     isFixBorder: false,
     extension,
     inputLabel,
-    size,
     type: IMAGE_TYPE.QUAD,
     polygons: [polygon],
     triangles: [triangles],
-    triangleCount: 2,
   };
   // @ts-ignore
   self.postMessage(result, [imageBitmap]);

@@ -1,21 +1,11 @@
-import { QUAD_TRIANGLES } from "./constants";
 import { IMAGE_TYPE } from "./enums";
-import { LibraryImageData } from "./types";
-import { cropImageBitmap, getQuadPolygon } from "./utils";
+import type { ImageWorkerData, LibraryImageData } from "./types";
 
 export default class ImageTransform {
-  private offscreenCanvas: OffscreenCanvas;
-
-  private offscreenCanvasContext: OffscreenCanvasRenderingContext2D;
-
   private imageData: LibraryImageData;
 
   constructor() {
     this.imageData = null;
-    this.offscreenCanvas = new OffscreenCanvas(2048, 2048);
-    this.offscreenCanvasContext = this.offscreenCanvas.getContext("2d", {
-      willReadFrequently: true,
-    });
   }
 
   public init(imageData: LibraryImageData): void {
@@ -23,73 +13,44 @@ export default class ImageTransform {
   }
 
   public async updateType(type: IMAGE_TYPE): Promise<void> {
-    this.imageData.type = type;
-
-    switch (type) {
-      case IMAGE_TYPE.QUAD:
-        return await this.generateQuad();
-      case IMAGE_TYPE.POLYGON:
-        return await this.generatePolygon();
-    }
-  }
-
-  private async generateQuad(): Promise<void> {
-    this.imageData.type = IMAGE_TYPE.QUAD;
-    this.imageData.isFixBorder = false;
-    this.imageData.src = await cropImageBitmap(
-      this.imageData.src,
-      this.imageData.extension,
-      this.offscreenCanvasContext,
-    );
-    this.imageData.polygons = [getQuadPolygon(this.imageData.src)];
-    this.imageData.triangles = [QUAD_TRIANGLES.slice()];
-  }
-
-  private async generatePolygon(): Promise<void> {
-    const { data } = await new Promise<
-      MessageEvent<{
-        src: ImageBitmap;
-        polygons: Uint16Array[];
-        triangles: Uint16Array[];
-      }>
-    >((resolve, reject) => {
-      const worker = new Worker(
-        new URL("./geom/polygon.worker", import.meta.url),
-        {
-          type: "module",
-        },
-      );
-
-      worker.onmessage = resolve;
-      worker.onerror = reject;
-
-      worker.postMessage(this.imageData.src, [this.imageData.src]);
-    });
-
-    this.imageData.src = data.src;
-    this.imageData.type = IMAGE_TYPE.POLYGON;
-    this.imageData.isFixBorder = false;
-    this.imageData.polygons = data.polygons;
-    this.imageData.triangles = data.triangles;
+    await this.transformImageData(type, 0);
   }
 
   public async fixQuadBorder(isFixBorder: boolean): Promise<void> {
-    const offset: number = isFixBorder ? 1 : -1;
-    const newWidth: number = this.imageData.src.width + (offset << 1);
-    const newHeight: number = this.imageData.src.height + (offset << 1);
+    await this.transformImageData(IMAGE_TYPE.QUAD, isFixBorder ? 1 : -1);
+  }
 
-    this.offscreenCanvasContext.clearRect(0, 0, newWidth, newHeight);
-    this.offscreenCanvasContext.drawImage(this.imageData.src, offset, offset);
+  private async transformImageData(
+    type: IMAGE_TYPE,
+    offset: number,
+  ): Promise<void> {
+    const { data } = await new Promise<MessageEvent<ImageWorkerData>>(
+      (resolve, reject) => {
+        const worker = new Worker(
+          new URL("./geom/polygon.worker", import.meta.url),
+          { type: "module" },
+        );
 
-    this.imageData.isFixBorder = isFixBorder;
-    this.imageData.src = await createImageBitmap(
-      this.offscreenCanvas,
-      0,
-      0,
-      newWidth,
-      newHeight,
+        worker.onmessage = resolve;
+        worker.onerror = reject;
+
+        worker.postMessage(
+          {
+            src: this.imageData.src,
+            type,
+            extension: this.imageData.extension,
+            offset,
+          },
+          [this.imageData.src],
+        );
+      },
     );
-    this.imageData.polygons = [getQuadPolygon(this.imageData.src)];
+
+    this.imageData.src = data.src;
+    this.imageData.type = type;
+    this.imageData.isFixBorder = data.isFixBorder;
+    this.imageData.polygons = data.polygons;
+    this.imageData.triangles = data.triangles;
   }
 
   public polgonAt(index: number): Uint16Array {
