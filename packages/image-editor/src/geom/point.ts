@@ -1,4 +1,5 @@
 import { intAbs } from "../math";
+import { cycleIndex } from "../utils";
 
 export default class Point {
   private data: Int32Array = new Int32Array(2);
@@ -46,10 +47,14 @@ export default class Point {
   }
 
   public distance(point1: Point, point2: Point): number {
-    const offset1 = point2.clone().sub(point1);
-    const offset2 = this.clone().sub(point1);
+    const pointIndices: number = Point.alloc(2);
+    const offset1: Point = Point.get(pointIndices, 0).set(point2).sub(point1);
+    const offset2: Point = Point.get(pointIndices, 1).set(this).sub(point1);
+    const result = intAbs(offset1.cross(offset2)) / offset1.length;
 
-    return intAbs(offset1.cross(offset2)) / offset1.length;
+    Point.malloc(pointIndices);
+
+    return result;
   }
 
   public lineDistance(line: Int32Array): number {
@@ -62,22 +67,44 @@ export default class Point {
     return numerator / denominator;
   }
 
-  public segmentDistance(point1: Point, point2: Point): number {
-    const offset1: Point = point2.clone().sub(point1);
-    const offset2: Point = this.clone().sub(point1);
+  public getOnSegment(point1: Point, point2: Point): boolean {
+    const pointIndices = Point.alloc(2);
+    const offset1 = Point.get(pointIndices, 0).set(point2).sub(point1);
+    const offset2 = Point.get(pointIndices, 1).set(this).sub(point1);
 
-    if (offset1.length2 === 0) {
-      return offset2.length;
+    const result: boolean =
+      intAbs(offset2.cross(offset1)) <= Number.EPSILON &&
+      Math.abs((2 * offset2.dot(offset1)) / offset1.length2 - 1) <= 1;
+
+    Point.malloc(pointIndices);
+
+    return result;
+  }
+
+  public getInside(polygon: Point[], isIncludeBorder: boolean = true): boolean {
+    const pointCount = polygon.length;
+    let result: boolean = false;
+    let p1: Point = polygon[0];
+    let p2: Point = polygon[0];
+    let i: number = 0;
+
+    for (i = 0; i < pointCount; ++i) {
+      p1 = polygon[i];
+      p2 = polygon[cycleIndex(i, pointCount, 1)];
+
+      if (this.getOnSegment(p1, p2)) {
+        return isIncludeBorder;
+      }
+
+      if (
+        p1.y > this.y !== p2.y > this.y &&
+        this.x < ((p2.x - p1.x) * (this.y - p1.y)) / (p2.y - p1.y) + p1.x
+      ) {
+        result = !result;
+      }
     }
 
-    const t: number = Math.max(
-      0,
-      Math.min(1, offset2.dot(offset1) / offset1.length2),
-    );
-    const dx: number = offset2.x - t * offset1.x;
-    const dy: number = offset2.y - t * offset1.y;
-
-    return Math.sqrt(dx * dx + dy * dy);
+    return result;
   }
 
   public get x(): number {
@@ -122,6 +149,17 @@ export default class Point {
     result[2] = -(result[0] * point1.x + result[1] * point1.y);
   }
 
+  public static getArea(polygon: Point[]): number {
+    const pointCount: number = polygon.length;
+    let result: number = 0;
+    let i: number = 0;
+
+    for (i = 0; i < pointCount; ++i) {
+      result += polygon[cycleIndex(i, pointCount, 1)].cross(polygon[i]);
+    }
+    return result / 2;
+  }
+
   public static getSqSegDist(p: Point, p1: Point, p2: Point): number {
     let localX: number = p1.x;
     let localY: number = p1.y;
@@ -146,4 +184,60 @@ export default class Point {
 
     return dx * dx + dy * dy;
   }
+
+  public static alloc(count: number): number {
+    let result: number = 0;
+    let currentCount: number = 0;
+    let freeBits: number = ~this.USED;
+    let currentBit: number = 0;
+
+    while (freeBits !== 0) {
+      currentBit = 1 << (Point.MAX_BITS - Math.clz32(freeBits));
+      result |= currentBit;
+      freeBits &= ~currentBit;
+      ++currentCount;
+
+      if (currentCount === count) {
+        Point.USED |= result;
+        return result;
+      }
+    }
+
+    throw Error("Pool is empty");
+  }
+
+  public static malloc(indices: number): void {
+    Point.USED &= ~indices;
+  }
+
+  public static get(indices: number, index: number): Point {
+    let currentIndex: number = 0;
+    let bitIndex: number = 0;
+    let currentBit: number = 0;
+    let currentIndices: number = indices;
+
+    while (currentIndices !== 0) {
+      bitIndex = Point.MAX_BITS - Math.clz32(currentIndices);
+      currentBit = 1 << bitIndex;
+
+      if (currentIndex === index) {
+        return Point.ITEMS[bitIndex];
+      }
+
+      currentIndices &= ~currentBit;
+      ++currentIndex;
+    }
+
+    throw Error(`Can't find point with index ${index}`);
+  }
+
+  private static readonly MAX_BITS: number = 31;
+
+  public static POOL_SIZE: number = 32;
+
+  private static ITEMS: Point[] = new Array(Point.POOL_SIZE)
+    .fill(null)
+    .map(() => new Point());
+
+  private static USED: number = 0;
 }

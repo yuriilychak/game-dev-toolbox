@@ -4,7 +4,7 @@ import poly2tri from "poly2tri";
 import BoundRect from "./bound-rect";
 import extend from "./extend";
 import Point from "./point";
-import simplifyPolygon from "./rdp";
+import simplifyPolygon from "./simplify";
 import { serializeTriangleIndices } from "../utils";
 import { bufferToContour, contourToBuffer, getPointIndex } from "./utils";
 

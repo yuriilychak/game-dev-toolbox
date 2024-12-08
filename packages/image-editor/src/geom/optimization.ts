@@ -1,88 +1,6 @@
 import { cycleIndex } from "../utils";
 import Point from "./point";
 
-function getPointInside(pt: Point, polygon: Point[]): boolean {
-  let n = polygon.length;
-  let inside = false;
-
-  for (let i = 0; i < n; i++) {
-    let p1 = polygon[i];
-    let p2 = polygon[(i + 1) % n];
-
-    if (isPointOnSegment(pt, p1, p2)) {
-      return true;
-    }
-
-    if (
-      p1.y > pt.y !== p2.y > pt.y &&
-      pt.x < ((p2.x - p1.x) * (pt.y - p1.y)) / (p2.y - p1.y) + p1.x
-    ) {
-      inside = !inside;
-    }
-  }
-
-  return inside;
-}
-
-/**
- * Перевіряє, чи точка лежить на відрізку
- */
-function isPointOnSegment(pt: Point, p1: Point, p2: Point): boolean {
-  const crossProduct =
-    (pt.y - p1.y) * (p2.x - p1.x) - (pt.x - p1.x) * (p2.y - p1.y);
-
-  if (Math.abs(crossProduct) > Number.EPSILON) {
-    return false;
-  }
-
-  const dotProduct =
-    (pt.x - p1.x) * (p2.x - p1.x) + (pt.y - p1.y) * (p2.y - p1.y);
-  if (dotProduct < 0) {
-    return false;
-  }
-
-  const squaredLength =
-    (p2.x - p1.x) * (p2.x - p1.x) + (p2.y - p1.y) * (p2.y - p1.y);
-  if (dotProduct > squaredLength) {
-    return false;
-  }
-
-  return true;
-}
-
-export function getDistanceValid(pt: Point, simplified: Point[]): boolean {
-  const pointCount: number = simplified.length;
-  let i: number = 0;
-
-  for (i = 0; i < pointCount; ++i) {
-    if (
-      pt.segmentDistance(
-        simplified[i],
-        simplified[cycleIndex(i, pointCount, 1)],
-      ) < 0.1
-    ) {
-      return false;
-    }
-  }
-
-  return true;
-}
-
-function getArea(polygon: Point[]): number {
-  const pointCount: number = polygon.length;
-  let result: number = 0;
-  let i: number = 0;
-  let p1: Point = null;
-  let p2: Point = null;
-
-  for (i = 0; i < pointCount; ++i) {
-    p1 = polygon[i];
-    p2 = polygon[cycleIndex(i, pointCount, 1)];
-    result += p1.x * p2.y - p2.x * p1.y;
-  }
-  return Math.abs(result) / 2;
-}
-
 function generateOffsets(): Point[] {
   const maxOffset: number = 1;
   const size: number = (2 * maxOffset + 1) ** 2;
@@ -102,8 +20,20 @@ function generateOffsets(): Point[] {
   return result;
 }
 
-function checkPointValid(point: Point, contour: Point[]): boolean {
-  return !getPointInside(point, contour) && getDistanceValid(point, contour);
+function getPolygonValid(polygon: Point[], contour: Point[]): boolean {
+  const pointCount: number = contour.length;
+  let point: Point = contour[0];
+  let i: number = 0;
+
+  for (i = 0; i < pointCount; ++i) {
+    point = contour[i];
+
+    if (!point.getInside(polygon, false)) {
+      return false;
+    }
+  }
+
+  return true;
 }
 
 export function optimizeSimplifiedPolygon(
@@ -116,17 +46,14 @@ export function optimizeSimplifiedPolygon(
   const offsets: Point[] = generateOffsets();
   const indexCount: number = 3;
   const indices: Uint8Array = new Uint8Array(indexCount);
-  let bestArea: number = getArea(optimizedPolygon);
+  let bestArea: number = Math.abs(Point.getArea(optimizedPolygon));
   let currArea: number = 0;
   let isImproved = true;
   let currIndex: number = 0;
   let i: number = 0;
   let j: number = 0;
 
-  if (
-    !contour.every((pt) => getPointInside(pt, tempPolygon)) ||
-    !contour.every((pt) => getDistanceValid(pt, tempPolygon))
-  ) {
+  if (!getPolygonValid(tempPolygon, contour)) {
     return optimizedPolygon;
   }
 
@@ -144,7 +71,7 @@ export function optimizeSimplifiedPolygon(
         currIndex = indices[0];
         tempPolygon[currIndex].set(optimizedPolygon[currIndex]).add(offset1);
 
-        if (!checkPointValid(tempPolygon[currIndex], contour)) {
+        if (tempPolygon[currIndex].getInside(contour)) {
           continue;
         }
 
@@ -152,7 +79,7 @@ export function optimizeSimplifiedPolygon(
           currIndex = indices[1];
           tempPolygon[currIndex].set(optimizedPolygon[currIndex]).add(offset2);
 
-          if (!checkPointValid(tempPolygon[currIndex], contour)) {
+          if (tempPolygon[currIndex].getInside(contour)) {
             continue;
           }
 
@@ -162,20 +89,13 @@ export function optimizeSimplifiedPolygon(
               .set(optimizedPolygon[currIndex])
               .add(offset3);
 
-            if (!checkPointValid(tempPolygon[currIndex], contour)) {
+            if (tempPolygon[currIndex].getInside(contour)) {
               continue;
             }
 
-            currArea = getArea(tempPolygon);
+            currArea = Math.abs(Point.getArea(tempPolygon));
 
-            if (currArea >= bestArea) {
-              continue;
-            }
-
-            if (
-              contour.every((pt) => getPointInside(pt, tempPolygon)) &&
-              contour.every((pt) => getDistanceValid(pt, tempPolygon))
-            ) {
+            if (currArea < bestArea && getPolygonValid(tempPolygon, contour)) {
               bestArea = currArea;
 
               for (j = 0; j < indexCount; ++j) {
