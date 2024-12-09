@@ -5,18 +5,20 @@ import {
   useRef,
   useReducer,
   useMemo,
-  act,
+  useContext,
 } from "react";
 import { LibraryFile } from "../../../../../../types";
 import { LIBRARY_FILE_TYPE } from "../../../../../../enums";
 import { IMAGE_EDITOR_ACTION, REDUCER_ACTION } from "./enums";
 import reducer from "./reducer";
 import { FOOTER_ACTIONS, INITIAL_STATE } from "./constants";
+import { PreviewContext } from "../../../../../../contexts";
 
 export default function useImageEdit(
   file: LibraryFile<LIBRARY_FILE_TYPE.IMAGE>,
   onClose: () => void,
 ) {
+  const { onFilesChanged } = useContext(PreviewContext);
   const [state, dispatch] = useReducer(reducer, INITIAL_STATE);
   const canvasWrapperRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -105,6 +107,8 @@ export default function useImageEdit(
           onClose();
           break;
         case IMAGE_EDITOR_ACTION.SUBMIT:
+          console.log("SUBMIT");
+          onFilesChanged([boundEditor.export()]);
           onClose();
           break;
         case IMAGE_EDITOR_ACTION.RESET:
@@ -112,7 +116,7 @@ export default function useImageEdit(
           break;
       }
     },
-    [boundEditor, onClose],
+    [onFilesChanged, boundEditor, onClose],
   );
 
   const handleToggleBorder = useCallback(

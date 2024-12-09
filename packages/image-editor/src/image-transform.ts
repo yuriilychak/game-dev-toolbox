@@ -57,6 +57,10 @@ export default class ImageTransform {
     this.imageData = data;
   }
 
+  public get data(): LibraryImageData {
+    return this.imageData;
+  }
+
   public polgonAt(index: number): Uint16Array {
     return this.imageData.polygons[index];
   }

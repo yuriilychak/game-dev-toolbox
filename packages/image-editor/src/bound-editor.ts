@@ -1,6 +1,6 @@
 import { IMAGE_TYPE } from "./enums";
 import ImageTransform from "./image-transform";
-import { LibraryFile } from "./types";
+import { LibraryFile, LibraryImageData } from "./types";
 import { getTriangleIndex } from "./utils";
 
 export default class BoundEditor {
@@ -132,6 +132,13 @@ export default class BoundEditor {
     this.render();
 
     this.onSuccess();
+  }
+
+  public export(): LibraryFile {
+    return {
+      ...this.file,
+      data: this.imageTransform.data,
+    };
   }
 
   private drawImage(): void {

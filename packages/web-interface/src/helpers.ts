@@ -1,3 +1,5 @@
+import { LibraryFile } from "./types";
+
 export function generateUUID() {
   let d: number = new Date().getTime(); //Timestamp
   let d2: number =
@@ -40,4 +42,31 @@ export function formatSize(bytes: number): string {
   }
 
   return `${(bytes / (1 << (unitIndex * kbShift))).toFixed(2)}${units[unitIndex]}`;
+}
+
+export function updateNode(
+  tree: LibraryFile[],
+  updatedFile: LibraryFile,
+): boolean {
+  const elementCount: number = tree.length;
+  let file: LibraryFile = null;
+  let i: number = 0;
+
+  for (i = 0; i < elementCount; ++i) {
+    file = tree[i];
+
+    if (file.id === updatedFile.id) {
+      tree[i] = updatedFile;
+
+      return true;
+    }
+
+    if (file.children && updateNode(file.children, updatedFile)) {
+      tree[i] = { ...file, children: file.children.slice() };
+
+      return true;
+    }
+  }
+
+  return false;
 }

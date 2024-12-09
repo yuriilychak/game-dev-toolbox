@@ -37,6 +37,7 @@ export type LibraryContextData = {
 
 export type PreviewContextData = {
   selectedFiles: LibraryFile[];
+  onFilesChanged(files: LibraryFile[]): void;
 };
 
 export interface FieldOption {

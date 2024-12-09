@@ -6,9 +6,9 @@ const emptyCallback = () => {};
 
 const LibraryContext = createContext<LibraryContextData>({
   tree: [],
+  focusedId: "",
   onTreeChange: emptyCallback,
   onSelectionChanged: emptyCallback,
-  focusedId: "",
   onFocusChanged: emptyCallback,
 });
 

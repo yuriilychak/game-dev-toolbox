@@ -1,4 +1,4 @@
-import { useEffect, useMemo, FC, useState } from "react";
+import { useEffect, useMemo, FC, useState, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 
 import { ThemeProvider, createTheme } from "@mui/material/styles";
@@ -13,6 +13,7 @@ import { LibraryContext, PreviewContext } from "./contexts";
 import { LibraryFile, LibraryContextData, PreviewContextData } from "./types";
 import { GLOBAL_STYLES, ROOT_ID } from "./constants";
 import { RightArea } from "./right-area";
+import { updateNode } from "./helpers";
 
 const App: FC = () => {
   const theme = useMemo(
@@ -64,6 +65,24 @@ const App: FC = () => {
   const [libararyTree, setLibraryTree] = useState<LibraryFile[]>([]);
   const [libraryFocusedId, setLibraryFocusedId] = useState<string>(ROOT_ID);
   const [selectedFiles, setLibrarySelectedFiles] = useState<LibraryFile[]>([]);
+
+  const onFilesChanged = useCallback((updatedFiles: LibraryFile[]) => {
+    setLibrarySelectedFiles((prevFiles) =>
+      prevFiles.map(
+        (file) =>
+          updatedFiles.find((updatedFile) => updatedFile.id === file.id) ||
+          file,
+      ),
+    );
+    setLibraryTree((prevTree) =>
+      updatedFiles.reduce((result, file) => {
+        updateNode(result, file);
+
+        return result;
+      }, prevTree.slice()),
+    );
+  }, []);
+
   const libraryData = useMemo<LibraryContextData>(
     () => ({
       tree: libararyTree,
@@ -72,11 +91,11 @@ const App: FC = () => {
       onFocusChanged: setLibraryFocusedId,
       onSelectionChanged: setLibrarySelectedFiles,
     }),
-    [libararyTree, libraryFocusedId],
+    [libararyTree, libraryFocusedId, onFilesChanged],
   );
   const previewData = useMemo<PreviewContextData>(
-    () => ({ selectedFiles }),
-    [selectedFiles],
+    () => ({ selectedFiles, onFilesChanged }),
+    [selectedFiles, onFilesChanged],
   );
 
   useEffect(() => {
@@ -96,7 +115,7 @@ const App: FC = () => {
             <LeftArea />
           </LibraryContext.Provider>
           <Stack direction="column" flex={1} height="100%">
-            <Box flex={1}>Working araea</Box>
+            <Box flex={1}>Working area</Box>
             <Paper elevation={3}>Bottom intertface</Paper>
           </Stack>
           <PreviewContext.Provider value={previewData}>
