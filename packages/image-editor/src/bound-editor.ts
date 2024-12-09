@@ -91,11 +91,14 @@ export default class BoundEditor {
       return;
     }
 
-    this.transform[0] = this.sceneWidth >> 1;
-    this.transform[1] = this.sceneHeight >> 1;
-    this.transform[2] = 1;
+    this.worldX = this.sceneWidth >> 1;
+    this.worldY = this.sceneHeight >> 1;
 
-    this.render();
+    if (this.scale !== 1) {
+      this.scale = 1;
+    } else {
+      this.render();
+    }
   }
 
   public render(): void {
@@ -433,6 +436,10 @@ export default class BoundEditor {
 
   private get sceneHeight(): number {
     return this.canvas.height;
+  }
+
+  public get isChanged(): boolean {
+    return this.imageTransform.getChanged(this.file.data);
   }
 
   private static MAX_SCALE: number = 4;

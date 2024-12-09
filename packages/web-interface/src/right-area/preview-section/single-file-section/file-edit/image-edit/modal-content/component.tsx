@@ -13,13 +13,7 @@ import Switch from "@mui/material/Switch/Switch";
 
 import { LIBRARY_FILE_TYPE } from "../../../../../../enums";
 import useImageEdit from "./hooks";
-import {
-  FOOTER_ACTIONS,
-  IMAGE_TYPES,
-  SCALE_MARKS,
-  STYLES,
-  ZOOM_STEP,
-} from "./constants";
+import { IMAGE_TYPES, SCALE_MARKS, STYLES, ZOOM_STEP } from "./constants";
 import { FieldOption, LibraryFile } from "../../../../../../types";
 import { ButtonGroup, SelectField } from "../../../../../../shared-components";
 import { SCALE_VALUE } from "./enums";
@@ -30,6 +24,7 @@ const ModalContent: FC<{
 }> = ({ file, onClose }) => {
   const { t } = useTranslation();
   const {
+    footerActions,
     scale,
     type,
     isProcessing,
@@ -113,8 +108,7 @@ const ModalContent: FC<{
           </Stack>
           <ButtonGroup
             flex={1}
-            disabled={isProcessing}
-            actions={FOOTER_ACTIONS}
+            actions={footerActions}
             onClick={handleAction}
             dividerIndex={1}
           />

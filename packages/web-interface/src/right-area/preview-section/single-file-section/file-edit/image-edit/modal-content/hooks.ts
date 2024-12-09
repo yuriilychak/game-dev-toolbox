@@ -4,12 +4,14 @@ import {
   useLayoutEffect,
   useRef,
   useReducer,
+  useMemo,
+  act,
 } from "react";
 import { LibraryFile } from "../../../../../../types";
 import { LIBRARY_FILE_TYPE } from "../../../../../../enums";
 import { IMAGE_EDITOR_ACTION, REDUCER_ACTION } from "./enums";
 import reducer from "./reducer";
-import { INITIAL_STATE } from "./constants";
+import { FOOTER_ACTIONS, INITIAL_STATE } from "./constants";
 
 export default function useImageEdit(
   file: LibraryFile<LIBRARY_FILE_TYPE.IMAGE>,
@@ -20,6 +22,17 @@ export default function useImageEdit(
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const { type, scale, boundEditor, isChanged, isFixBorder, isProcessing } =
     state;
+
+  const footerActions = useMemo(
+    () =>
+      FOOTER_ACTIONS.map((action) => ({
+        ...action,
+        disabled:
+          (action.action !== IMAGE_EDITOR_ACTION.RESET && isProcessing) ||
+          (action.action === IMAGE_EDITOR_ACTION.SUBMIT && !isChanged),
+      })),
+    [isChanged, isProcessing],
+  );
 
   const handleDispatch = useCallback(
     (type: REDUCER_ACTION, payload?: unknown) => dispatch({ type, payload }),
@@ -118,6 +131,7 @@ export default function useImageEdit(
     isProcessing,
     canvasRef,
     canvasWrapperRef,
+    footerActions,
     scale,
     type,
     handleScaleChange,

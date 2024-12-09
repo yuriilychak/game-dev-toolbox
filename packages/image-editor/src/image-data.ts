@@ -16,10 +16,10 @@ export default class ImageData {
     context: OffscreenCanvasRenderingContext2D,
   ) {
     const padding = ImageData.CLASTER_SIZE * 16;
-    this._width = imageBitmap.width + 2 * padding;
+    this._width = imageBitmap.width + (padding << 1);
     this._leftOffset = padding;
     this._rightOffset = this._width - padding - imageBitmap.width;
-    this._height = imageBitmap.height + 2 * padding;
+    this._height = imageBitmap.height + (padding << 1);
     this._topOffset = padding;
     this._bottomOffset = this._height - padding - imageBitmap.height;
 
@@ -92,7 +92,7 @@ export default class ImageData {
 
     while (stack.length > 0) {
       currPoint = stack.pop();
-      visited.add((currPoint.x << 16) | currPoint.y);
+      visited.add(ImageData.getPointKey(currPoint));
 
       this.clearPixel(currPoint);
 
@@ -100,7 +100,7 @@ export default class ImageData {
         nextPoint.set(currPoint).add(offsets[i]);
 
         if (
-          !visited.has((nextPoint.x << 16) | nextPoint.y) &&
+          !visited.has(ImageData.getPointKey(nextPoint)) &&
           boundRect.contains(nextPoint) &&
           this.getFilled(nextPoint)
         ) {
@@ -115,12 +115,12 @@ export default class ImageData {
       return;
     }
 
-    const index = (point.y * this._width + point.x) * 4;
+    const index = (point.y * this._width + point.x) * ImageData.BITS_PER_PIXEL;
+    let i: number = 0;
 
-    this._data[index] = 0;
-    this._data[index + 1] = 0;
-    this._data[index + 2] = 0;
-    this._data[index + 3] = 0;
+    for (i = 0; i < 4; ++i) {
+      this._data[index + i] = 0;
+    }
   }
 
   public getFilled(point: Point): number {
@@ -151,10 +151,10 @@ export default class ImageData {
   }
 
   public getFirstNoneTransparentPixel(threshold: number): Point {
-    let i: number = 0;
-    let j: number = 0;
     const height: number = this.height;
     const width: number = this.width;
+    let i: number = 0;
+    let j: number = 0;
 
     for (i = 0; i < height; ++i) {
       for (j = 0; j < width; ++j) {
@@ -201,10 +201,10 @@ export default class ImageData {
 
   public get isEmpty(): boolean {
     const totalPixels = this.totalPixels;
+    let i: number = 0;
 
-    for (let i = 0; i < totalPixels; i++) {
-      const alphaIndex = i * 4 + 3;
-      if (this._data[alphaIndex] !== 0) {
+    for (i = 0; i < totalPixels; ++i) {
+      if (this._data[i * ImageData.BITS_PER_PIXEL + 3] !== 0) {
         return false;
       }
     }
@@ -212,5 +212,11 @@ export default class ImageData {
     return true;
   }
 
-  private static CLASTER_SIZE: number = 4;
+  private static getPointKey(point: Point): number {
+    return (point.x << 16) | point.y;
+  }
+
+  private static readonly BITS_PER_PIXEL: number = 4;
+
+  private static readonly CLASTER_SIZE: number = 4;
 }

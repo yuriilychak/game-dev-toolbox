@@ -3,7 +3,7 @@ import marchSquare from "./marching-squares";
 import Polygon from "./polygon";
 import Point from "./point";
 import { IMAGE_TYPE } from "../enums";
-import type { ImageWorkerData } from "../types";
+import type { LibraryImageData } from "../types";
 import { cropImageBitmap, getQuadPolygon } from "../utils";
 import { QUAD_TRIANGLES } from "../constants";
 
@@ -12,20 +12,10 @@ const context: OffscreenCanvasRenderingContext2D = canvas.getContext("2d", {
   willReadFrequently: true,
 });
 
-self.onmessage = async function ({
-  data,
-}: MessageEvent<{
-  src: ImageBitmap;
-  type: IMAGE_TYPE;
-  extension: string;
-  offset: number;
-}>) {
-  const result: ImageWorkerData = {
-    src: null,
-    polygons: [],
-    triangles: [],
-    isFixBorder: false,
-  };
+self.onmessage = async function (
+  event: MessageEvent<{ data: LibraryImageData; offset: number }>,
+) {
+  const { data, offset } = event.data;
 
   if (data.type === IMAGE_TYPE.POLYGON) {
     const imageData = new ImageData(data.src, context);
@@ -73,37 +63,38 @@ self.onmessage = async function ({
       imageData.topOffset - bounds.top,
     );
 
-    result.src = await createImageBitmap(canvas, 0, 0, width, height);
+    data.src = await createImageBitmap(canvas, 0, 0, width, height);
 
-    polygons.reduce<ImageWorkerData>((res, polygon) => {
+    polygons.reduce<LibraryImageData>((result, polygon) => {
       const [polygonData, trianglesData] = polygon.export(
         bounds.left,
         bounds.top,
       );
 
-      res.polygons.push(polygonData);
-      res.triangles.push(trianglesData);
+      result.polygons.push(polygonData);
+      result.triangles.push(trianglesData);
 
-      return res;
-    }, result);
+      return result;
+    }, data);
   } else {
-    if (data.offset === 0) {
-      result.src = await cropImageBitmap(data.src, data.extension, context);
+    if (offset === 0) {
+      data.src = await cropImageBitmap(data.src, data.extension, context);
     } else {
-      const newWidth: number = data.src.width + (data.offset << 1);
-      const newHeight: number = data.src.height + (data.offset << 1);
+      const newWidth: number = data.src.width + (offset << 1);
+      const newHeight: number = data.src.height + (offset << 1);
 
       context.clearRect(0, 0, newWidth, newHeight);
-      context.drawImage(data.src, data.offset, data.offset);
+      context.drawImage(data.src, offset, offset);
 
-      result.src = await createImageBitmap(canvas, 0, 0, newWidth, newHeight);
+      data.src = await createImageBitmap(canvas, 0, 0, newWidth, newHeight);
     }
 
-    result.polygons.push(getQuadPolygon(result.src));
-    result.triangles.push(QUAD_TRIANGLES.slice());
-    result.isFixBorder = data.offset === 1;
+    data.polygons.push(getQuadPolygon(data.src));
+    data.triangles.push(QUAD_TRIANGLES.slice());
   }
 
+  data.isFixBorder = offset === 1;
+
   // @ts-ignore
-  self.postMessage(result, [result.src]);
+  self.postMessage(data, [data.src]);
 };

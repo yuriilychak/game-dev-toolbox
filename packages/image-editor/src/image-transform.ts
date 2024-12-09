@@ -1,5 +1,5 @@
 import { IMAGE_TYPE } from "./enums";
-import type { ImageWorkerData, LibraryImageData } from "./types";
+import type { LibraryImageData } from "./types";
 
 export default class ImageTransform {
   private imageData: LibraryImageData;
@@ -10,6 +10,13 @@ export default class ImageTransform {
 
   public init(imageData: LibraryImageData): void {
     this.imageData = { ...imageData };
+  }
+
+  public getChanged(imageData: LibraryImageData): boolean {
+    return (
+      this.imageData.type !== imageData.type ||
+      this.imageData.isFixBorder !== imageData.isFixBorder
+    );
   }
 
   public async updateType(type: IMAGE_TYPE): Promise<void> {
@@ -24,7 +31,7 @@ export default class ImageTransform {
     type: IMAGE_TYPE,
     offset: number,
   ): Promise<void> {
-    const { data } = await new Promise<MessageEvent<ImageWorkerData>>(
+    const { data } = await new Promise<MessageEvent<LibraryImageData>>(
       (resolve, reject) => {
         const worker = new Worker(
           new URL("./geom/polygon.worker", import.meta.url),
@@ -34,23 +41,20 @@ export default class ImageTransform {
         worker.onmessage = resolve;
         worker.onerror = reject;
 
-        worker.postMessage(
-          {
-            src: this.imageData.src,
+        worker.postMessage({
+          data: {
+            ...this.imageData,
             type,
-            extension: this.imageData.extension,
-            offset,
+            polygons: [],
+            triangles: [],
+            isFixBorder: false,
           },
-          [this.imageData.src],
-        );
+          offset,
+        });
       },
     );
 
-    this.imageData.src = data.src;
-    this.imageData.type = type;
-    this.imageData.isFixBorder = data.isFixBorder;
-    this.imageData.polygons = data.polygons;
-    this.imageData.triangles = data.triangles;
+    this.imageData = data;
   }
 
   public polgonAt(index: number): Uint16Array {

@@ -58,6 +58,7 @@ const REDUCER = new Map<REDUCER_ACTION, ReducerMiddleware>([
     REDUCER_ACTION.FINISH_PROCESSING,
     (prevState: ReducerState): ReducerState => ({
       ...prevState,
+      isChanged: prevState.boundEditor.isChanged,
       isProcessing: false,
     }),
   ],
@@ -69,7 +70,7 @@ const REDUCER = new Map<REDUCER_ACTION, ReducerMiddleware>([
 
       boundEditor.updateType(type);
 
-      return { ...prevState, type, isProcessing: true, isChanged: true };
+      return { ...prevState, type, isProcessing: true };
     },
   ],
   [
@@ -84,7 +85,6 @@ const REDUCER = new Map<REDUCER_ACTION, ReducerMiddleware>([
         ...prevState,
         isFixBorder: nextFixBorder,
         isProcessing: true,
-        isChanged: true,
       };
     },
   ],
