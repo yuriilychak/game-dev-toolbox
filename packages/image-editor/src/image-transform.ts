@@ -1,14 +1,19 @@
+import { singleThread, WORKER_TYPE } from "worker-utils";
+
 import { IMAGE_TYPE } from "./enums";
-import type { LibraryImageData } from "./types";
+import type {
+  ImageTransformWorkerInput,
+  ImageTransformWorkerResult,
+  LibraryImageData,
+} from "./types";
 
 export default class ImageTransform {
-  private imageData: LibraryImageData;
+  private imageData: LibraryImageData = null;
 
-  constructor() {
-    this.imageData = null;
-  }
+  private id: string = "";
 
-  public init(imageData: LibraryImageData): void {
+  public init(id: string, imageData: LibraryImageData): void {
+    this.id = id;
     this.imageData = { ...imageData };
   }
 
@@ -31,30 +36,19 @@ export default class ImageTransform {
     type: IMAGE_TYPE,
     offset: number,
   ): Promise<void> {
-    const { data } = await new Promise<MessageEvent<LibraryImageData>>(
-      (resolve, reject) => {
-        const worker = new Worker(
-          new URL("./geom/polygon.worker", import.meta.url),
-          { type: "module" },
-        );
+    const data: LibraryImageData = {
+      ...this.imageData,
+      type,
+      polygons: [],
+      triangles: [],
+      isFixBorder: false,
+    };
+    const result = await singleThread<
+      ImageTransformWorkerInput,
+      ImageTransformWorkerResult
+    >(WORKER_TYPE.GENERATE_IMAGE_BOUNDS, { data, offset, id: this.id });
 
-        worker.onmessage = resolve;
-        worker.onerror = reject;
-
-        worker.postMessage({
-          data: {
-            ...this.imageData,
-            type,
-            polygons: [],
-            triangles: [],
-            isFixBorder: false,
-          },
-          offset,
-        });
-      },
-    );
-
-    this.imageData = data;
+    this.imageData = result.data;
   }
 
   public get data(): LibraryImageData {

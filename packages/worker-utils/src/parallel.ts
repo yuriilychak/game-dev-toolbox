@@ -1,15 +1,14 @@
-import { ImageFileData, LibraryImageData } from "./types";
+﻿import { WORKER_TYPE } from "./enums";
+import { default as getWorker } from "./workers";
 
-export default class ImageCropService {
+export default class Parallel<InputType, OutputType> {
   #threadsUsage: boolean[];
-
-  #threadCount: number;
 
   #threads: Worker[];
 
-  #input: ImageFileData[] = null;
+  #input: InputType[] = null;
 
-  #output: LibraryImageData[] = null;
+  #output: OutputType[] = null;
 
   #threadIndices: number[];
 
@@ -21,17 +20,21 @@ export default class ImageCropService {
 
   #totalThreads: number = 0;
 
+  #type: WORKER_TYPE = WORKER_TYPE.NONE;
+
   #onError: (error: ErrorEvent) => void = null;
 
-  #onSuccess: (result: LibraryImageData[]) => void = null;
+  #onSuccess: (result: OutputType[]) => void = null;
 
   #onSpawn: (count: number) => void = null;
 
-  constructor() {
-    this.#threadCount = navigator.hardwareConcurrency || 4;
-    this.#threadsUsage = new Array(this.#threadCount);
-    this.#threads = new Array(this.#threadCount);
-    this.#threadIndices = new Array(this.#threadCount);
+  #onTrigger: (input: InputType) => Transferable[] = null;
+
+  constructor(type: WORKER_TYPE) {
+    this.#type = type;
+    this.#threadsUsage = new Array(Parallel.MAX_THREAD_COUNT);
+    this.#threads = new Array(Parallel.MAX_THREAD_COUNT);
+    this.#threadIndices = new Array(Parallel.MAX_THREAD_COUNT);
 
     this.#threadsUsage.fill(false);
     this.#threads.fill(null);
@@ -39,9 +42,10 @@ export default class ImageCropService {
   }
 
   public start(
-    input: ImageFileData[],
-    onSuccess: (result: LibraryImageData[]) => void,
+    input: InputType[],
+    onSuccess: (result: OutputType[]) => void,
     onError: (error: ErrorEvent) => void,
+    onTrigger: (input: InputType) => Transferable[] = () => [],
     onSpawn: (scount: number) => void = null,
   ): boolean {
     if (input.length === 0) {
@@ -52,6 +56,7 @@ export default class ImageCropService {
     this.#onError = onError;
     this.#onSuccess = onSuccess;
     this.#onSpawn = onSpawn;
+    this.#onTrigger = onTrigger;
     this.#iterationCount = 0;
     this.#startedThreads = 0;
     this.#input = input;
@@ -63,11 +68,8 @@ export default class ImageCropService {
     this.#threadIndices.fill(-1);
 
     if (this.#isTerminated) {
-      for (i = 0; i < this.#threadCount; ++i) {
-        this.#threads[i] = new Worker(
-          new URL("./crop.worker", import.meta.url),
-          { type: "module" },
-        );
+      for (i = 0; i < Parallel.MAX_THREAD_COUNT; ++i) {
+        this.#threads[i] = getWorker(this.#type);
       }
 
       this.#isTerminated = false;
@@ -86,7 +88,7 @@ export default class ImageCropService {
   public terminate(): void {
     let i: number = 0;
 
-    for (i = 0; i < this.#threadCount; ++i) {
+    for (i = 0; i < Parallel.MAX_THREAD_COUNT; ++i) {
       if (this.#threads[i] !== null) {
         this.#threads[i].terminate();
         this.#threads[i] = null;
@@ -122,12 +124,12 @@ export default class ImageCropService {
 
     thread.onmessage = this.onMessage;
     thread.onerror = this.onError;
-    thread.postMessage(input, [input.buffer]);
+    thread.postMessage(input, this.#onTrigger(input));
 
     return true;
   }
 
-  private onMessage = (message: MessageEvent<LibraryImageData>) => {
+  private onMessage = (message: MessageEvent<OutputType>) => {
     const index = this.clean(message.currentTarget as Worker);
     const threadIndex = this.#threadIndices[index];
 
@@ -151,7 +153,7 @@ export default class ImageCropService {
   private clean(target: Worker): number {
     let i: number = 0;
 
-    for (i = 0; i < this.#threadCount; ++i) {
+    for (i = 0; i < Parallel.MAX_THREAD_COUNT; ++i) {
       if (this.#threads[i] === target) {
         break;
       }
@@ -162,4 +164,7 @@ export default class ImageCropService {
 
     return i;
   }
+
+  public static readonly MAX_THREAD_COUNT: number =
+    navigator.hardwareConcurrency || 4;
 }

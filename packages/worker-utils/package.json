@@ -1,5 +1,5 @@
 {
-  "name": "polygon-packer",
+  "name": "worker-utils",
   "version": "1.0.0",
   "main": "src/index.ts",
   "scripts": {
@@ -9,16 +9,10 @@
     "lint": "eslint src/**/*.ts",
     "lint:fix": "eslint src/**/*.ts --fix"
   },
-  "description": "Polygon packing algorythm",
-  "dependencies": {
-    "geometry-utils": "^1.0.0",
-    "worker-utils": "^1.0.0"
-  },
+  "description": "Utils for work with workers",
   "keywords": [
-    "polygons",
-    "genetic",
-    "algorythm",
-    "nesting"
+    "web-worker",
+    "parallel"
   ],
   "author": "yurii.lychak",
   "license": "MIT"

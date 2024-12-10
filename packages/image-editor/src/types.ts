@@ -25,3 +25,10 @@ export type ImageFileData = {
   size: number;
   index: number;
 };
+
+export type ImageTransformWorkerInput = {
+  data: LibraryImageData;
+  id: string;
+  offset: number;
+};
+export type ImageTransformWorkerResult = { data: LibraryImageData; id: string };

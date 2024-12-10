@@ -1,22 +1,16 @@
-import ImageData from "../image-data";
-import marchSquare from "./marching-squares";
-import Polygon from "./polygon";
-import Point from "./point";
-import { IMAGE_TYPE } from "../enums";
-import type { LibraryImageData } from "../types";
-import { cropImageBitmap, getQuadPolygon } from "../utils";
-import { QUAD_TRIANGLES } from "../constants";
+import { QUAD_TRIANGLES } from "./constants";
+import { IMAGE_TYPE } from "./enums";
+import { LibraryImageData } from "./types";
+import { cropImageBitmap, getQuadPolygon } from "./utils";
+import ImageData from "./image-data";
+import { marchSquare, Point, Polygon } from "./geom";
 
-const canvas: OffscreenCanvas = new OffscreenCanvas(2048, 2048);
-const context: OffscreenCanvasRenderingContext2D = canvas.getContext("2d", {
-  willReadFrequently: true,
-});
-
-self.onmessage = async function (
-  event: MessageEvent<{ data: LibraryImageData; offset: number }>,
-) {
-  const { data, offset } = event.data;
-
+export default async function generateBounds(
+  data: LibraryImageData,
+  offset: number,
+  canvas: OffscreenCanvas,
+  context: OffscreenCanvasRenderingContext2D,
+): Promise<void> {
   if (data.type === IMAGE_TYPE.POLYGON) {
     const imageData = new ImageData(data.src, context);
     const polygons: Polygon[] = [];
@@ -94,7 +88,4 @@ self.onmessage = async function (
   }
 
   data.isFixBorder = offset === 1;
-
-  // @ts-ignore
-  self.postMessage(data, [data.src]);
-};
+}

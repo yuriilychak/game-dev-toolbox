@@ -7,19 +7,25 @@ export default {
   target: "web",
   devtool: "source-map",
   output: {
-    library: "imageEditor",
+    library: "workerUtils",
     libraryTarget: "umd",
     umdNamedDefine: true,
-    filename: "image-editor.js",
+    filename: "worker-utils.js",
     path: path.resolve("../../dist"),
   },
-  externals: {
-    "worker-utils": "workerUtils",
-  },
   resolve: { extensions: [".ts"] },
-  devServer: { contentBase: "../../dist", hot: true },
   plugins: [new webpack.HotModuleReplacementPlugin()],
+  devServer: {
+    contentBase: "../../dist",
+    hot: true,
+  },
   module: {
-    rules: [{ test: /\.tsx?$/, use: "ts-loader", exclude: /node_modules/ }],
+    rules: [
+      {
+        test: /\.ts?$/,
+        use: [{ loader: "ts-loader", options: { transpileOnly: true } }],
+        exclude: /node_modules/,
+      },
+    ],
   },
 };

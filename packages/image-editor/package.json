@@ -10,7 +10,9 @@
     "lint:fix": "eslint src/**/*.ts --fix"
   },
   "description": "Image editing tools for polygon and mesh generation",
-  "devDependencies": {},
+  "dependencies": {
+    "worker-utils": "^1.0.0"
+  },
   "keywords": [
     "polygons",
     "algorythm",

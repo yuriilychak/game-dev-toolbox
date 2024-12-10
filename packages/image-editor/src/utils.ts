@@ -1,13 +1,19 @@
-import ImageCropService from "./image-crop-service";
+import { Parallel, WORKER_TYPE } from "worker-utils";
 import { ImageFileData, LibraryImageData } from "./types";
+import { QUAD_TRIANGLES } from "./constants";
+import { IMAGE_TYPE } from "./enums";
+
+const onTransfer = (input: ImageFileData) => [input.buffer];
 
 export async function formatImageData(
   fileData: ImageFileData[],
 ): Promise<LibraryImageData[]> {
   return new Promise((resolve, reject) => {
-    const workerPool = new ImageCropService();
+    const workerPool = new Parallel<ImageFileData, LibraryImageData>(
+      WORKER_TYPE.CROP_IMAGE,
+    );
 
-    workerPool.start(fileData, (result) => resolve(result), reject);
+    workerPool.start(fileData, resolve, reject, onTransfer);
   });
 }
 
@@ -163,4 +169,33 @@ export function serializeTriangleIndices(
 
 export function getTriangleIndex(source: number, index: number): number {
   return (source >> (index * 5)) & FIVE_BIT_MASK;
+}
+
+export async function cropImage(
+  data: ImageFileData,
+  context: OffscreenCanvasRenderingContext2D,
+): Promise<LibraryImageData> {
+  const { buffer, type, label } = data;
+  const blob = new Blob([buffer], { type });
+  const inputImageBitmap: ImageBitmap = await createImageBitmap(blob);
+  const imageBitmap: ImageBitmap = await cropImageBitmap(
+    inputImageBitmap,
+    type,
+    context,
+  );
+  const labelSplit = label.split(".");
+  const extension = labelSplit.pop().toUpperCase();
+  const inputLabel = labelSplit.join(".").substring(0, 32);
+  const polygon: Uint16Array = getQuadPolygon(imageBitmap);
+  const triangles: Uint16Array = QUAD_TRIANGLES.slice();
+
+  return {
+    src: imageBitmap,
+    isFixBorder: false,
+    extension,
+    inputLabel,
+    type: IMAGE_TYPE.QUAD,
+    polygons: [polygon],
+    triangles: [triangles],
+  };
 }

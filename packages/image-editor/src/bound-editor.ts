@@ -1,6 +1,6 @@
 import { IMAGE_TYPE } from "./enums";
 import ImageTransform from "./image-transform";
-import { LibraryFile, LibraryImageData } from "./types";
+import { LibraryFile } from "./types";
 import { getTriangleIndex } from "./utils";
 
 export default class BoundEditor {
@@ -63,7 +63,7 @@ export default class BoundEditor {
   ): void {
     if (canvasRef.current) {
       this.file = file as LibraryFile;
-      this.imageTransform.init(this.file.data);
+      this.imageTransform.init(this.file.id, this.file.data);
       this.canvas = canvasRef.current;
       this.context = this.canvas.getContext("2d", {
         willReadFrequently: true,
