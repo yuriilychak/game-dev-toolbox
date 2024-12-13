@@ -2,23 +2,19 @@
 import { default as getWorker } from "./workers";
 
 export default class Parallel<InputType, OutputType> {
-  #threadsUsage: boolean[];
+  #threadsUsage: boolean[] = new Array(Parallel.THREAD_COUNT);
 
-  #threads: Worker[];
+  #threads: Worker[] = new Array(Parallel.THREAD_COUNT);
 
   #input: InputType[] = null;
 
   #output: OutputType[] = null;
 
-  #threadIndices: number[];
+  #threadIndices: Uint8Array = new Uint8Array(Parallel.THREAD_COUNT);
 
   #isTerminated: boolean = true;
 
-  #iterationCount: number = 0;
-
-  #startedThreads: number = 0;
-
-  #totalThreads: number = 0;
+  #threadData: Uint16Array = new Uint16Array(3);
 
   #type: WORKER_TYPE = WORKER_TYPE.NONE;
 
@@ -32,13 +28,6 @@ export default class Parallel<InputType, OutputType> {
 
   constructor(type: WORKER_TYPE) {
     this.#type = type;
-    this.#threadsUsage = new Array(Parallel.MAX_THREAD_COUNT);
-    this.#threads = new Array(Parallel.MAX_THREAD_COUNT);
-    this.#threadIndices = new Array(Parallel.MAX_THREAD_COUNT);
-
-    this.#threadsUsage.fill(false);
-    this.#threads.fill(null);
-    this.#threadIndices.fill(-1);
   }
 
   public start(
@@ -53,32 +42,27 @@ export default class Parallel<InputType, OutputType> {
       return false;
     }
 
+    this.cleanup();
+
+    this.totalThreads = input.length;
     this.#onError = onError;
     this.#onSuccess = onSuccess;
     this.#onSpawn = onSpawn;
     this.#onTrigger = onTrigger;
-    this.#iterationCount = 0;
-    this.#startedThreads = 0;
     this.#input = input;
-    this.#totalThreads = input.length;
-    this.#output = new Array(this.#totalThreads);
+    this.#output = new Array(this.totalThreads);
+
     let i: number = 0;
 
-    this.#threadsUsage.fill(false);
-    this.#threadIndices.fill(-1);
-
     if (this.#isTerminated) {
-      for (i = 0; i < Parallel.MAX_THREAD_COUNT; ++i) {
+      for (i = 0; i < Parallel.THREAD_COUNT; ++i) {
         this.#threads[i] = getWorker(this.#type);
       }
 
       this.#isTerminated = false;
     }
 
-    while (
-      this.#startedThreads < this.#totalThreads &&
-      this.#threadsUsage.indexOf(false) !== -1
-    ) {
+    while (this.hasFreeThreads) {
       this.trigger();
     }
 
@@ -88,36 +72,33 @@ export default class Parallel<InputType, OutputType> {
   public terminate(): void {
     let i: number = 0;
 
-    for (i = 0; i < Parallel.MAX_THREAD_COUNT; ++i) {
+    for (i = 0; i < Parallel.THREAD_COUNT; ++i) {
       if (this.#threads[i] !== null) {
         this.#threads[i].terminate();
-        this.#threads[i] = null;
       }
-      this.#threadsUsage[i] = false;
-      this.#threadIndices[i] = -1;
     }
 
-    this.#isTerminated = true;
+    this.cleanup();
   }
 
   private trigger(): boolean {
-    const index: number = this.#threadsUsage.indexOf(false);
-
-    if (index === -1) {
+    if (!this.hasFreeThreads) {
       return false;
     }
+
+    const index: number = this.#threadsUsage.indexOf(false);
 
     this.#threadsUsage[index] = true;
 
     const thread = this.#threads[index];
-    const threadIndex: number = this.#startedThreads;
+    const threadIndex: number = this.startedThreads;
 
-    ++this.#startedThreads;
+    ++this.startedThreads;
 
-    this.#threadIndices[index] = threadIndex;
+    this.#threadIndices[index] = threadIndex + 1;
 
     if (this.#onSpawn !== null) {
-      this.#onSpawn(this.#startedThreads);
+      this.#onSpawn(this.startedThreads);
     }
 
     const input = this.#input[threadIndex];
@@ -131,16 +112,18 @@ export default class Parallel<InputType, OutputType> {
 
   private onMessage = (message: MessageEvent<OutputType>) => {
     const index = this.clean(message.currentTarget as Worker);
-    const threadIndex = this.#threadIndices[index];
+    const threadIndex = this.#threadIndices[index] - 1;
 
     this.#output[threadIndex] = message.data;
 
-    if (this.#iterationCount === this.#totalThreads) {
+    if (this.isComplete) {
       this.#onSuccess(this.#output);
+      this.cleanup();
+
       return;
     }
 
-    if (this.#startedThreads < this.#totalThreads) {
+    if (this.hasFreeThreads) {
       this.trigger();
     }
   };
@@ -153,18 +136,73 @@ export default class Parallel<InputType, OutputType> {
   private clean(target: Worker): number {
     let i: number = 0;
 
-    for (i = 0; i < Parallel.MAX_THREAD_COUNT; ++i) {
+    for (i = 0; i < Parallel.THREAD_COUNT; ++i) {
       if (this.#threads[i] === target) {
         break;
       }
     }
 
     this.#threadsUsage[i] = false;
-    ++this.#iterationCount;
+    ++this.iterationCount;
 
     return i;
   }
 
-  public static readonly MAX_THREAD_COUNT: number =
-    navigator.hardwareConcurrency || 4;
+  private cleanup(): void {
+    this.#isTerminated = true;
+    this.#onError = null;
+    this.#onSuccess = null;
+    this.#onSpawn = null;
+    this.#onTrigger = null;
+    this.#input = null;
+    this.#output = null;
+    this.#threadsUsage.fill(false);
+    this.#threads.fill(null);
+    this.#threadData.fill(0);
+    this.#threadIndices.fill(0);
+  }
+
+  private get totalThreads(): number {
+    return this.#threadData[0];
+  }
+
+  private set totalThreads(value: number) {
+    this.#threadData[0] = value;
+  }
+
+  private get startedThreads(): number {
+    return this.#threadData[1];
+  }
+
+  private set startedThreads(value: number) {
+    this.#threadData[1] = value;
+  }
+
+  private get iterationCount(): number {
+    return this.#threadData[2];
+  }
+
+  private set iterationCount(value: number) {
+    this.#threadData[2] = value;
+  }
+
+  private get hasFreeThreads(): boolean {
+    return (
+      this.startedThreads < this.totalThreads &&
+      this.#threadsUsage.includes(false)
+    );
+  }
+
+  private get isComplete(): boolean {
+    return this.iterationCount === this.totalThreads;
+  }
+
+  public static readonly MIN_THREAD_COUNT = 4;
+
+  public static readonly MAX_THREAD_COUNT = 32;
+
+  public static readonly THREAD_COUNT: number = Math.min(
+    navigator.hardwareConcurrency || Parallel.MIN_THREAD_COUNT,
+    Parallel.MAX_THREAD_COUNT,
+  );
 }
