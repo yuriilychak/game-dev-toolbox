@@ -1,5 +1,10 @@
 import { Parallel, WORKER_TYPE } from "worker-utils";
-import { ImageFileData, LibraryImageData } from "./types";
+import type {
+  ImageFileData,
+  ImageTransformWorkerInput,
+  ImageTransformWorkerResult,
+  LibraryImageData,
+} from "./types";
 import { QUAD_TRIANGLES } from "./constants";
 import { IMAGE_TYPE } from "./enums";
 
@@ -15,6 +20,21 @@ export async function formatImageData(
 
     workerPool.start(fileData, resolve, reject, onTransfer);
   });
+}
+
+export function transformImageData(
+  input: ImageTransformWorkerInput[],
+  onSuccess: (result: ImageTransformWorkerResult[]) => void,
+  onError: (error: ErrorEvent) => void,
+  onSpawn: (spawned: number, completed: number) => void,
+) {
+  const workerPool = new Parallel<
+    ImageTransformWorkerInput,
+    ImageTransformWorkerResult
+  >(WORKER_TYPE.GENERATE_IMAGE_BOUNDS);
+  const handleTransform = (data: ImageTransformWorkerInput) => [data.data.src];
+
+  workerPool.start(input, onSuccess, onError, handleTransform, onSpawn);
 }
 
 export function cycleIndex(
@@ -190,6 +210,7 @@ export async function cropImage(
   const triangles: Uint16Array = QUAD_TRIANGLES.slice();
 
   return {
+    size: data.size,
     src: imageBitmap,
     isFixBorder: false,
     extension,

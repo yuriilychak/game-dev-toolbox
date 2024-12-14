@@ -22,7 +22,7 @@ export default class Parallel<InputType, OutputType> {
 
   #onSuccess: (result: OutputType[]) => void = null;
 
-  #onSpawn: (count: number) => void = null;
+  #onSpawn: (spawned: number, completed: number) => void = null;
 
   #onTrigger: (input: InputType) => Transferable[] = null;
 
@@ -35,7 +35,7 @@ export default class Parallel<InputType, OutputType> {
     onSuccess: (result: OutputType[]) => void,
     onError: (error: ErrorEvent) => void,
     onTrigger: (input: InputType) => Transferable[] = () => [],
-    onSpawn: (scount: number) => void = null,
+    onSpawn: (spawned: number, completed: number) => void = null,
   ): boolean {
     if (input.length === 0) {
       this.onError(new ErrorEvent("Empty data"));
@@ -98,7 +98,7 @@ export default class Parallel<InputType, OutputType> {
     this.#threadIndices[index] = threadIndex + 1;
 
     if (this.#onSpawn !== null) {
-      this.#onSpawn(this.startedThreads);
+      this.#onSpawn(this.startedThreads, this.iterationCount);
     }
 
     const input = this.#input[threadIndex];

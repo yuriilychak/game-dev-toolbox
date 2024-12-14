@@ -5,6 +5,7 @@ export type LibraryImageData = {
   isFixBorder: boolean;
   extension: string;
   inputLabel: string;
+  size: number;
   type: IMAGE_TYPE;
   polygons: Uint16Array[];
   triangles: Uint16Array[];
@@ -31,4 +32,5 @@ export type ImageTransformWorkerInput = {
   id: string;
   offset: number;
 };
+
 export type ImageTransformWorkerResult = { data: LibraryImageData; id: string };

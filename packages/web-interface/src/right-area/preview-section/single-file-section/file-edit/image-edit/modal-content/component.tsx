@@ -1,22 +1,19 @@
-import { useMemo, FC } from "react";
+import { FC } from "react";
 import { useTranslation } from "react-i18next";
-
-import { IMAGE_TYPE } from "image-editor";
 
 import Stack from "@mui/material/Stack";
 import Paper from "@mui/material/Paper";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Slider from "@mui/material/Slider";
-import FormControlLabel from "@mui/material/FormControlLabel/FormControlLabel";
-import Switch from "@mui/material/Switch/Switch";
 
 import { LIBRARY_FILE_TYPE } from "../../../../../../enums";
-import useImageEdit from "./hooks";
-import { IMAGE_TYPES, SCALE_MARKS, STYLES, ZOOM_STEP } from "./constants";
-import { FieldOption, LibraryFile } from "../../../../../../types";
-import { ButtonGroup, SelectField } from "../../../../../../shared-components";
+import { SCALE_MARKS, STYLES, ZOOM_STEP } from "./constants";
+import { LibraryFile } from "../../../../../../types";
+import { ButtonGroup } from "../../../../../../shared-components";
+import { ImageParams } from "../../../../shared";
 import { SCALE_VALUE } from "./enums";
+import useImageEdit from "./hooks";
 
 const ModalContent: FC<{
   file: LibraryFile<LIBRARY_FILE_TYPE.IMAGE>;
@@ -38,11 +35,6 @@ const ModalContent: FC<{
     handleValueText,
   } = useImageEdit(file, onClose);
 
-  const imageTypeOptions = useMemo<FieldOption[]>(
-    () => IMAGE_TYPES.map((value) => ({ ...value, label: t(value.label) })),
-    [t],
-  );
-
   return (
     <Paper elevation={2} sx={STYLES.MODAL_ROOT}>
       <Stack
@@ -53,7 +45,7 @@ const ModalContent: FC<{
         overflow="hidden"
       >
         <Typography variant="h5">
-          {t("preview.singleFile.edit.image.modal.title")}
+          {t("preview.shared.edit.image.modal.title")}
         </Typography>
         <Stack flex={1} direction="row" overflow="hidden">
           <Box flex={1} height="100%" overflow="hidden" ref={canvasWrapperRef}>
@@ -64,30 +56,16 @@ const ModalContent: FC<{
               ref={canvasRef}
             />
           </Box>
-          <Stack
+          <ImageParams
             width={256}
-            height="100%"
             paddingLeft={2}
-            paddingTop={1}
-            gap={1}
-          >
-            <SelectField
-              label={t("preview.singleFile.edit.image.modal.type.label")}
-              id="imageType"
-              options={imageTypeOptions}
-              value={type}
-              onChange={handleChangeType}
-              disabled={isProcessing}
-            />
-            {type === IMAGE_TYPE.QUAD && (
-              <FormControlLabel
-                disabled={isProcessing}
-                onClick={handleToggleBorder}
-                control={<Switch checked={isFixBorder} />}
-                label="Add 1px padding"
-              />
-            )}
-          </Stack>
+            paddingRight={0}
+            onChangeBorder={handleToggleBorder}
+            type={type}
+            isFixBorder={isFixBorder}
+            isProcessing={isProcessing}
+            onChangeType={handleChangeType}
+          />
         </Stack>
         <Stack gap={1} direction="row" height={48} alignItems="center">
           <Stack direction="row" gap={1} sx={STYLES.SCALE_CONTAINER}>

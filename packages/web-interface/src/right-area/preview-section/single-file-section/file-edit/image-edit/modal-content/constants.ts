@@ -4,13 +4,8 @@ import type { Mark } from "@mui/material/Slider/useSlider.types";
 import { SxProps, Theme } from "@mui/material/styles";
 
 import type { ButtonGroupAction } from "../../../../../../shared-components";
-import type { FieldOption } from "../../../../../../types";
 import { IMAGE_EDITOR_ACTION, SCALE_VALUE } from "./enums";
 import { ReducerState } from "./types";
-import {
-  IMAGE_TYPE_ICONS,
-  IMAGE_TYPE_LOCALES,
-} from "../../../../../../constants";
 
 export const SCALE_MARKS: Mark[] = [
   SCALE_VALUE.MIN,
@@ -39,19 +34,6 @@ export const STYLES: Record<string, SxProps<Theme>> = {
   },
   SCALE_LABEL: { paddingTop: 0.25 },
 };
-
-const DISABLED_TYPES: IMAGE_TYPE[] = [IMAGE_TYPE.MESH];
-
-export const IMAGE_TYPES: FieldOption[] = [
-  IMAGE_TYPE.QUAD,
-  IMAGE_TYPE.POLYGON,
-  IMAGE_TYPE.MESH,
-].map((value) => ({
-  value,
-  label: IMAGE_TYPE_LOCALES.get(value),
-  Icon: IMAGE_TYPE_ICONS.get(value),
-  disabled: DISABLED_TYPES.includes(value),
-}));
 
 export const FOOTER_ACTIONS: ButtonGroupAction<IMAGE_EDITOR_ACTION>[] = [
   {

@@ -1,14 +1,15 @@
-import { memo } from "react";
+import { memo, FC } from "react";
 
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 
 import { LIBRARY_ITEM_ICONS } from "../../../constants";
 import { FilePreview } from "./file-preview";
-import { SingleFileComponent } from "./types";
 import { FileEdit } from "./file-edit";
+import type { FilesComponent } from "../types";
 
-const SingleFileSection: SingleFileComponent = ({ file }) => {
+const SingleFileSection: FilesComponent = ({ files }) => {
+  const file = files[0];
   const Icon = LIBRARY_ITEM_ICONS.get(file.type);
 
   return (

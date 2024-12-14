@@ -64,9 +64,8 @@ const REDUCER = new Map<REDUCER_ACTION, ReducerMiddleware>([
   ],
   [
     REDUCER_ACTION.CHANGE_TYPE,
-    (prevState: ReducerState, rawType: string): ReducerState => {
+    (prevState: ReducerState, type: IMAGE_TYPE): ReducerState => {
       const { boundEditor } = prevState;
-      const type: IMAGE_TYPE = parseInt(rawType) as IMAGE_TYPE;
 
       boundEditor.updateType(type);
 

@@ -13,6 +13,7 @@ import { IMAGE_EDITOR_ACTION, REDUCER_ACTION } from "./enums";
 import reducer from "./reducer";
 import { FOOTER_ACTIONS, INITIAL_STATE } from "./constants";
 import { PreviewContext } from "../../../../../../contexts";
+import { IMAGE_TYPE } from "image-editor";
 
 export default function useImageEdit(
   file: LibraryFile<LIBRARY_FILE_TYPE.IMAGE>,
@@ -96,7 +97,7 @@ export default function useImageEdit(
   );
 
   const handleChangeType = useCallback(
-    (rawValue: string) => handleDispatch(REDUCER_ACTION.CHANGE_TYPE, rawValue),
+    (value: IMAGE_TYPE) => handleDispatch(REDUCER_ACTION.CHANGE_TYPE, value),
     [handleDispatch],
   );
 
