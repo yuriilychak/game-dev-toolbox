@@ -4,6 +4,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import CheckIcon from "@mui/icons-material/Check";
 import CloseIcon from "@mui/icons-material/Close";
+import { SxProps } from "@mui/material";
 
 import { LIBRARY_ACTION, LIBRARY_FILE_TYPE } from "../../enums";
 import { IconMap } from "../../types";
@@ -35,3 +36,8 @@ export const ADD_TYPES: LIBRARY_FILE_TYPE[] = [
   LIBRARY_FILE_TYPE.IMAGE,
   LIBRARY_FILE_TYPE.TEXTURE_ATLAS,
 ];
+
+export const LIBRAY_STYLES: Map<boolean, SxProps> = new Map([
+  [true, { pointerEvents: "none", opacity: 0.7 }],
+  [false, { pointerEvents: "unset", opacity: 1 }],
+]);

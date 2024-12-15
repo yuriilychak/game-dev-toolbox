@@ -4,6 +4,7 @@ import { PreviewContextData } from "../types";
 
 const PreviewContext = createContext<PreviewContextData>({
   selectedFiles: [],
+  onProcessing: () => {},
   onFilesChanged: () => {},
 });
 

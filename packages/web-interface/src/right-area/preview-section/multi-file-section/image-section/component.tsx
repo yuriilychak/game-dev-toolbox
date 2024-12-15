@@ -9,7 +9,7 @@ import { ImageParams } from "../../shared";
 import { PreviewContext } from "../../../../contexts";
 
 const ImageSection: FilesComponent<LIBRARY_FILE_TYPE.IMAGE> = ({ files }) => {
-  const { onFilesChanged } = useContext(PreviewContext);
+  const { onFilesChanged, onProcessing } = useContext(PreviewContext);
   const initialType = useMemo(() => getImageType(files), [files]);
   const [type, setType] = useState<IMAGE_TYPE>(IMAGE_TYPE.NONE);
   const [isFixBorder, setFixBorder] = useState<boolean>(false);
@@ -42,6 +42,7 @@ const ImageSection: FilesComponent<LIBRARY_FILE_TYPE.IMAGE> = ({ files }) => {
 
   const handleTransform = useCallback(
     (imageType: IMAGE_TYPE, offset: number) => {
+      onProcessing();
       transformImageData(
         transformFiles(files, imageType, offset),
         handleComplete,
@@ -49,16 +50,17 @@ const ImageSection: FilesComponent<LIBRARY_FILE_TYPE.IMAGE> = ({ files }) => {
         handleSpawn,
       );
     },
-    [files, handleComplete, handleError, handleSpawn],
+    [files, handleComplete, handleError, handleSpawn, onProcessing],
   );
 
   const handleChangeType = useCallback(
     (nextType: IMAGE_TYPE) => {
+      onProcessing();
       setType(nextType);
       setProcessing(true);
       handleTransform(nextType, 0);
     },
-    [handleTransform],
+    [handleTransform, onProcessing],
   );
 
   const handleToggleBorder = useCallback(() => {

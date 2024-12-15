@@ -18,8 +18,14 @@ import {
 import { LibraryFile } from "../../types";
 
 export function useLibraryView() {
-  const { tree, onTreeChange, focusedId, onFocusChanged, onSelectionChanged } =
-    useContext(LibraryContext);
+  const {
+    tree,
+    onTreeChange,
+    focusedId,
+    onFocusChanged,
+    onSelectionChanged,
+    isProcessing,
+  } = useContext(LibraryContext);
   const [isAddModalOpen, setAddModalOpen] = useState<boolean>(false);
 
   const handleAction = useCallback(
@@ -76,6 +82,7 @@ export function useLibraryView() {
 
   return {
     tree,
+    isProcessing,
     isAddModalOpen,
     focusedId,
     handleAction,

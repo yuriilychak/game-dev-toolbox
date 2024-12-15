@@ -19,7 +19,7 @@ export default function useImageEdit(
   file: LibraryFile<LIBRARY_FILE_TYPE.IMAGE>,
   onClose: () => void,
 ) {
-  const { onFilesChanged } = useContext(PreviewContext);
+  const { onFilesChanged, onProcessing } = useContext(PreviewContext);
   const [state, dispatch] = useReducer(reducer, INITIAL_STATE);
   const canvasWrapperRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -97,8 +97,11 @@ export default function useImageEdit(
   );
 
   const handleChangeType = useCallback(
-    (value: IMAGE_TYPE) => handleDispatch(REDUCER_ACTION.CHANGE_TYPE, value),
-    [handleDispatch],
+    (value: IMAGE_TYPE) => {
+      onProcessing();
+      handleDispatch(REDUCER_ACTION.CHANGE_TYPE, value);
+    },
+    [handleDispatch, onProcessing],
   );
 
   const handleAction = useCallback(
@@ -108,7 +111,6 @@ export default function useImageEdit(
           onClose();
           break;
         case IMAGE_EDITOR_ACTION.SUBMIT:
-          console.log("SUBMIT");
           onFilesChanged([boundEditor.export()]);
           onClose();
           break;

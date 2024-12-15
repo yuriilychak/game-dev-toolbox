@@ -65,6 +65,7 @@ const App: FC = () => {
   const [libararyTree, setLibraryTree] = useState<LibraryFile[]>([]);
   const [libraryFocusedId, setLibraryFocusedId] = useState<string>(ROOT_ID);
   const [selectedFiles, setLibrarySelectedFiles] = useState<LibraryFile[]>([]);
+  const [isProcessing, setProcessing] = useState<boolean>(false);
 
   const onFilesChanged = useCallback((updatedFiles: LibraryFile[]) => {
     setLibrarySelectedFiles((prevFiles) =>
@@ -81,21 +82,32 @@ const App: FC = () => {
         return result;
       }, prevTree.slice()),
     );
+    setProcessing(false);
   }, []);
+
+  const onProcessing = useCallback(() => setProcessing(true), []);
 
   const libraryData = useMemo<LibraryContextData>(
     () => ({
       tree: libararyTree,
+      isProcessing,
+      onProcessing,
       focusedId: libraryFocusedId,
       onTreeChange: setLibraryTree,
       onFocusChanged: setLibraryFocusedId,
       onSelectionChanged: setLibrarySelectedFiles,
     }),
-    [libararyTree, libraryFocusedId, onFilesChanged],
+    [
+      libararyTree,
+      libraryFocusedId,
+      onFilesChanged,
+      onProcessing,
+      isProcessing,
+    ],
   );
   const previewData = useMemo<PreviewContextData>(
-    () => ({ selectedFiles, onFilesChanged }),
-    [selectedFiles, onFilesChanged],
+    () => ({ selectedFiles, onFilesChanged, onProcessing }),
+    [selectedFiles, onFilesChanged, onProcessing],
   );
 
   useEffect(() => {

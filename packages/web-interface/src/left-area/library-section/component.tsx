@@ -13,6 +13,7 @@ import { ActionButton } from "../../shared-components";
 import {
   ACTION_TO_LOCALE,
   LIBRARY_ACTION_ICONS,
+  LIBRAY_STYLES,
   ROOT_ACTIONS,
 } from "./constants";
 import { useLibraryView } from "./hooks";
@@ -22,6 +23,7 @@ const LibrarySection: FC = () => {
   const { t } = useTranslation();
   const {
     tree,
+    isProcessing,
     isAddModalOpen,
     focusedId,
     handleAction,
@@ -33,6 +35,8 @@ const LibrarySection: FC = () => {
     handleAddFiles,
     handleSelect,
   } = useLibraryView();
+
+  console.log(isProcessing, LIBRAY_STYLES.get(isProcessing));
 
   return (
     <Stack gap={0.5} padding={0.5}>
@@ -50,7 +54,7 @@ const LibrarySection: FC = () => {
           />
         ))}
       </Stack>
-      <Paper elevation={0}>
+      <Paper elevation={0} sx={LIBRAY_STYLES.get(isProcessing)}>
         <Tree
           data={tree}
           onFocus={handleFocus}

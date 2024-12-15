@@ -30,6 +30,8 @@ export type LibraryFile<T extends LIBRARY_FILE_TYPE = LIBRARY_FILE_TYPE> = {
 export type LibraryContextData = {
   tree: LibraryFile[];
   focusedId: string;
+  isProcessing: boolean;
+  onProcessing(): void;
   onTreeChange(middleware: (prevTree: LibraryFile[]) => LibraryFile[]): void;
   onFocusChanged(focusedId: string): void;
   onSelectionChanged(files: LibraryFile[]): void;
@@ -37,6 +39,7 @@ export type LibraryContextData = {
 
 export type PreviewContextData = {
   selectedFiles: LibraryFile[];
+  onProcessing(): void;
   onFilesChanged(files: LibraryFile[]): void;
 };
 
