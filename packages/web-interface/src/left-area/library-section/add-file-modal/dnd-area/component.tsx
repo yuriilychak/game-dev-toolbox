@@ -13,6 +13,7 @@ import { FileItem } from "./file-item";
 
 type DnDAreaProps = {
   type: LIBRARY_FILE_TYPE;
+  disabled?: boolean;
   onChange(nodes: LibraryFile[]): void;
   onRemove(id: string): void;
   nodes: LibraryFile[];
@@ -22,6 +23,7 @@ type DnDAreaProps = {
 const DnDArea: FC<DnDAreaProps> = ({
   type,
   nodes,
+  disabled = false,
   onChange,
   onRemove,
   onToggleLoading,
@@ -53,7 +55,10 @@ const DnDArea: FC<DnDAreaProps> = ({
     : "library.addModal.fileSection.drag";
 
   return (
-    <Stack gap={1}>
+    <Stack
+      gap={1}
+      sx={disabled ? { pointerEvents: "none", opacity: 0.7 } : undefined}
+    >
       <Stack
         {...getRootProps()}
         sx={{ cursor: "pointer" }}

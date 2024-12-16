@@ -2,6 +2,7 @@ import {
   IMAGE_TYPE,
   ImageTransformWorkerInput,
   ImageTransformWorkerResult,
+  LibraryImageData,
 } from "image-editor";
 import { LIBRARY_FILE_TYPE } from "../../../../enums";
 import { LibraryFile } from "../../../../types";
@@ -37,24 +38,20 @@ export function transformFiles(
   offset: number,
 ): ImageTransformWorkerInput[] {
   const fileCount: number = files.length;
-  const result: ImageTransformWorkerInput[] = new Array(fileCount);
+  const result: ImageTransformWorkerInput[] = [];
   let file: LibraryFile<LIBRARY_FILE_TYPE.IMAGE> = null;
   let i: number = 0;
+  let isFixBorder: boolean = offset === 1;
+  let data: LibraryImageData = null;
 
   for (i = 0; i < fileCount; ++i) {
     file = files[i];
+    data = file.data;
 
-    result[i] = {
-      id: file.id,
-      offset,
-      data: {
-        ...file.data,
-        type,
-        triangles: [],
-        polygons: [],
-        isFixBorder: false,
-      },
-    };
+    if (type !== data.type || data.isFixBorder !== isFixBorder) {
+      data = { ...data, type, triangles: [], polygons: [], isFixBorder: false };
+      result.push({ id: file.id, offset, data });
+    }
   }
 
   return result;

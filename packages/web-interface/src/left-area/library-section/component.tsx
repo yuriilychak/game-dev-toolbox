@@ -36,8 +36,6 @@ const LibrarySection: FC = () => {
     handleSelect,
   } = useLibraryView();
 
-  console.log(isProcessing, LIBRAY_STYLES.get(isProcessing));
-
   return (
     <Stack gap={0.5} padding={0.5}>
       <Stack direction="row">
@@ -54,23 +52,25 @@ const LibrarySection: FC = () => {
           />
         ))}
       </Stack>
-      <Paper elevation={0} sx={LIBRAY_STYLES.get(isProcessing)}>
-        <Tree
-          data={tree}
-          onFocus={handleFocus}
-          onRename={handleRename}
-          onSelect={handleSelect}
-          onMove={handleMove}
-          onDelete={handleDelete}
-          openByDefault={false}
-          width="100%"
-          height={500}
-          indent={12}
-          rowHeight={24}
-          overscanCount={1}
-        >
-          {LibraryItem}
-        </Tree>
+      <Paper elevation={0} sx={{ width: "100%", height: 500 }}>
+        <Box width="100%" height="100%" sx={LIBRAY_STYLES.get(isProcessing)}>
+          <Tree
+            data={tree}
+            onFocus={handleFocus}
+            onRename={handleRename}
+            onSelect={handleSelect}
+            onMove={handleMove}
+            onDelete={handleDelete}
+            openByDefault={false}
+            width="100%"
+            height={500}
+            indent={12}
+            rowHeight={24}
+            overscanCount={1}
+          >
+            {LibraryItem}
+          </Tree>
+        </Box>
       </Paper>
       <Modal
         open={isAddModalOpen}

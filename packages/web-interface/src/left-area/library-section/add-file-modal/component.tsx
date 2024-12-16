@@ -7,6 +7,7 @@ import Paper from "@mui/material/Paper";
 import TextField from "@mui/material/TextField";
 import InputLabel from "@mui/material/InputLabel";
 import FormControl from "@mui/material/FormControl";
+import LinearProgress from "@mui/material/LinearProgress";
 
 import { ADD_TYPES } from "../constants";
 import {
@@ -68,16 +69,14 @@ const AddFileModal: FC<AddFileModalProps> = ({ onCancel, onSubmit }) => {
     <Paper sx={{ width: 512 }}>
       <Stack gap={2} padding={2}>
         <Typography variant="h5">{t("library.addModal.title")}</Typography>
-        <Stack
-          gap={2}
-          sx={isLoading ? { pointerEvents: "none", opacity: 0.7 } : undefined}
-        >
+        <Stack gap={2}>
           <FormControl fullWidth>
             <InputLabel id="fileTypeLabel" required>
               {t("library.addModal.type.label")}
             </InputLabel>
             <SelectField
               id="fileTypeSelect"
+              disabled={isLoading}
               label={t("library.addModal.type.label")}
               required
               value={type}
@@ -85,6 +84,12 @@ const AddFileModal: FC<AddFileModalProps> = ({ onCancel, onSubmit }) => {
               options={selectOptions}
             />
           </FormControl>
+          {isLoading && (
+            <>
+              <Typography>{t("library.addModal.lader.label")}</Typography>
+              <LinearProgress color="inherit" />
+            </>
+          )}
           {type === LIBRARY_FILE_TYPE.TEXTURE_ATLAS && (
             <TextField
               size="small"
@@ -98,6 +103,7 @@ const AddFileModal: FC<AddFileModalProps> = ({ onCancel, onSubmit }) => {
           )}
           {type === LIBRARY_FILE_TYPE.IMAGE && (
             <DnDArea
+              disabled={isLoading}
               onToggleLoading={handleToggleLoading}
               onChange={handleChangeFiles}
               onRemove={handleRemoveFile}
@@ -107,6 +113,7 @@ const AddFileModal: FC<AddFileModalProps> = ({ onCancel, onSubmit }) => {
           )}
           <ButtonGroup
             width="100%"
+            disabled={isLoading}
             actions={buttonActions}
             dividerIndex={0}
             onClick={handleAction}

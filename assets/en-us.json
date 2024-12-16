@@ -3,6 +3,7 @@
   "root.description": "Toolbox for game development.",
   "library.title": "Library",
   "library.addModal.title": "Add file(s)",
+  "library.addModal.lader.label": "Processing files",
   "library.addModal.type.label": "Type",
   "library.addModal.name.label": "Name",
   "library.addModal.fileSection.drop": "Drop the files here ...",
