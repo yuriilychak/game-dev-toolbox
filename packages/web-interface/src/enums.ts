@@ -5,6 +5,12 @@ export enum LIBRARY_FILE_TYPE {
   TEXTURE_ATLAS = 3,
 }
 
+export enum SHARED_ACTION {
+  NONE,
+  SUBMIT,
+  CANCEL,
+}
+
 export enum LIBRARY_ACTION {
   NONE,
   RENAME,

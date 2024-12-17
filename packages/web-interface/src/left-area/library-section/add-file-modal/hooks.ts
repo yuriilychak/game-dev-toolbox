@@ -1,6 +1,16 @@
-import { ChangeEventHandler, useCallback, useState, useRef } from "react";
+import {
+  ChangeEventHandler,
+  useCallback,
+  useState,
+  useRef,
+  useMemo,
+} from "react";
 
-import { LIBRARY_ACTION, LIBRARY_FILE_TYPE } from "../../../enums";
+import {
+  ButtonGroupAction,
+  SHARED_MODAL_ACTIONS,
+} from "../../../shared-components";
+import { LIBRARY_FILE_TYPE, SHARED_ACTION } from "../../../enums";
 import { LibraryFile } from "../../../types";
 import { getSubmitDisabled } from "./helpers";
 import { createTextureAtlas } from "../helpers";
@@ -16,6 +26,16 @@ export function useAddFileModal(
   const isSubmitDisabled: boolean = isLoading || getSubmitDisabled(type, files);
 
   filesRef.current = files;
+
+  const buttonActions: ButtonGroupAction<SHARED_ACTION>[] = useMemo(
+    () =>
+      SHARED_MODAL_ACTIONS.map((action) =>
+        action.action === SHARED_ACTION.SUBMIT
+          ? { ...action, disabled: isSubmitDisabled }
+          : action,
+      ),
+    [isSubmitDisabled],
+  );
 
   const handleChangeFiles = useCallback(
     (nodes: LibraryFile[]) =>
@@ -54,12 +74,12 @@ export function useAddFileModal(
   );
 
   const handleAction = useCallback(
-    (action: LIBRARY_ACTION) => {
+    (action: SHARED_ACTION) => {
       switch (action) {
-        case LIBRARY_ACTION.SUBMIT:
+        case SHARED_ACTION.SUBMIT:
           onSubmit(filesRef.current);
           break;
-        case LIBRARY_ACTION.CANCEL:
+        case SHARED_ACTION.CANCEL:
           onCancel();
           break;
         default:
@@ -69,10 +89,10 @@ export function useAddFileModal(
   );
 
   return {
-    isLoading,
-    isSubmitDisabled,
+    buttonActions,
     files,
     type,
+    isLoading,
     handleChangeFiles,
     handleAddTypeChange,
     handleNameChange,

@@ -1,4 +1,4 @@
-import { useCallback, useContext, useState } from "react";
+import { useCallback, useContext } from "react";
 import {
   DeleteHandler,
   MoveHandler,
@@ -16,6 +16,7 @@ import {
   renameItem,
 } from "./helpers";
 import { LibraryFile } from "../../types";
+import { useModal } from "../../hooks";
 
 export function useLibraryView() {
   const {
@@ -26,13 +27,17 @@ export function useLibraryView() {
     onSelectionChanged,
     isProcessing,
   } = useContext(LibraryContext);
-  const [isAddModalOpen, setAddModalOpen] = useState<boolean>(false);
+  const {
+    isOpen: isAddModalOpen,
+    handleOpen: handleAddModalOpen,
+    handleClose: handleAddModalClose,
+  } = useModal();
 
   const handleAction = useCallback(
     (focusedId: string, action: LIBRARY_ACTION) => {
       switch (action) {
         case LIBRARY_ACTION.ADD_FILE:
-          setAddModalOpen(true);
+          handleAddModalOpen();
           break;
         case LIBRARY_ACTION.ADD_FOLDER:
           onTreeChange(
@@ -41,7 +46,7 @@ export function useLibraryView() {
           break;
       }
     },
-    [onTreeChange],
+    [onTreeChange, handleAddModalOpen],
   );
 
   const handleRename: RenameHandler<LibraryFile> = useCallback(
@@ -73,11 +78,9 @@ export function useLibraryView() {
     [onSelectionChanged],
   );
 
-  const handleCloseAddModal = useCallback(() => setAddModalOpen(false), []);
-
   const handleAddFiles = (items: LibraryFile[]) => {
     onTreeChange((prevTree) => insertItems(prevTree, items, focusedId).tree);
-    setAddModalOpen(false);
+    handleAddModalClose();
   };
 
   return {
@@ -91,7 +94,7 @@ export function useLibraryView() {
     handleMove,
     handleRename,
     handleSelect,
-    handleCloseAddModal,
+    handleAddModalClose,
     handleAddFiles,
   };
 }

@@ -1,4 +1,6 @@
 {
+  "shared.action.cancel": "Cancel",
+  "shared.action.submit": "Submit",
   "root.title": "GameDev toolbox",
   "root.description": "Toolbox for game development.",
   "library.title": "Library",

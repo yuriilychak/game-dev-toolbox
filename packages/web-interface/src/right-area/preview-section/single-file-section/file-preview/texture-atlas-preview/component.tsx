@@ -11,8 +11,8 @@ const TextureAtlasPreview: SingleFileComponent<
     messages={[
       `ImageCount: ${file.data.images.length}`,
       `Generated: ${file.data.isGenerated}`,
-      `Width: ${file.data.resolution.width}px`,
-      `Height: ${file.data.resolution.height}px`,
+      `Width: ${file.data.width}px`,
+      `Height: ${file.data.height}px`,
     ]}
   />
 );

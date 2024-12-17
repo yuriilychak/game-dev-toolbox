@@ -6,7 +6,6 @@ import Stack from "@mui/material/Stack";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Paper from "@mui/material/Paper";
-import Modal from "@mui/material/Modal";
 
 import { LibraryItem } from "./library-item";
 import { ActionButton } from "../../shared-components";
@@ -31,7 +30,7 @@ const LibrarySection: FC = () => {
     handleFocus,
     handleMove,
     handleRename,
-    handleCloseAddModal,
+    handleAddModalClose,
     handleAddFiles,
     handleSelect,
   } = useLibraryView();
@@ -72,15 +71,12 @@ const LibrarySection: FC = () => {
           </Tree>
         </Box>
       </Paper>
-      <Modal
-        open={isAddModalOpen}
-        sx={{ display: "flex", alignItems: "center", justifyContent: "center" }}
-      >
+      {isAddModalOpen && (
         <AddFileModal
-          onCancel={handleCloseAddModal}
+          onCancel={handleAddModalClose}
           onSubmit={handleAddFiles}
         />
-      </Modal>
+      )}
     </Stack>
   );
 };

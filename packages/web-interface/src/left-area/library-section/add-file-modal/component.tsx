@@ -3,7 +3,6 @@ import { useTranslation } from "react-i18next";
 
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
-import Paper from "@mui/material/Paper";
 import TextField from "@mui/material/TextField";
 import InputLabel from "@mui/material/InputLabel";
 import FormControl from "@mui/material/FormControl";
@@ -14,16 +13,11 @@ import {
   LIBRARY_ITEM_ICONS,
   LIBRARY_ITEM_TYPE_LOCALES,
 } from "../../../constants";
-import { LIBRARY_ACTION, LIBRARY_FILE_TYPE } from "../../../enums";
+import { LIBRARY_FILE_TYPE } from "../../../enums";
 import { FieldOption, LibraryFile } from "../../../types";
 import { DnDArea } from "./dnd-area";
 import { useAddFileModal } from "./hooks";
-import {
-  ButtonGroup,
-  ButtonGroupAction,
-  SelectField,
-} from "../../../shared-components";
-import { FOOTER_ACTIONS } from "./constants";
+import { ActionModal, SelectField } from "../../../shared-components";
 
 type AddFileModalProps = {
   onSubmit(items: LibraryFile[]): void;
@@ -33,10 +27,10 @@ type AddFileModalProps = {
 const AddFileModal: FC<AddFileModalProps> = ({ onCancel, onSubmit }) => {
   const { t } = useTranslation();
   const {
+    buttonActions,
     type,
     files,
     isLoading,
-    isSubmitDisabled,
     handleAddTypeChange,
     handleChangeFiles,
     handleNameChange,
@@ -55,72 +49,59 @@ const AddFileModal: FC<AddFileModalProps> = ({ onCancel, onSubmit }) => {
     [t],
   );
 
-  const buttonActions: ButtonGroupAction<LIBRARY_ACTION>[] = useMemo(
-    () =>
-      FOOTER_ACTIONS.map((action) =>
-        action.action === LIBRARY_ACTION.SUBMIT
-          ? { ...action, disabled: isSubmitDisabled }
-          : action,
-      ),
-    [isSubmitDisabled],
-  );
-
   return (
-    <Paper sx={{ width: 512 }}>
-      <Stack gap={2} padding={2}>
-        <Typography variant="h5">{t("library.addModal.title")}</Typography>
-        <Stack gap={2}>
-          <FormControl fullWidth>
-            <InputLabel id="fileTypeLabel" required>
-              {t("library.addModal.type.label")}
-            </InputLabel>
-            <SelectField
-              id="fileTypeSelect"
-              disabled={isLoading}
-              label={t("library.addModal.type.label")}
-              required
-              value={type}
-              onChange={handleAddTypeChange}
-              options={selectOptions}
-            />
-          </FormControl>
-          {isLoading && (
-            <>
-              <Typography>{t("library.addModal.lader.label")}</Typography>
-              <LinearProgress color="inherit" />
-            </>
-          )}
-          {type === LIBRARY_FILE_TYPE.TEXTURE_ATLAS && (
-            <TextField
-              size="small"
-              required
-              id="file-name"
-              label={t("library.addModal.name.label")}
-              value={files[0].label}
-              onChange={handleNameChange}
-              slotProps={{ htmlInput: { maxLength: 32 } }}
-            />
-          )}
-          {type === LIBRARY_FILE_TYPE.IMAGE && (
-            <DnDArea
-              disabled={isLoading}
-              onToggleLoading={handleToggleLoading}
-              onChange={handleChangeFiles}
-              onRemove={handleRemoveFile}
-              type={type}
-              nodes={files}
-            />
-          )}
-          <ButtonGroup
-            width="100%"
+    <ActionModal
+      width={512}
+      open
+      title={t("library.addModal.title")}
+      disabled={isLoading}
+      actions={buttonActions}
+      onAction={handleAction}
+    >
+      <Stack gap={2}>
+        <FormControl fullWidth>
+          <InputLabel id="fileTypeLabel" required>
+            {t("library.addModal.type.label")}
+          </InputLabel>
+          <SelectField
+            id="fileTypeSelect"
             disabled={isLoading}
-            actions={buttonActions}
-            dividerIndex={0}
-            onClick={handleAction}
+            label={t("library.addModal.type.label")}
+            required
+            value={type}
+            onChange={handleAddTypeChange}
+            options={selectOptions}
           />
-        </Stack>
+        </FormControl>
+        {isLoading && (
+          <>
+            <Typography>{t("library.addModal.lader.label")}</Typography>
+            <LinearProgress color="inherit" />
+          </>
+        )}
+        {type === LIBRARY_FILE_TYPE.TEXTURE_ATLAS && (
+          <TextField
+            size="small"
+            required
+            id="file-name"
+            label={t("library.addModal.name.label")}
+            value={files[0].label}
+            onChange={handleNameChange}
+            slotProps={{ htmlInput: { maxLength: 32 } }}
+          />
+        )}
+        {type === LIBRARY_FILE_TYPE.IMAGE && (
+          <DnDArea
+            disabled={isLoading}
+            onToggleLoading={handleToggleLoading}
+            onChange={handleChangeFiles}
+            onRemove={handleRemoveFile}
+            type={type}
+            nodes={files}
+          />
+        )}
       </Stack>
-    </Paper>
+    </ActionModal>
   );
 };
 

@@ -1,5 +1,6 @@
 import { IMAGE_TYPE } from "image-editor";
 
+import { SxProps } from "@mui/material";
 import ImageIcon from "@mui/icons-material/Image";
 import FolderIcon from "@mui/icons-material/Folder";
 import TextureIcon from "@mui/icons-material/Texture";
@@ -39,7 +40,7 @@ export const IMAGE_TYPE_ICONS: IconMap<IMAGE_TYPE> = new Map([
   [IMAGE_TYPE.MESH, Grid4x4Icon],
 ]);
 
-export const GLOBAL_STYLES = {
+export const GLOBAL_STYLES: Record<string, SxProps> = {
   "*": {
     scrollbarColor: "white rgba(0, 0, 0, 0)",
     scrollbarWidth: "thin",
