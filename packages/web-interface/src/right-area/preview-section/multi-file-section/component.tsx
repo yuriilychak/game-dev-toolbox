@@ -1,6 +1,7 @@
 import { memo } from "react";
 import type { FilesComponent } from "../types";
-import { flattenFiles, getFilesType } from "./helpers";
+import { getFilesType } from "./helpers";
+import { flattenFiles } from "../helpers";
 import { LIBRARY_FILE_TYPE } from "../../../enums";
 import { ImageSection } from "./image-section";
 
