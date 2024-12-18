@@ -18,10 +18,10 @@ import FilledInput from "@mui/material/FilledInput";
 
 import { EXPAND_ICONS, ITEM_ACTIONS } from "./constants";
 import { LibraryFile } from "../../../types";
-import { ActionButton } from "../../../shared-components";
+import { ActionButton } from "../../action-button";
 import { LIBRARY_ACTION } from "../../../enums";
-import { ACTION_TO_LOCALE, LIBRARY_ACTION_ICONS } from "../constants";
 import { LIBRARY_ITEM_ICONS } from "../../../constants";
+import { ACTION_TO_LOCALE, LIBRARY_ACTION_ICONS } from "../constants";
 
 const LibraryItem: FC<NodeRendererProps<LibraryFile>> = ({
   node,

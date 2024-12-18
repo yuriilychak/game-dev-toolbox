@@ -1,20 +1,17 @@
 import { FC, memo } from "react";
 import { useTranslation } from "react-i18next";
-import { Tree } from "react-arborist";
 
 import Stack from "@mui/material/Stack";
-import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
-import Paper from "@mui/material/Paper";
+import Box from "@mui/material/Box";
 
-import { LibraryItem } from "./library-item";
-import { ActionButton } from "../../shared-components";
 import {
-  ACTION_TO_LOCALE,
+  ActionButton,
+  LibraryTree,
   LIBRARY_ACTION_ICONS,
-  LIBRAY_STYLES,
-  ROOT_ACTIONS,
-} from "./constants";
+  ACTION_TO_LOCALE,
+} from "../../shared-components";
+import { ROOT_ACTIONS } from "./constants";
 import { useLibraryView } from "./hooks";
 import { AddFileModal } from "./add-file-modal";
 
@@ -51,26 +48,15 @@ const LibrarySection: FC = () => {
           />
         ))}
       </Stack>
-      <Paper elevation={0} sx={{ width: "100%", height: 500 }}>
-        <Box width="100%" height="100%" sx={LIBRAY_STYLES.get(isProcessing)}>
-          <Tree
-            data={tree}
-            onFocus={handleFocus}
-            onRename={handleRename}
-            onSelect={handleSelect}
-            onMove={handleMove}
-            onDelete={handleDelete}
-            openByDefault={false}
-            width="100%"
-            height={500}
-            indent={12}
-            rowHeight={24}
-            overscanCount={1}
-          >
-            {LibraryItem}
-          </Tree>
-        </Box>
-      </Paper>
+      <LibraryTree
+        disabled={isProcessing}
+        tree={tree}
+        onFocus={handleFocus}
+        onRename={handleRename}
+        onSelect={handleSelect}
+        onMove={handleMove}
+        onDelete={handleDelete}
+      />
       {isAddModalOpen && (
         <AddFileModal
           onCancel={handleAddModalClose}

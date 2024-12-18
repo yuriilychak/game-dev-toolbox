@@ -1,10 +1,5 @@
 import { useCallback, useContext } from "react";
-import {
-  DeleteHandler,
-  MoveHandler,
-  NodeApi,
-  RenameHandler,
-} from "react-arborist";
+import { DeleteHandler, MoveHandler, RenameHandler } from "react-arborist";
 
 import { LibraryContext } from "../../contexts";
 import { LIBRARY_ACTION } from "../../enums";
@@ -66,18 +61,6 @@ export function useLibraryView() {
     [onTreeChange],
   );
 
-  const handleFocus = useCallback(
-    (node: NodeApi<LibraryFile>) =>
-      onFocusChanged(node.isLeaf ? node.parent.id : node.id),
-    [onFocusChanged],
-  );
-
-  const handleSelect = useCallback(
-    (nodes: NodeApi<LibraryFile>[]) =>
-      onSelectionChanged(nodes.map(({ data }) => data)),
-    [onSelectionChanged],
-  );
-
   const handleAddFiles = (items: LibraryFile[]) => {
     onTreeChange((prevTree) => insertItems(prevTree, items, focusedId).tree);
     handleAddModalClose();
@@ -90,10 +73,10 @@ export function useLibraryView() {
     focusedId,
     handleAction,
     handleDelete,
-    handleFocus,
+    handleFocus: onFocusChanged,
     handleMove,
     handleRename,
-    handleSelect,
+    handleSelect: onSelectionChanged,
     handleAddModalClose,
     handleAddFiles,
   };
