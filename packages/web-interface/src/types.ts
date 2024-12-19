@@ -38,6 +38,7 @@ export type LibraryContextData = {
 };
 
 export type PreviewContextData = {
+  tree: LibraryFile[];
   selectedFiles: LibraryFile[];
   onProcessing(): void;
   onFilesChanged(files: LibraryFile[]): void;

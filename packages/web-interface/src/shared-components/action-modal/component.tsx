@@ -20,7 +20,7 @@ type ActionModalProps<T extends number> = {
   children: ReactNode;
   fotterContent?: ReactNode;
   disabled?: boolean;
-  actions?: ButtonGroupAction<T>[];
+  actions: ButtonGroupAction<T>[];
   onAction(action: T): void;
 };
 

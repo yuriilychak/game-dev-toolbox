@@ -32,6 +32,7 @@ type LibraryTreeProps = {
 const LibraryTree: FC<LibraryTreeProps> = ({
   disabled = false,
   tree,
+  disableEdit,
   onRename,
   onMove,
   onDelete,
@@ -40,12 +41,13 @@ const LibraryTree: FC<LibraryTreeProps> = ({
 }) => {
   const handleFocus = useCallback(
     (node: NodeApi<LibraryFile>) =>
-      onFocus(node.isLeaf ? node.parent.id : node.id),
+      onFocus && onFocus(node.isLeaf ? node.parent.id : node.id),
     [onFocus],
   );
 
   const handleSelect = useCallback(
-    (nodes: NodeApi<LibraryFile>[]) => onSelect(nodes.map(({ data }) => data)),
+    (nodes: NodeApi<LibraryFile>[]) =>
+      onSelect && onSelect(nodes.map(({ data }) => data)),
     [onSelect],
   );
 
@@ -54,6 +56,7 @@ const LibraryTree: FC<LibraryTreeProps> = ({
       <Box width="100%" height="100%" sx={LIBRAY_STYLES.get(disabled)}>
         <Tree
           data={tree}
+          disableEdit={disableEdit}
           onFocus={handleFocus}
           onRename={onRename}
           onSelect={handleSelect}

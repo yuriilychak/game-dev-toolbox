@@ -29,6 +29,7 @@ const LibraryItem: FC<NodeRendererProps<LibraryFile>> = ({
   style,
   dragHandle,
 }) => {
+  const { disableEdit = false } = tree.props;
   const { t } = useTranslation();
   const [newLabel, setNewLabel] = useState("");
   const Icon = useMemo(
@@ -68,9 +69,13 @@ const LibraryItem: FC<NodeRendererProps<LibraryFile>> = ({
   }, [node.isLeaf]);
 
   const handleDoubleClick = useCallback(() => {
+    if (disableEdit) {
+      return;
+    }
+
     node.focus();
     node.edit();
-  }, [node.isLeaf]);
+  }, [node.isLeaf, disableEdit]);
 
   const handleAction = useCallback((id: string, action: LIBRARY_ACTION) => {
     switch (action) {
@@ -143,17 +148,18 @@ const LibraryItem: FC<NodeRendererProps<LibraryFile>> = ({
         </Typography>
       )}
       <Box flex={1} />
-      {currentActions.map((action) => (
-        <ActionButton
-          key={`item_action_${action}`}
-          title={t(ACTION_TO_LOCALE.get(action))}
-          Icon={LIBRARY_ACTION_ICONS.get(action)}
-          action={action}
-          id={node.data.id}
-          onClick={handleAction}
-          disabled={action === LIBRARY_ACTION.SUBMIT && isSubmitDisabled}
-        />
-      ))}
+      {!disableEdit &&
+        currentActions.map((action) => (
+          <ActionButton
+            key={`item_action_${action}`}
+            title={t(ACTION_TO_LOCALE.get(action))}
+            Icon={LIBRARY_ACTION_ICONS.get(action)}
+            action={action}
+            id={node.data.id}
+            onClick={handleAction}
+            disabled={action === LIBRARY_ACTION.SUBMIT && isSubmitDisabled}
+          />
+        ))}
     </Stack>
   );
 };

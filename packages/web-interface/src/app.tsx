@@ -106,8 +106,8 @@ const App: FC = () => {
     ],
   );
   const previewData = useMemo<PreviewContextData>(
-    () => ({ selectedFiles, onFilesChanged, onProcessing }),
-    [selectedFiles, onFilesChanged, onProcessing],
+    () => ({ selectedFiles, onFilesChanged, onProcessing, tree: libararyTree }),
+    [selectedFiles, onFilesChanged, onProcessing, libararyTree],
   );
 
   useEffect(() => {
