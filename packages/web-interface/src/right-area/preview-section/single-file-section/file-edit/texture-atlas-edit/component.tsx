@@ -1,4 +1,4 @@
-import { useContext, useMemo } from "react";
+import { useCallback, useContext, useMemo, useState } from "react";
 
 import Button from "@mui/material/Button";
 
@@ -19,6 +19,17 @@ const TextureAtlasEdit: SingleFileComponent<
   const { tree } = useContext(PreviewContext);
   const { isOpen, handleClose, handleOpen } = useModal();
   const filteredTree = useMemo(() => filterTree(tree), [tree]);
+  const [checkedIds, setCheckedIds] = useState(file.data.images);
+
+  const handleCheck = useCallback(
+    (value: boolean, idToUpdate: string) =>
+      setCheckedIds((prevCheckedIds) =>
+        value
+          ? [...prevCheckedIds, idToUpdate]
+          : prevCheckedIds.filter((id) => id !== idToUpdate),
+      ),
+    [],
+  );
 
   return (
     <>
@@ -32,7 +43,13 @@ const TextureAtlasEdit: SingleFileComponent<
         title={"Edit atlas"}
         onAction={handleClose}
       >
-        <LibraryTree tree={filteredTree} disableEdit />
+        <LibraryTree
+          tree={filteredTree}
+          disableEdit
+          hasCheckboxes
+          onCheck={handleCheck}
+          checkedIds={checkedIds}
+        />
       </ActionModal>
     </>
   );

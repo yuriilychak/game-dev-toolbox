@@ -7,6 +7,7 @@ import {
   useState,
   useRef,
   KeyboardEventHandler,
+  MouseEventHandler,
 } from "react";
 import { NodeRendererProps } from "react-arborist";
 import { useTranslation } from "react-i18next";
@@ -15,6 +16,7 @@ import Stack from "@mui/material/Stack";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import FilledInput from "@mui/material/FilledInput";
+import Checkbox from "@mui/material/Checkbox";
 
 import { EXPAND_ICONS, ITEM_ACTIONS } from "./constants";
 import { LibraryFile } from "../../../types";
@@ -29,7 +31,18 @@ const LibraryItem: FC<NodeRendererProps<LibraryFile>> = ({
   style,
   dragHandle,
 }) => {
-  const { disableEdit = false } = tree.props;
+  const {
+    disableEdit = false,
+    //@ts-ignore
+    hasCheckboxes,
+    //@ts-ignore
+    checkedIds,
+    //@ts-ignore
+    onCheck,
+  } = tree.props;
+
+  const isChecked = checkedIds.includes(node.data.id);
+
   const { t } = useTranslation();
   const [newLabel, setNewLabel] = useState("");
   const Icon = useMemo(
@@ -62,7 +75,7 @@ const LibraryItem: FC<NodeRendererProps<LibraryFile>> = ({
     }
   }, [isReset]);
 
-  const handleClick = useCallback(() => {
+  const handleClick: MouseEventHandler<HTMLDivElement> = useCallback(() => {
     if (!node.isLeaf) {
       node.toggle();
     }
@@ -76,6 +89,15 @@ const LibraryItem: FC<NodeRendererProps<LibraryFile>> = ({
     node.focus();
     node.edit();
   }, [node.isLeaf, disableEdit]);
+
+  const handleSelect = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      event.stopPropagation();
+      event.preventDefault();
+      onCheck(event.target.checked, node.data.id);
+    },
+    [onCheck, node.data.id],
+  );
 
   const handleAction = useCallback((id: string, action: LIBRARY_ACTION) => {
     switch (action) {
@@ -111,6 +133,14 @@ const LibraryItem: FC<NodeRendererProps<LibraryFile>> = ({
     [],
   );
 
+  const handleCheckClick: MouseEventHandler<HTMLButtonElement> = useCallback(
+    (event) => {
+      event.stopPropagation();
+      event.preventDefault();
+    },
+    [],
+  );
+
   return (
     <Stack
       key={node.data.id}
@@ -121,12 +151,20 @@ const LibraryItem: FC<NodeRendererProps<LibraryFile>> = ({
       onDoubleClick={handleDoubleClick}
       style={style}
       sx={{
+        maxHeight: 24,
         cursor: "pointer",
         backgroundColor: node.isFocused || node.isSelected ? "#555" : "unset",
         "&:hover": { backgroundColor: "#666" },
       }}
     >
-      <Stack direction="row" gap={0.5} alignItems="center">
+      <Stack direction="row" gap={0.5} alignItems="center" maxHeight={24}>
+        {hasCheckboxes && (
+          <Checkbox
+            checked={isChecked}
+            onChange={handleSelect}
+            onClick={handleCheckClick}
+          />
+        )}
         {!node.isLeaf && <ExpandIcon fontSize="small" />}
         <Icon fontSize="small" />
       </Stack>
