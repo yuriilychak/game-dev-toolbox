@@ -20,3 +20,9 @@ export enum LIBRARY_ACTION {
   SUBMIT,
   CANCEL,
 }
+
+export enum SELECTION_STATE {
+  UNSELECTED = 0,
+  SELECTED_PARTIALY = 1,
+  SELECTED = 2,
+}

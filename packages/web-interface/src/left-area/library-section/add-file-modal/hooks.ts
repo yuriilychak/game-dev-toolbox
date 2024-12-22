@@ -20,7 +20,7 @@ export function useAddFileModal(
   onCancel: () => void,
 ) {
   const [files, setFiles] = useState<LibraryFile[]>([]);
-  const [type, setType] = useState<LIBRARY_FILE_TYPE>(LIBRARY_FILE_TYPE.NONE);
+  const [type, setType] = useState<LIBRARY_FILE_TYPE>(LIBRARY_FILE_TYPE.IMAGE);
   const [isLoading, setLoading] = useState<boolean>(false);
   const filesRef = useRef(files);
   const isSubmitDisabled: boolean = isLoading || getSubmitDisabled(type, files);

@@ -19,7 +19,7 @@ import { LIBRAY_STYLES } from "./constants";
 type LibraryTreeProps = {
   disabled?: boolean;
   tree: LibraryFile[];
-  onCheck?: (value: boolean, id: string) => void;
+  onCheck?: (ids: string[], isChecked: boolean) => void;
   onRename?: RenameHandler<LibraryFile>;
   onMove?: MoveHandler<LibraryFile>;
   onDelete?: DeleteHandler<LibraryFile>;

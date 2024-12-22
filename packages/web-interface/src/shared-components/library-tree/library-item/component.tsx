@@ -21,9 +21,14 @@ import Checkbox from "@mui/material/Checkbox";
 import { EXPAND_ICONS, ITEM_ACTIONS } from "./constants";
 import { LibraryFile } from "../../../types";
 import { ActionButton } from "../../action-button";
-import { LIBRARY_ACTION } from "../../../enums";
+import {
+  LIBRARY_ACTION,
+  LIBRARY_FILE_TYPE,
+  SELECTION_STATE,
+} from "../../../enums";
 import { LIBRARY_ITEM_ICONS } from "../../../constants";
 import { ACTION_TO_LOCALE, LIBRARY_ACTION_ICONS } from "../constants";
+import { checkSelection, getChildIds } from "./helpers";
 
 const LibraryItem: FC<NodeRendererProps<LibraryFile>> = ({
   node,
@@ -41,7 +46,10 @@ const LibraryItem: FC<NodeRendererProps<LibraryFile>> = ({
     onCheck,
   } = tree.props;
 
-  const isChecked = checkedIds.includes(node.data.id);
+  const selectionState: SELECTION_STATE = checkSelection(node.data, checkedIds);
+  const isChecked = selectionState === SELECTION_STATE.SELECTED;
+  const isIndeterminate = selectionState === SELECTION_STATE.SELECTED_PARTIALY;
+  const isFolder = node.data.type === LIBRARY_FILE_TYPE.FOLDER;
 
   const { t } = useTranslation();
   const [newLabel, setNewLabel] = useState("");
@@ -57,6 +65,7 @@ const LibraryItem: FC<NodeRendererProps<LibraryFile>> = ({
     () => ITEM_ACTIONS.get(node.isEditing),
     [node.isEditing],
   );
+
   const labelRef = useRef("");
   const isReset: boolean = !node.isFocused && node.isEditing;
   const isSubmitDisabled: boolean = node.isEditing && newLabel.length === 0;
@@ -89,15 +98,6 @@ const LibraryItem: FC<NodeRendererProps<LibraryFile>> = ({
     node.focus();
     node.edit();
   }, [node.isLeaf, disableEdit]);
-
-  const handleSelect = useCallback(
-    (event: React.ChangeEvent<HTMLInputElement>) => {
-      event.stopPropagation();
-      event.preventDefault();
-      onCheck(event.target.checked, node.data.id);
-    },
-    [onCheck, node.data.id],
-  );
 
   const handleAction = useCallback((id: string, action: LIBRARY_ACTION) => {
     switch (action) {
@@ -137,8 +137,13 @@ const LibraryItem: FC<NodeRendererProps<LibraryFile>> = ({
     (event) => {
       event.stopPropagation();
       event.preventDefault();
+
+      const updatedIds = isFolder
+        ? getChildIds(node.data.children)
+        : [node.data.id];
+      onCheck(updatedIds, !isChecked);
     },
-    [],
+    [onCheck, node.data.id, isFolder, node.data.children, isChecked],
   );
 
   return (
@@ -161,7 +166,7 @@ const LibraryItem: FC<NodeRendererProps<LibraryFile>> = ({
         {hasCheckboxes && (
           <Checkbox
             checked={isChecked}
-            onChange={handleSelect}
+            indeterminate={isIndeterminate}
             onClick={handleCheckClick}
           />
         )}
