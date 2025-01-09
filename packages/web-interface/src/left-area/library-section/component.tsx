@@ -9,7 +9,7 @@ import {
   ActionButton,
   LibraryTree,
   LIBRARY_ACTION_ICONS,
-  ACTION_TO_LOCALE,
+  ACTION_TO_LOCALE
 } from "../../shared-components";
 import { ROOT_ACTIONS } from "./constants";
 import { useLibraryView } from "./hooks";
@@ -29,7 +29,7 @@ const LibrarySection: FC = () => {
     handleRename,
     handleAddModalClose,
     handleAddFiles,
-    handleSelect,
+    handleSelect
   } = useLibraryView();
 
   return (

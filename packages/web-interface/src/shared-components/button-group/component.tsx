@@ -22,12 +22,12 @@ function ButtonGroup<T extends number>({
   dividerIndex = -1,
   flex,
   width,
-  disabled = false,
+  disabled = false
 }: ButtonGroupProps<T>) {
   const { t } = useTranslation();
   const handleClick = useCallback<MouseEventHandler<HTMLButtonElement>>(
     (event) => onClick(parseInt((event.target as HTMLButtonElement).id) as T),
-    [onClick],
+    [onClick]
   );
 
   let totalActions = actions;
@@ -54,7 +54,7 @@ function ButtonGroup<T extends number>({
           >
             {t(locale)}
           </Button>
-        ),
+        )
       )}
     </Stack>
   );

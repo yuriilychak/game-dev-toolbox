@@ -3,7 +3,7 @@ import { LibraryFile } from "../../types";
 
 export function flattenFiles(
   files: LibraryFile[],
-  result: LibraryFile[] = [],
+  result: LibraryFile[] = []
 ): LibraryFile[] {
   const fileCount: number = files.length;
   let file: LibraryFile = null;

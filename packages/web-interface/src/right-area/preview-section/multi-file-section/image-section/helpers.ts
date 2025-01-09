@@ -2,13 +2,13 @@ import {
   IMAGE_TYPE,
   ImageTransformWorkerInput,
   ImageTransformWorkerResult,
-  LibraryImageData,
+  LibraryImageData
 } from "image-editor";
 import { LIBRARY_FILE_TYPE } from "../../../../enums";
 import { LibraryFile } from "../../../../types";
 
 export function getImageType(
-  files: LibraryFile<LIBRARY_FILE_TYPE.IMAGE>[],
+  files: LibraryFile<LIBRARY_FILE_TYPE.IMAGE>[]
 ): IMAGE_TYPE {
   const fileCount: number = files.length;
 
@@ -35,13 +35,13 @@ export function getImageType(
 export function transformFiles(
   files: LibraryFile<LIBRARY_FILE_TYPE.IMAGE>[],
   type: IMAGE_TYPE,
-  offset: number,
+  offset: number
 ): ImageTransformWorkerInput[] {
   const fileCount: number = files.length;
   const result: ImageTransformWorkerInput[] = [];
   let file: LibraryFile<LIBRARY_FILE_TYPE.IMAGE> = null;
   let i: number = 0;
-  let isFixBorder: boolean = offset === 1;
+  const isFixBorder: boolean = offset === 1;
   let data: LibraryImageData = null;
 
   for (i = 0; i < fileCount; ++i) {
@@ -59,7 +59,7 @@ export function transformFiles(
 
 export function updateFiles(
   outputs: ImageTransformWorkerResult[],
-  files: LibraryFile<LIBRARY_FILE_TYPE.IMAGE>[],
+  files: LibraryFile<LIBRARY_FILE_TYPE.IMAGE>[]
 ): LibraryFile<LIBRARY_FILE_TYPE.IMAGE>[] {
   const outputSize: number = outputs.length;
   const fileCount: number = files.length;

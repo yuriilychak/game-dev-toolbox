@@ -8,7 +8,7 @@ type StatisticsContainerProps = { children?: ReactNode; messages: string[] };
 
 const StatisticsContainer: FC<StatisticsContainerProps> = ({
   children,
-  messages,
+  messages
 }) => (
   <Paper elevation={0}>
     {children}

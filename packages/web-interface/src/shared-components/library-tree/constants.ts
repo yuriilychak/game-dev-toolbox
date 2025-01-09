@@ -16,7 +16,7 @@ export const LIBRARY_ACTION_ICONS: IconMap<LIBRARY_ACTION> = new Map([
   [LIBRARY_ACTION.DELETE, DeleteIcon],
   [LIBRARY_ACTION.RENAME, EditIcon],
   [LIBRARY_ACTION.SUBMIT, CheckIcon],
-  [LIBRARY_ACTION.CANCEL, CloseIcon],
+  [LIBRARY_ACTION.CANCEL, CloseIcon]
 ]);
 
 export const ACTION_TO_LOCALE: Map<LIBRARY_ACTION, string> = new Map([
@@ -25,10 +25,10 @@ export const ACTION_TO_LOCALE: Map<LIBRARY_ACTION, string> = new Map([
   [LIBRARY_ACTION.RENAME, "library.action.rename"],
   [LIBRARY_ACTION.DELETE, "library.action.delete"],
   [LIBRARY_ACTION.SUBMIT, "library.action.submit"],
-  [LIBRARY_ACTION.CANCEL, "library.action.cancel"],
+  [LIBRARY_ACTION.CANCEL, "library.action.cancel"]
 ]);
 
 export const LIBRAY_STYLES: Map<boolean, SxProps> = new Map([
   [true, { pointerEvents: "none", opacity: 0.7 }],
-  [false, { pointerEvents: "unset", opacity: 1 }],
+  [false, { pointerEvents: "unset", opacity: 1 }]
 ]);

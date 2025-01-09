@@ -1,10 +1,10 @@
-import { WORKER_TYPE } from "./enums";
-import getWorker from "./workers";
+import { WORKER_TYPE } from './enums';
+import getWorker from './workers';
 
 export default async function singleThread<InputType, OutputType>(
   type: WORKER_TYPE,
   input: InputType,
-  transferable: Transferable[] = [],
+  transferable: Transferable[] = []
 ): Promise<OutputType> {
   try {
     const result = await new Promise<MessageEvent<OutputType>>(
@@ -15,7 +15,7 @@ export default async function singleThread<InputType, OutputType>(
         worker.onerror = reject;
 
         worker.postMessage(input, transferable);
-      },
+      }
     );
 
     return result.data;

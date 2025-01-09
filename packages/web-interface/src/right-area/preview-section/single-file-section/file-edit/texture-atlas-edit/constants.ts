@@ -4,5 +4,5 @@ export const NEST_CONFIG = {
   rotations: 4,
   populationSize: 10,
   mutationRate: 10,
-  useHoles: false,
+  useHoles: false
 };

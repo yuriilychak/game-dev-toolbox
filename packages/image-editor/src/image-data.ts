@@ -3,19 +3,27 @@ import BoundRect from "./geom/bound-rect";
 import { intAbs, intSign } from "./math";
 
 export default class ImageData {
+
   private _data: Uint8Array;
+
   private _width: number;
+
   private _height: number;
+
   private _leftOffset: number;
+
   private _rightOffset: number;
+
   private _topOffset: number;
+
   private _bottomOffset: number;
 
   constructor(
     imageBitmap: ImageBitmap,
-    context: OffscreenCanvasRenderingContext2D,
+    context: OffscreenCanvasRenderingContext2D
   ) {
     const padding = ImageData.CLASTER_SIZE * 16;
+
     this._width = imageBitmap.width + (padding << 1);
     this._leftOffset = padding;
     this._rightOffset = this._width - padding - imageBitmap.width;
@@ -60,7 +68,7 @@ export default class ImageData {
       if (
         !this.getPixelAlpha(
           x + neighboarOffset - currentOffset,
-          y + currentOffset,
+          y + currentOffset
         )
       ) {
         return true;
@@ -83,7 +91,7 @@ export default class ImageData {
       new Point(1, 0),
       new Point(-1, 0),
       new Point(0, 1),
-      new Point(0, -1),
+      new Point(0, -1)
     ];
     const neighboarCount: number = offsets.length;
     const nextPoint: Point = new Point();
@@ -219,4 +227,5 @@ export default class ImageData {
   private static readonly BITS_PER_PIXEL: number = 4;
 
   private static readonly CLASTER_SIZE: number = 4;
+
 }

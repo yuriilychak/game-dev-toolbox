@@ -19,7 +19,7 @@ const ActionButton: FC<ActionButtonProps> = ({
   action,
   onClick,
   Icon,
-  disabled = false,
+  disabled = false
 }) => {
   const handleClick: MouseEventHandler = useCallback(
     (e) => {
@@ -27,7 +27,7 @@ const ActionButton: FC<ActionButtonProps> = ({
 
       onClick(id, action);
     },
-    [id, action, onClick],
+    [id, action, onClick]
   );
 
   return (

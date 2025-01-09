@@ -1,14 +1,15 @@
-import { BOUND } from "../enums";
-import Point from "./point";
+import { BOUND } from '../enums';
+import Point from './point';
 
 export default class BoundRect {
+
   private data: Uint16Array;
 
   private constructor(
     left: number,
     top: number,
     right: number,
-    bottom: number,
+    bottom: number
   ) {
     this.data = new Uint16Array(BoundRect.BOUND_COUNT);
 
@@ -23,7 +24,7 @@ export default class BoundRect {
       new Point(this.left, this.top),
       new Point(this.right, this.top),
       new Point(this.right, this.bottom),
-      new Point(this.left, this.bottom),
+      new Point(this.left, this.bottom)
     ];
   }
 
@@ -41,21 +42,23 @@ export default class BoundRect {
       Math.min(this.left, boundRect.left),
       Math.min(this.top, boundRect.top),
       Math.max(this.right, boundRect.right),
-      Math.max(this.bottom, boundRect.bottom),
+      Math.max(this.bottom, boundRect.bottom)
     );
   }
 
   public contains(point: Point): boolean {
     return (
       point.x >= this.left &&
-      point.x <= this.right &&
-      point.y >= this.top &&
-      point.y <= this.bottom
+            point.x <= this.right &&
+            point.y >= this.top &&
+            point.y <= this.bottom
     );
   }
 
   public getDistance(point: Point, bound: BOUND): number {
-    const value: number = BoundRect.getHorizontal(bound) ? point.x : point.y;
+    const value: number = BoundRect.getHorizontal(bound)
+      ? point.x
+      : point.y;
 
     return Math.abs(value - this.data[bound]);
   }
@@ -82,17 +85,17 @@ export default class BoundRect {
       return offsetY === 0
         ? null
         : new Point(
-            p1.x + Math.round(((value - p1.y) * offsetX) / offsetY),
-            value,
-          );
+          p1.x + Math.round(((value - p1.y) * offsetX) / offsetY),
+          value
+        );
     }
 
     return offsetX === 0
       ? null
       : new Point(
-          value,
-          p1.y + Math.round(((value - p1.x) * offsetY) / offsetX),
-        );
+        value,
+        p1.y + Math.round(((value - p1.x) * offsetY) / offsetX)
+      );
   }
 
   public getSegmentIntersectBounds(p1: Point, p2: Point): BOUND[] {
@@ -163,7 +166,7 @@ export default class BoundRect {
     left: number = 0,
     top: number = 0,
     right: number = 0,
-    bottom: number = 0,
+    bottom: number = 0
   ): BoundRect {
     return new BoundRect(left, top, right, bottom);
   }
@@ -191,4 +194,5 @@ export default class BoundRect {
   }
 
   public static readonly BOUND_COUNT: number = 4;
+
 }

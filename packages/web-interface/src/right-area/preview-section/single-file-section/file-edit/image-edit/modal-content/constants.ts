@@ -10,10 +10,10 @@ import { ReducerState } from "./types";
 export const SCALE_MARKS: Mark[] = [
   SCALE_VALUE.MIN,
   SCALE_VALUE.DEFAULT,
-  SCALE_VALUE.MAX,
+  SCALE_VALUE.MAX
 ].map((value) => ({
   value,
-  label: `${value * 100}%`,
+  label: `${value * 100}%`
 }));
 
 export const STYLES: Record<string, SxProps<Theme>> = {
@@ -23,34 +23,34 @@ export const STYLES: Record<string, SxProps<Theme>> = {
     maxHeight: "96vh",
     padding: 2,
     boxSizing: "border-box",
-    overflow: "hidden",
+    overflow: "hidden"
   },
   SCALE_CONTAINER: {
     paddingBottom: 1,
     paddingRight: 2,
     width: 256,
     height: 48,
-    boxSizing: "border-box",
+    boxSizing: "border-box"
   },
-  SCALE_LABEL: { paddingTop: 0.25 },
+  SCALE_LABEL: { paddingTop: 0.25 }
 };
 
 export const FOOTER_ACTIONS: ButtonGroupAction<IMAGE_EDITOR_ACTION>[] = [
   {
     action: IMAGE_EDITOR_ACTION.RESET,
     locale: "preview.singleFile.edit.image.modal.button.reset",
-    variant: "contained",
+    variant: "contained"
   },
   {
     action: IMAGE_EDITOR_ACTION.SUBMIT,
     locale: "preview.singleFile.edit.image.modal.button.submit",
-    variant: "contained",
+    variant: "contained"
   },
   {
     action: IMAGE_EDITOR_ACTION.CANCEL,
     locale: "preview.singleFile.edit.image.modal.button.cancel",
-    variant: "outlined",
-  },
+    variant: "outlined"
+  }
 ];
 
 export const INITIAL_STATE: ReducerState = {
@@ -59,7 +59,7 @@ export const INITIAL_STATE: ReducerState = {
   isChanged: false,
   isFixBorder: false,
   isProcessing: false,
-  boundEditor: new BoundEditor(),
+  boundEditor: new BoundEditor()
 };
 
 export const ZOOM_STEP: number = 0.1;

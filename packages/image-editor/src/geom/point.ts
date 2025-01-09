@@ -1,7 +1,8 @@
-import { intAbs } from "../math";
-import { cycleIndex } from "../utils";
+import { intAbs } from '../math';
+import { cycleIndex } from '../utils';
 
 export default class Point {
+
   private data: Int32Array = new Int32Array(2);
 
   constructor(x: number = 0, y: number = 0) {
@@ -48,7 +49,9 @@ export default class Point {
 
   public distance(point1: Point, point2: Point): number {
     const pointIndices: number = Point.alloc(2);
-    const offset1: Point = Point.get(pointIndices, 0).set(point2).sub(point1);
+    const offset1: Point = Point.get(pointIndices, 0)
+      .set(point2)
+      .sub(point1);
     const offset2: Point = Point.get(pointIndices, 1).set(this).sub(point1);
     const result = intAbs(offset1.cross(offset2)) / offset1.length;
 
@@ -73,15 +76,18 @@ export default class Point {
     const offset2 = Point.get(pointIndices, 1).set(this).sub(point1);
 
     const result: boolean =
-      intAbs(offset2.cross(offset1)) <= Number.EPSILON &&
-      Math.abs((2 * offset2.dot(offset1)) / offset1.length2 - 1) <= 1;
+            intAbs(offset2.cross(offset1)) <= Number.EPSILON &&
+            Math.abs((2 * offset2.dot(offset1)) / offset1.length2 - 1) <= 1;
 
     Point.malloc(pointIndices);
 
     return result;
   }
 
-  public getInside(polygon: Point[], isIncludeBorder: boolean = true): boolean {
+  public getInside(
+    polygon: Point[],
+    isIncludeBorder: boolean = true
+  ): boolean {
     const pointCount = polygon.length;
     let result: boolean = false;
     let p1: Point = polygon[0];
@@ -98,7 +104,8 @@ export default class Point {
 
       if (
         p1.y > this.y !== p2.y > this.y &&
-        this.x < ((p2.x - p1.x) * (this.y - p1.y)) / (p2.y - p1.y) + p1.x
+                this.x <
+                    ((p2.x - p1.x) * (this.y - p1.y)) / (p2.y - p1.y) + p1.x
       ) {
         result = !result;
       }
@@ -142,7 +149,7 @@ export default class Point {
   public static getLineEquation(
     point1: Point,
     point2: Point,
-    result: Int32Array,
+    result: Int32Array
   ): void {
     result[0] = point2.y - point1.y;
     result[1] = point1.x - point2.x;
@@ -157,6 +164,7 @@ export default class Point {
     for (i = 0; i < pointCount; ++i) {
       result += polygon[cycleIndex(i, pointCount, 1)].cross(polygon[i]);
     }
+
     return result / 2;
   }
 
@@ -168,7 +176,9 @@ export default class Point {
     let t: number = 0;
 
     if (dx !== 0 || dy !== 0) {
-      t = ((p.x - localX) * dx + (p.y - localY) * dy) / (dx * dx + dy * dy);
+      t =
+                ((p.x - localX) * dx + (p.y - localY) * dy) /
+                (dx * dx + dy * dy);
 
       if (t > 1) {
         localX = p2.x;
@@ -199,11 +209,12 @@ export default class Point {
 
       if (currentCount === count) {
         Point.USED |= result;
+
         return result;
       }
     }
 
-    throw Error("Pool is empty");
+    throw Error('Pool is empty');
   }
 
   public static malloc(indices: number): void {
@@ -240,4 +251,5 @@ export default class Point {
     .map(() => new Point());
 
   private static USED: number = 0;
+
 }

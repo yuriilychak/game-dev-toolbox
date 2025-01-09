@@ -1,35 +1,35 @@
-import { FC, useCallback, memo } from "react";
+import { FC, useCallback, memo } from 'react';
 import {
   DeleteHandler,
   MoveHandler,
   NodeApi,
   RenameHandler,
-  Tree,
-} from "react-arborist";
+  Tree
+} from 'react-arborist';
 
-import type { BoolFunc } from "react-arborist/dist/module/types/utils";
+import type { BoolFunc } from 'react-arborist/dist/module/types/utils';
 
-import Box from "@mui/material/Box";
-import Paper from "@mui/material/Paper";
+import Box from '@mui/material/Box';
+import Paper from '@mui/material/Paper';
 
-import { LibraryItem } from "./library-item";
-import { LibraryFile } from "../../types";
-import { LIBRAY_STYLES } from "./constants";
+import { LibraryItem } from './library-item';
+import { LibraryFile } from '../../types';
+import { LIBRAY_STYLES } from './constants';
 
 type LibraryTreeProps = {
-  disabled?: boolean;
-  tree: LibraryFile[];
-  onCheck?: (ids: string[], isChecked: boolean) => void;
-  onRename?: RenameHandler<LibraryFile>;
-  onMove?: MoveHandler<LibraryFile>;
-  onDelete?: DeleteHandler<LibraryFile>;
-  onFocus?: (id: string) => void;
-  onSelect?(files: LibraryFile[]): void;
-  hasCheckboxes?: boolean;
-  checkedIds?: string[];
-  disableEdit?: string | boolean | BoolFunc<LibraryFile>;
-  disableDrag?: string | boolean | BoolFunc<LibraryFile>;
-  disableDrop?: string | boolean | BoolFunc<LibraryFile>;
+    disabled?: boolean;
+    tree: LibraryFile[];
+    onCheck?: (ids: string[], isChecked: boolean) => void;
+    onRename?: RenameHandler<LibraryFile>;
+    onMove?: MoveHandler<LibraryFile>;
+    onDelete?: DeleteHandler<LibraryFile>;
+    onFocus?: (id: string) => void;
+    onSelect?(files: LibraryFile[]): void;
+    hasCheckboxes?: boolean;
+    checkedIds?: string[];
+    disableEdit?: string | boolean | BoolFunc<LibraryFile>;
+    disableDrag?: string | boolean | BoolFunc<LibraryFile>;
+    disableDrop?: string | boolean | BoolFunc<LibraryFile>;
 };
 
 const LibraryTree: FC<LibraryTreeProps> = ({
@@ -43,30 +43,28 @@ const LibraryTree: FC<LibraryTreeProps> = ({
   onMove,
   onDelete,
   onFocus,
-  onSelect,
+  onSelect
 }) => {
   const handleFocus = useCallback(
     (node: NodeApi<LibraryFile>) =>
       onFocus && onFocus(node.isLeaf ? node.parent.id : node.id),
-    [onFocus],
+    [onFocus]
   );
 
   const handleSelect = useCallback(
     (nodes: NodeApi<LibraryFile>[]) =>
       onSelect && onSelect(nodes.map(({ data }) => data)),
-    [onSelect],
+    [onSelect]
   );
 
   return (
-    <Paper elevation={0} sx={{ width: "100%", height: 500 }}>
+    <Paper elevation={0} sx={{ width: '100%', height: 500 }}>
       <Box width="100%" height="100%" sx={LIBRAY_STYLES.get(disabled)}>
         <Tree
           data={tree}
-          //@ts-ignore
+          //@ts-expect-error - additional tree props
           hasCheckboxes={hasCheckboxes}
-          //@ts-ignore
           checkedIds={checkedIds}
-          //@ts-ignore
           onCheck={onCheck}
           disableEdit={disableEdit}
           onFocus={handleFocus}

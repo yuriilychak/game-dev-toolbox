@@ -1,23 +1,23 @@
 {
-  "name": "web-interface",
-  "version": "1.0.0",
-  "main": "src/index.ts",
-  "scripts": {
-    "build": "webpack",
-    "watch": "webpack --watch --config webpack.config.mjs",
-    "test": "jest",
-    "lint": "eslint src/**/*.ts src/**/*.tsx",
-    "lint:fix": "eslint src/**/*.ts src/**/*.tsx --fix"
-  },
-  "dependencies": {
-    "image-editor": "^1.0.0",
-    "polygon-packer": "^1.0.0"
-  },
-  "description": "user interface package for SVGNest",
-  "keywords": [
-    "react",
-    "UI"
-  ],
-  "author": "yurii.lychak",
-  "license": "MIT"
+    "name": "web-interface",
+    "version": "1.0.0",
+    "main": "src/index.ts",
+    "scripts": {
+        "build": "webpack",
+        "watch": "webpack --watch --config webpack.config.mjs",
+        "test": "jest",
+        "lint": "eslint 'src/**/*.{ts,tsx}'",
+        "lint:fix": "eslint 'src/**/*.{ts,tsx}' --fix"
+    },
+    "dependencies": {
+        "image-editor": "^1.0.0",
+        "polygon-packer": "^1.0.0"
+    },
+    "description": "user interface package for SVGNest",
+    "keywords": [
+        "react",
+        "UI"
+    ],
+    "author": "yurii.lychak",
+    "license": "MIT"
 }

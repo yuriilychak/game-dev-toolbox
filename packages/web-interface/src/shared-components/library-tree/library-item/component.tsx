@@ -7,66 +7,70 @@ import {
   useState,
   useRef,
   KeyboardEventHandler,
-  MouseEventHandler,
-} from "react";
-import { NodeRendererProps } from "react-arborist";
-import { useTranslation } from "react-i18next";
+  MouseEventHandler
+} from 'react';
+import { NodeRendererProps } from 'react-arborist';
+import { useTranslation } from 'react-i18next';
 
-import Stack from "@mui/material/Stack";
-import Box from "@mui/material/Box";
-import Typography from "@mui/material/Typography";
-import FilledInput from "@mui/material/FilledInput";
-import Checkbox from "@mui/material/Checkbox";
+import Stack from '@mui/material/Stack';
+import Box from '@mui/material/Box';
+import Typography from '@mui/material/Typography';
+import FilledInput from '@mui/material/FilledInput';
+import Checkbox from '@mui/material/Checkbox';
 
-import { EXPAND_ICONS, ITEM_ACTIONS } from "./constants";
-import { LibraryFile } from "../../../types";
-import { ActionButton } from "../../action-button";
+import { EXPAND_ICONS, ITEM_ACTIONS } from './constants';
+import { LibraryFile } from '../../../types';
+import { ActionButton } from '../../action-button';
 import {
   LIBRARY_ACTION,
   LIBRARY_FILE_TYPE,
-  SELECTION_STATE,
-} from "../../../enums";
-import { LIBRARY_ITEM_ICONS } from "../../../constants";
-import { ACTION_TO_LOCALE, LIBRARY_ACTION_ICONS } from "../constants";
-import { checkSelection, getChildIds } from "./helpers";
+  SELECTION_STATE
+} from '../../../enums';
+import { LIBRARY_ITEM_ICONS } from '../../../constants';
+import { ACTION_TO_LOCALE, LIBRARY_ACTION_ICONS } from '../constants';
+import { checkSelection, getChildIds } from './helpers';
 
 const LibraryItem: FC<NodeRendererProps<LibraryFile>> = ({
   node,
   tree,
   style,
-  dragHandle,
+  dragHandle
 }) => {
   const {
     disableEdit = false,
-    //@ts-ignore
+    //@ts-expect-error - tree props are not typed
     hasCheckboxes,
-    //@ts-ignore
+    //@ts-expect-error - tree props are not typed
     checkedIds,
-    //@ts-ignore
-    onCheck,
+    //@ts-expect-error - tree props are not typed
+    onCheck
   } = tree.props;
 
-  const selectionState: SELECTION_STATE = checkSelection(node.data, checkedIds);
+  const selectionState: SELECTION_STATE = checkSelection(
+    node.data,
+    checkedIds
+  );
   const isChecked = selectionState === SELECTION_STATE.SELECTED;
-  const isIndeterminate = selectionState === SELECTION_STATE.SELECTED_PARTIALY;
+  const isIndeterminate =
+        selectionState === SELECTION_STATE.SELECTED_PARTIALY;
   const isFolder = node.data.type === LIBRARY_FILE_TYPE.FOLDER;
 
   const { t } = useTranslation();
-  const [newLabel, setNewLabel] = useState("");
+  const [newLabel, setNewLabel] = useState('');
   const Icon = useMemo(
     () => LIBRARY_ITEM_ICONS.get(node.data.type),
-    [node.data.type],
+    [node.data.type]
   );
   const ExpandIcon = useMemo(
     () => EXPAND_ICONS.get(node.isOpen),
-    [node.isOpen],
+    [node.isOpen]
   );
   const currentActions = useMemo(
     () => ITEM_ACTIONS.get(node.isEditing),
-    [node.isEditing],
+    [node.isEditing]
   );
 
-  const labelRef = useRef("");
+  const labelRef = useRef('');
   const isReset: boolean = !node.isFocused && node.isEditing;
   const isSubmitDisabled: boolean = node.isEditing && newLabel.length === 0;
 
@@ -115,22 +119,22 @@ const LibraryItem: FC<NodeRendererProps<LibraryFile>> = ({
         node.edit();
         break;
       default:
-        console.warn("Wrong library action", action, id);
+        console.warn('Wrong library action', action, id);
     }
   }, []);
 
   const handleChange: ChangeEventHandler<HTMLInputElement> = useCallback(
     ({ target }) => setNewLabel(target.value),
-    [],
+    []
   );
 
   const handleKeyDown: KeyboardEventHandler<HTMLInputElement> = useCallback(
     (e) => {
-      if (e.code === "Enter") {
+      if (e.code === 'Enter') {
         node.submit(labelRef.current);
       }
     },
-    [],
+    []
   );
 
   const handleCheckClick: MouseEventHandler<HTMLButtonElement> = useCallback(
@@ -141,9 +145,10 @@ const LibraryItem: FC<NodeRendererProps<LibraryFile>> = ({
       const updatedIds = isFolder
         ? getChildIds(node.data.children)
         : [node.data.id];
+
       onCheck(updatedIds, !isChecked);
     },
-    [onCheck, node.data.id, isFolder, node.data.children, isChecked],
+    [onCheck, node.data.id, isFolder, node.data.children, isChecked]
   );
 
   return (
@@ -157,9 +162,10 @@ const LibraryItem: FC<NodeRendererProps<LibraryFile>> = ({
       style={style}
       sx={{
         maxHeight: 24,
-        cursor: "pointer",
-        backgroundColor: node.isFocused || node.isSelected ? "#555" : "unset",
-        "&:hover": { backgroundColor: "#666" },
+        cursor: 'pointer',
+        backgroundColor:
+                    node.isFocused || node.isSelected ? '#555' : 'unset',
+        '&:hover': { backgroundColor: '#666' }
       }}
     >
       <Stack direction="row" gap={0.5} alignItems="center" maxHeight={24}>
@@ -177,7 +183,10 @@ const LibraryItem: FC<NodeRendererProps<LibraryFile>> = ({
         <FilledInput
           autoFocus
           inputProps={{ maxLength: 32 }}
-          sx={{ height: 24, "& input": { padding: 0, paddingLeft: 0.5 } }}
+          sx={{
+            height: 24,
+            '& input': { padding: 0, paddingLeft: 0.5 }
+          }}
           onChange={handleChange}
           onKeyDown={handleKeyDown}
           value={newLabel}
@@ -192,17 +201,19 @@ const LibraryItem: FC<NodeRendererProps<LibraryFile>> = ({
       )}
       <Box flex={1} />
       {!disableEdit &&
-        currentActions.map((action) => (
-          <ActionButton
-            key={`item_action_${action}`}
-            title={t(ACTION_TO_LOCALE.get(action))}
-            Icon={LIBRARY_ACTION_ICONS.get(action)}
-            action={action}
-            id={node.data.id}
-            onClick={handleAction}
-            disabled={action === LIBRARY_ACTION.SUBMIT && isSubmitDisabled}
-          />
-        ))}
+                currentActions.map((action) => (
+                  <ActionButton
+                    key={`item_action_${action}`}
+                    title={t(ACTION_TO_LOCALE.get(action))}
+                    Icon={LIBRARY_ACTION_ICONS.get(action)}
+                    action={action}
+                    id={node.data.id}
+                    onClick={handleAction}
+                    disabled={
+                      action === LIBRARY_ACTION.SUBMIT && isSubmitDisabled
+                    }
+                  />
+                ))}
     </Stack>
   );
 };

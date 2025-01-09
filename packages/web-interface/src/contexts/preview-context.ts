@@ -6,7 +6,7 @@ const PreviewContext = createContext<PreviewContextData>({
   tree: [],
   selectedFiles: [],
   onProcessing: () => {},
-  onFilesChanged: () => {},
+  onFilesChanged: () => {}
 });
 
 export default PreviewContext;

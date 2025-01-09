@@ -33,18 +33,18 @@ const ImageParams: FC<ImageParamsProps> = ({
   paddingRight,
   onChangeType,
   onChangeBorder,
-  type,
+  type
 }) => {
   const { t } = useTranslation();
 
   const imageTypeOptions = useMemo<FieldOption[]>(
     () => IMAGE_TYPES.map((value) => ({ ...value, label: t(value.label) })),
-    [t],
+    [t]
   );
 
   const handleChangeType = useCallback(
     (value: string) => onChangeType(parseInt(value) as IMAGE_TYPE),
-    [],
+    []
   );
 
   return (

@@ -3,7 +3,7 @@ import { LibraryFile } from "../../../types";
 
 function checkSimpleFileSelection(
   file: LibraryFile,
-  selectedIds: string[],
+  selectedIds: string[]
 ): SELECTION_STATE {
   return !selectedIds.includes(file.id)
     ? SELECTION_STATE.UNSELECTED
@@ -12,7 +12,7 @@ function checkSimpleFileSelection(
 
 function checkChildrenSelection(
   tree: LibraryFile[],
-  selectedIds: string[],
+  selectedIds: string[]
 ): SELECTION_STATE {
   const selection = new Uint8Array(3);
 
@@ -47,7 +47,7 @@ function checkChildrenSelection(
 
 export function checkSelection(
   file: LibraryFile,
-  selectedIds: string[],
+  selectedIds: string[]
 ): SELECTION_STATE {
   return file.type === LIBRARY_FILE_TYPE.FOLDER
     ? checkChildrenSelection(file.children, selectedIds)
@@ -56,7 +56,7 @@ export function checkSelection(
 
 export function getChildIds(
   tree: LibraryFile[],
-  result: string[] = [],
+  result: string[] = []
 ): string[] {
   for (const file of tree) {
     if (file.type !== LIBRARY_FILE_TYPE.FOLDER) {

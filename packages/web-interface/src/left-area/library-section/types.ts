@@ -1,11 +1,11 @@
 import { LibraryFile } from "../../types";
 
-export interface BasicExecutionResult {
+export type BasicExecutionResult = {
   tree: LibraryFile[];
   isExecuted: boolean;
 }
 
-export interface DeleteExecutionResult extends BasicExecutionResult {
+export type DeleteExecutionResult = {
   ids: string[];
   removedItems: LibraryFile[];
-}
+} & BasicExecutionResult

@@ -1,7 +1,7 @@
-import { MAX_POINT_COUNT, MAX_SIMPLIFY_DISTANCE } from "./constants";
-import { getContourDirection, getPointIndex } from "./utils";
-import { cycleIndex } from "../utils";
-import Point from "./point";
+import { MAX_POINT_COUNT, MAX_SIMPLIFY_DISTANCE } from './constants';
+import { getContourDirection, getPointIndex } from './utils';
+import { cycleIndex } from '../utils';
+import Point from './point';
 
 function simplify(
   points: Point[],
@@ -9,7 +9,7 @@ function simplify(
   simplified: Point[] = [points[0]],
   first: number = 0,
   last: number = points.length - 1,
-  isRoot: boolean = true,
+  isRoot: boolean = true
 ): Point[] {
   let maxSqDist: number = sqTolerance;
   let index: number = 0;
@@ -75,13 +75,13 @@ function iterativeSimplify(initialPoints: Point[]): Point[] {
       for (j = startIndex; j < endIndex; ++j) {
         distance = Math.max(
           initialPoints[j].distance(currPoint, nextPoint),
-          distance,
+          distance
         );
       }
 
       if (
         resultPointCount <= MAX_POINT_COUNT &&
-        distance > MAX_SIMPLIFY_DISTANCE
+                distance > MAX_SIMPLIFY_DISTANCE
       ) {
         return result;
       }
@@ -98,7 +98,7 @@ function restore(result: Point[], initialPoints: Point[]): Point[] {
   }
 
   const contourSize: number = initialPoints.length;
-  let line: Int32Array = new Int32Array(3);
+  const line: Int32Array = new Int32Array(3);
   let i: number = 0;
   let j: number = 0;
   let isRestored: boolean = true;
@@ -122,7 +122,8 @@ function restore(result: Point[], initialPoints: Point[]): Point[] {
       point2 = result[i + 1];
       startIndex = getPointIndex(initialPoints, point1);
       endIndex = getPointIndex(initialPoints, point2);
-      endIndex = startIndex > endIndex ? endIndex + contourSize : endIndex;
+      endIndex =
+                startIndex > endIndex ? endIndex + contourSize : endIndex;
       Point.getLineEquation(point1, point2, line);
 
       maxDistance = 0;
@@ -143,7 +144,7 @@ function restore(result: Point[], initialPoints: Point[]): Point[] {
 
       if (
         maxDistance > MAX_SIMPLIFY_DISTANCE &&
-        result.length < MAX_POINT_COUNT
+                result.length < MAX_POINT_COUNT
       ) {
         result.splice(i + 1, 0, initialPoints[maxIndex].clone());
         isRestored = true;

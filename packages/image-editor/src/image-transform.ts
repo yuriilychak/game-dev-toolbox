@@ -4,10 +4,11 @@ import { IMAGE_TYPE } from "./enums";
 import type {
   ImageTransformWorkerInput,
   ImageTransformWorkerResult,
-  LibraryImageData,
+  LibraryImageData
 } from "./types";
 
 export default class ImageTransform {
+
   private imageData: LibraryImageData = null;
 
   private id: string = "";
@@ -34,14 +35,14 @@ export default class ImageTransform {
 
   private async transformImageData(
     type: IMAGE_TYPE,
-    offset: number,
+    offset: number
   ): Promise<void> {
     const data: LibraryImageData = {
       ...this.imageData,
       type,
       polygons: [],
       triangles: [],
-      isFixBorder: false,
+      isFixBorder: false
     };
     const result = await singleThread<
       ImageTransformWorkerInput,
@@ -82,4 +83,5 @@ export default class ImageTransform {
   public get trianglesCount(): number {
     return this.imageData.triangles.length;
   }
+
 }

@@ -1,74 +1,77 @@
 import Point from './point';
 
 export default class PointPool {
-    private items: Point[];
 
-    private used: number;
+  private items: Point[];
 
-    private memSeg: Float64Array;
+  private used: number;
 
-    constructor(buffer: ArrayBuffer) {
-        this.items = new Array(PointPool.POOL_SIZE);
-        this.used = 0;
-        this.memSeg = new Float64Array(buffer, 0, PointPool.POOL_SIZE << 1);
-        this.memSeg.fill(0);
+  private memSeg: Float64Array;
 
-        for (let i = 0; i < PointPool.POOL_SIZE; ++i) {
-            this.items[i] = new Point(this.memSeg, i << 1);
-        }
+  constructor(buffer: ArrayBuffer) {
+    this.items = new Array(PointPool.POOL_SIZE);
+    this.used = 0;
+    this.memSeg = new Float64Array(buffer, 0, PointPool.POOL_SIZE << 1);
+    this.memSeg.fill(0);
+
+    for (let i = 0; i < PointPool.POOL_SIZE; ++i) {
+      this.items[i] = new Point(this.memSeg, i << 1);
+    }
+  }
+
+  alloc(count: number): number {
+    let result: number = 0;
+    let currentCount: number = 0;
+    let freeBits: number = ~this.used;
+    let currentBit: number = 0;
+
+    while (freeBits !== 0) {
+      currentBit = 1 << (PointPool.MAX_BITS - Math.clz32(freeBits));
+      result |= currentBit;
+      freeBits &= ~currentBit;
+      ++currentCount;
+
+      if (currentCount === count) {
+        this.used |= result;
+
+        return result;
+      }
     }
 
-    alloc(count: number): number {
-        let result: number = 0;
-        let currentCount: number = 0;
-        let freeBits: number = ~this.used;
-        let currentBit: number = 0;
+    throw Error('Pool is empty');
+  }
 
-        while (freeBits !== 0) {
-            currentBit = 1 << (PointPool.MAX_BITS - Math.clz32(freeBits));
-            result |= currentBit;
-            freeBits &= ~currentBit;
-            ++currentCount;
+  malloc(indices: number): void {
+    this.used &= ~indices;
+  }
 
-            if (currentCount === count) {
-                this.used |= result;
-                return result;
-            }
-        }
+  get(indices: number, index: number): Point {
+    let currentIndex: number = 0;
+    let bitIndex: number = 0;
+    let currentBit: number = 0;
+    let currentIndices: number = indices;
 
-        throw Error('Pool is empty');
+    while (currentIndices !== 0) {
+      bitIndex = PointPool.MAX_BITS - Math.clz32(currentIndices);
+      currentBit = 1 << bitIndex;
+
+      if (currentIndex === index) {
+        return this.items[bitIndex];
+      }
+
+      currentIndices &= ~currentBit;
+      ++currentIndex;
     }
 
-    malloc(indices: number): void {
-        this.used &= ~indices;
-    }
+    throw Error(`Can't find point with index ${index}`);
+  }
 
-    get(indices: number, index: number): Point {
-        let currentIndex: number = 0;
-        let bitIndex: number = 0;
-        let currentBit: number = 0;
-        let currentIndices: number = indices;
+  public get size(): number {
+    return this.memSeg.byteLength;
+  }
 
-        while (currentIndices !== 0) {
-            bitIndex = PointPool.MAX_BITS - Math.clz32(currentIndices);
-            currentBit = 1 << bitIndex;
+  private static readonly MAX_BITS: number = 31;
 
-            if (currentIndex === index) {
-                return this.items[bitIndex];
-            }
+  public static POOL_SIZE: number = 32;
 
-            currentIndices &= ~currentBit;
-            ++currentIndex;
-        }
-
-        throw Error(`Can't find point with index ${index}`);
-    }
-
-    public get size(): number {
-        return this.memSeg.byteLength;
-    }
-
-    private static readonly MAX_BITS: number = 31;
-
-    public static POOL_SIZE: number = 32;
 }

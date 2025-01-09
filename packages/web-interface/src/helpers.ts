@@ -24,7 +24,7 @@ export function generateUUID() {
       }
 
       return (c === "x" ? r : (r & 0x3) | 0x8).toString(16);
-    },
+    }
   );
 }
 
@@ -46,7 +46,7 @@ export function formatSize(bytes: number): string {
 
 export function updateNode(
   tree: LibraryFile[],
-  updatedFile: LibraryFile,
+  updatedFile: LibraryFile
 ): boolean {
   const elementCount: number = tree.length;
   let file: LibraryFile = null;

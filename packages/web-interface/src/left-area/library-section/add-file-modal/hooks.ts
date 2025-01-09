@@ -3,12 +3,12 @@ import {
   useCallback,
   useState,
   useRef,
-  useMemo,
+  useMemo
 } from "react";
 
 import {
   ButtonGroupAction,
-  SHARED_MODAL_ACTIONS,
+  SHARED_MODAL_ACTIONS
 } from "../../../shared-components";
 import { LIBRARY_FILE_TYPE, SHARED_ACTION } from "../../../enums";
 import { LibraryFile } from "../../../types";
@@ -17,7 +17,7 @@ import { createTextureAtlas } from "../helpers";
 
 export function useAddFileModal(
   onSubmit: (items: LibraryFile[]) => void,
-  onCancel: () => void,
+  onCancel: () => void
 ) {
   const [files, setFiles] = useState<LibraryFile[]>([]);
   const [type, setType] = useState<LIBRARY_FILE_TYPE>(LIBRARY_FILE_TYPE.IMAGE);
@@ -32,21 +32,21 @@ export function useAddFileModal(
       SHARED_MODAL_ACTIONS.map((action) =>
         action.action === SHARED_ACTION.SUBMIT
           ? { ...action, disabled: isSubmitDisabled }
-          : action,
+          : action
       ),
-    [isSubmitDisabled],
+    [isSubmitDisabled]
   );
 
   const handleChangeFiles = useCallback(
     (nodes: LibraryFile[]) =>
       setFiles((prevLibFiles) => prevLibFiles.concat(nodes)),
-    [type],
+    [type]
   );
 
   const handleRemoveFile = useCallback(
     (id: string) =>
       setFiles((prevFiles) => prevFiles.filter((file) => file.id !== id)),
-    [],
+    []
   );
 
   const handleAddTypeChange = useCallback((rawValue: string) => {
@@ -63,14 +63,14 @@ export function useAddFileModal(
   const handleNameChange: ChangeEventHandler<HTMLInputElement> = useCallback(
     ({ target }) =>
       setFiles((prevFiles) => [{ ...prevFiles[0], label: target.value }]),
-    [],
+    []
   );
 
   const handleSubmit = () => onSubmit(files);
 
   const handleToggleLoading = useCallback(
     () => setLoading((isLoading) => !isLoading),
-    [],
+    []
   );
 
   const handleAction = useCallback(
@@ -85,7 +85,7 @@ export function useAddFileModal(
         default:
       }
     },
-    [onSubmit, onCancel],
+    [onSubmit, onCancel]
   );
 
   return {
@@ -99,6 +99,6 @@ export function useAddFileModal(
     handleRemoveFile,
     handleSubmit,
     handleToggleLoading,
-    handleAction,
+    handleAction
   };
 }

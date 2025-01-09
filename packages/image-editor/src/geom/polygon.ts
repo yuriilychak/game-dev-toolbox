@@ -1,16 +1,18 @@
 // @ts-expect-error no ts-defintion
-import poly2tri from "poly2tri";
+import poly2tri from 'poly2tri';
 
-import BoundRect from "./bound-rect";
-import extend from "./extend";
-import Point from "./point";
-import simplifyPolygon from "./simplify";
-import { serializeTriangleIndices } from "../utils";
-import { getPointIndex } from "./utils";
-import { optimizeSimplifiedPolygon } from "./optimization";
+import BoundRect from './bound-rect';
+import extend from './extend';
+import Point from './point';
+import simplifyPolygon from './simplify';
+import { serializeTriangleIndices } from '../utils';
+import { getPointIndex } from './utils';
+import { optimizeSimplifiedPolygon } from './optimization';
 
 export default class Polygon {
+
   private _contour: Point[];
+
   private _polygon: Point[];
 
   private _boundRect: BoundRect;
@@ -21,7 +23,7 @@ export default class Polygon {
 
     if (
       this._boundRect.width <= Polygon.QUAD_TRASHOLD ||
-      this._boundRect.height <= Polygon.QUAD_TRASHOLD
+            this._boundRect.height <= Polygon.QUAD_TRASHOLD
     ) {
       this._boundRect.extend();
       this._polygon = this._boundRect.exportPolygon();
@@ -58,8 +60,8 @@ export default class Polygon {
 
       if (
         index !== i &&
-        polygon.isRectangle &&
-        this.bounds.unionSqaureDiff(polygon.bounds) < 1024
+                polygon.isRectangle &&
+                this.bounds.unionSqaureDiff(polygon.bounds) < 1024
       ) {
         this.union(polygon);
 
@@ -86,7 +88,7 @@ export default class Polygon {
     let triangles: Uint16Array = null;
 
     const contour = this._polygon.map(
-      (point) => new poly2tri.Point(point.x, point.y),
+      (point) => new poly2tri.Point(point.x, point.y)
     );
 
     triangles = new Uint16Array(this.triangulate(contour));
@@ -105,7 +107,7 @@ export default class Polygon {
 
     return triangulation.map((triangle: { points_: Point[] }) => {
       const indices = triangle.points_.map((vertex: Point) =>
-        getPointIndex(this._polygon, vertex),
+        getPointIndex(this._polygon, vertex)
       );
 
       return serializeTriangleIndices(indices[0], indices[1], indices[2]);
@@ -115,14 +117,14 @@ export default class Polygon {
   public get isRectangle(): boolean {
     return (
       this._polygon.length === 4 &&
-      ((this._polygon[0].x === this._polygon[1].x &&
-        this._polygon[2].x === this._polygon[3].x &&
-        this._polygon[0].y === this._polygon[3].y &&
-        this._polygon[1].y === this._polygon[2].y) ||
-        (this._polygon[0].y === this._polygon[1].y &&
-          this._polygon[2].y === this._polygon[3].y &&
-          this._polygon[0].x === this._polygon[3].x &&
-          this._polygon[1].x === this._polygon[2].x))
+            ((this._polygon[0].x === this._polygon[1].x &&
+                this._polygon[2].x === this._polygon[3].x &&
+                this._polygon[0].y === this._polygon[3].y &&
+                this._polygon[1].y === this._polygon[2].y) ||
+                (this._polygon[0].y === this._polygon[1].y &&
+                    this._polygon[2].y === this._polygon[3].y &&
+                    this._polygon[0].x === this._polygon[3].x &&
+                    this._polygon[1].x === this._polygon[2].x))
     );
   }
 
@@ -142,8 +144,8 @@ export default class Polygon {
         Point.crossProduct(
           this._polygon[i],
           this._polygon[(i + 1) % pointCount],
-          this._polygon[(i + 2) % pointCount],
-        ),
+          this._polygon[(i + 2) % pointCount]
+        )
       );
 
       if (currentSign === 0) {
@@ -167,7 +169,7 @@ export default class Polygon {
   public get isBroken(): boolean {
     return (
       this._polygon.length < 3 ||
-      (this._boundRect.width < 3 && this._boundRect.height < 3)
+            (this._boundRect.width < 3 && this._boundRect.height < 3)
     );
   }
 
@@ -176,4 +178,5 @@ export default class Polygon {
   }
 
   private static QUAD_TRASHOLD = 64;
+
 }

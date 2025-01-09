@@ -5,8 +5,8 @@ export const getFolderStatistic = (
   files: LibraryFile[],
   accumulator: { childCount: number; size: number } = {
     childCount: 0,
-    size: 0,
-  },
+    size: 0
+  }
 ): { childCount: number; size: number } =>
   files.reduce((result, file) => {
     switch (file.type) {
@@ -16,6 +16,7 @@ export const getFolderStatistic = (
       case LIBRARY_FILE_TYPE.TEXTURE_ATLAS:
         ++result.childCount;
         result.size += file.data.size;
+
         return result;
       default:
         return result;

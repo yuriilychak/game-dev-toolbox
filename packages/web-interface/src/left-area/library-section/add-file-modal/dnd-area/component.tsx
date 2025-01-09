@@ -26,7 +26,7 @@ const DnDArea: FC<DnDAreaProps> = ({
   disabled = false,
   onChange,
   onRemove,
-  onToggleLoading,
+  onToggleLoading
 }) => {
   const { t } = useTranslation();
   const AppIcon = useMemo(() => LIBRARY_ITEM_ICONS.get(type), [type]);
@@ -41,13 +41,13 @@ const DnDArea: FC<DnDAreaProps> = ({
 
       onToggleLoading();
     },
-    [type],
+    [type]
   );
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDropAccepted,
     accept: { "image/png": [".png"], "image/jpeg": [".jpeg"] },
-    disabled: type !== LIBRARY_FILE_TYPE.IMAGE,
+    disabled: type !== LIBRARY_FILE_TYPE.IMAGE
   });
 
   const dragLocale: string = isDragActive

@@ -9,7 +9,7 @@ export default async function generateBounds(
   data: LibraryImageData,
   offset: number,
   canvas: OffscreenCanvas,
-  context: OffscreenCanvasRenderingContext2D,
+  context: OffscreenCanvasRenderingContext2D
 ): Promise<void> {
   if (data.type === IMAGE_TYPE.POLYGON) {
     const imageData = new ImageData(data.src, context);
@@ -45,7 +45,7 @@ export default async function generateBounds(
 
     const bounds = polygons.reduce(
       (result, polygon) => result.union(polygon.bounds, true),
-      polygons[0].bounds.clone(),
+      polygons[0].bounds.clone()
     );
     const width: number = bounds.width;
     const height: number = bounds.height;
@@ -54,7 +54,7 @@ export default async function generateBounds(
     context.drawImage(
       data.src,
       imageData.leftOffset - bounds.left,
-      imageData.topOffset - bounds.top,
+      imageData.topOffset - bounds.top
     );
 
     data.src = await createImageBitmap(canvas, 0, 0, width, height);
@@ -62,7 +62,7 @@ export default async function generateBounds(
     polygons.reduce<LibraryImageData>((result, polygon) => {
       const [polygonData, trianglesData] = polygon.export(
         bounds.left,
-        bounds.top,
+        bounds.top
       );
 
       result.polygons.push(polygonData);

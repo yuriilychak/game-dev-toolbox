@@ -4,7 +4,7 @@ export { ButtonGroup } from "./button-group";
 export {
   LibraryTree,
   LIBRARY_ACTION_ICONS,
-  ACTION_TO_LOCALE,
+  ACTION_TO_LOCALE
 } from "./library-tree";
 export { SelectField } from "./select-field";
 

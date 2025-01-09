@@ -4,6 +4,7 @@ import { LibraryFile } from "./types";
 import { getTriangleIndex } from "./utils";
 
 export default class BoundEditor {
+
   private file: LibraryFile;
 
   private canvas: HTMLCanvasElement;
@@ -59,14 +60,14 @@ export default class BoundEditor {
   public init(
     file: object,
     canvasRef: { current: HTMLCanvasElement | null },
-    onSuccess: () => void,
+    onSuccess: () => void
   ): void {
     if (canvasRef.current) {
       this.file = file as LibraryFile;
       this.imageTransform.init(this.file.id, this.file.data);
       this.canvas = canvasRef.current;
       this.context = this.canvas.getContext("2d", {
-        willReadFrequently: true,
+        willReadFrequently: true
       }) as CanvasRenderingContext2D;
 
       this.canvas.width = this.canvas.offsetWidth;
@@ -137,7 +138,7 @@ export default class BoundEditor {
   public export(): LibraryFile {
     return {
       ...this.file,
-      data: this.imageTransform.data,
+      data: this.imageTransform.data
     };
   }
 
@@ -150,6 +151,7 @@ export default class BoundEditor {
       this.worldToScreenX(width + this.imageOffset[0]) - screenX;
     const screenHeight: number =
       this.worldToScreenY(height + this.imageOffset[1]) - screenY;
+
     this.context.drawImage(
       this.imageTransform.imageBitmap,
       0,
@@ -159,7 +161,7 @@ export default class BoundEditor {
       screenX,
       screenY,
       screenWidth,
-      screenHeight,
+      screenHeight
     );
   }
 
@@ -171,7 +173,7 @@ export default class BoundEditor {
     if (!this.checkerPattern) {
       this.checkerPattern = this.context.createPattern(
         this.checkerBitmap,
-        "repeat",
+        "repeat"
       ) as CanvasPattern;
     }
 
@@ -180,11 +182,11 @@ export default class BoundEditor {
     const scale: number = this.scale / BoundEditor.MAX_SCALE;
     const offsetX: number = this.worldToScreenX(
       Math.floor(this.screenToWorldX(0) / this.worldPatternSize) *
-        this.worldPatternSize,
+        this.worldPatternSize
     );
     const offsetY: number = this.worldToScreenY(
       Math.floor(this.screenToWorldY(0) / this.worldPatternSize) *
-        this.worldPatternSize,
+        this.worldPatternSize
     );
 
     this.context.save();
@@ -195,7 +197,7 @@ export default class BoundEditor {
       0,
       0,
       Math.ceil((this.sceneWidth - offsetX) / scale),
-      Math.ceil((this.sceneHeight - offsetY) / scale),
+      Math.ceil((this.sceneHeight - offsetY) / scale)
     );
     this.context.restore();
 
@@ -254,7 +256,7 @@ export default class BoundEditor {
       pointIndex = i << 1;
       pointX = this.worldToScreenX(polygon[pointIndex] + this.imageOffset[0]);
       pointY = this.worldToScreenY(
-        polygon[pointIndex + 1] + this.imageOffset[1],
+        polygon[pointIndex + 1] + this.imageOffset[1]
       );
 
       if (i === 0) {
@@ -273,7 +275,7 @@ export default class BoundEditor {
       pointIndex = i << 1;
       pointX = this.worldToScreenX(polygon[pointIndex] + this.imageOffset[0]);
       pointY = this.worldToScreenY(
-        polygon[pointIndex + 1] + this.imageOffset[1],
+        polygon[pointIndex + 1] + this.imageOffset[1]
       );
 
       this.context.fillRect(pointX - 2, pointY - 2, 5, 5);
@@ -309,7 +311,7 @@ export default class BoundEditor {
         pointIndex = getTriangleIndex(triangles[i], j) << 1;
         pointX = this.worldToScreenX(polygon[pointIndex] + this.imageOffset[0]);
         pointY = this.worldToScreenY(
-          polygon[pointIndex + 1] + this.imageOffset[1],
+          polygon[pointIndex + 1] + this.imageOffset[1]
         );
 
         if (j === 0) {
@@ -450,4 +452,5 @@ export default class BoundEditor {
   }
 
   private static MAX_SCALE: number = 4;
+
 }

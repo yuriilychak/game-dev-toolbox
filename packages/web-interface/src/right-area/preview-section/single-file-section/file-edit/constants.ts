@@ -11,5 +11,5 @@ export const FILE_COMPONENTS: Map<
   [LIBRARY_FILE_TYPE.IMAGE, ImageEdit as SingleFileComponent],
   [LIBRARY_FILE_TYPE.TEXTURE_ATLAS, TextureAtlasEdit as SingleFileComponent],
   [LIBRARY_FILE_TYPE.NONE, null],
-  [LIBRARY_FILE_TYPE.FOLDER, FolderEdit as SingleFileComponent],
+  [LIBRARY_FILE_TYPE.FOLDER, FolderEdit as SingleFileComponent]
 ]);

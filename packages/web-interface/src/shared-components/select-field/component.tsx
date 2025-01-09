@@ -23,11 +23,11 @@ const SelectField: FC<SelectFieldProps> = ({
   options,
   required = false,
   disabled = false,
-  onChange,
+  onChange
 }) => {
   const handleChange = useCallback(
     (event: SelectChangeEvent) => onChange(event.target.value, id),
-    [onChange, id],
+    [onChange, id]
   );
 
   return (

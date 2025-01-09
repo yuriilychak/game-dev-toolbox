@@ -11,7 +11,7 @@ import LinearProgress from "@mui/material/LinearProgress";
 import { ADD_TYPES } from "../constants";
 import {
   LIBRARY_ITEM_ICONS,
-  LIBRARY_ITEM_TYPE_LOCALES,
+  LIBRARY_ITEM_TYPE_LOCALES
 } from "../../../constants";
 import { LIBRARY_FILE_TYPE } from "../../../enums";
 import { FieldOption, LibraryFile } from "../../../types";
@@ -36,7 +36,7 @@ const AddFileModal: FC<AddFileModalProps> = ({ onCancel, onSubmit }) => {
     handleNameChange,
     handleRemoveFile,
     handleAction,
-    handleToggleLoading,
+    handleToggleLoading
   } = useAddFileModal(onSubmit, onCancel);
 
   const selectOptions = useMemo<FieldOption[]>(
@@ -44,9 +44,9 @@ const AddFileModal: FC<AddFileModalProps> = ({ onCancel, onSubmit }) => {
       ADD_TYPES.map((value) => ({
         value,
         label: t(LIBRARY_ITEM_TYPE_LOCALES.get(value)),
-        Icon: LIBRARY_ITEM_ICONS.get(value),
+        Icon: LIBRARY_ITEM_ICONS.get(value)
       })),
-    [t],
+    [t]
   );
 
   return (

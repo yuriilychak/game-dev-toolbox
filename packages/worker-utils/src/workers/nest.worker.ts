@@ -1,23 +1,15 @@
-import { prepareWorker } from "./utils";
+import { prepareWorker } from './utils';
 
-declare module geometryUtils {
-  export type CalculateConfig = { pointPool: unknown; isInit: boolean };
-  export function calculate(
-    config: CalculateConfig,
-    data: ArrayBuffer,
-  ): ArrayBuffer;
-}
-
-prepareWorker(self, "geometry-utils");
+prepareWorker(self, 'geometry-utils');
 
 const config: geometryUtils.CalculateConfig = {
   isInit: false,
-  pointPool: null,
+  pointPool: null
 };
 
 self.onmessage = (event: MessageEvent<ArrayBuffer>) => {
   const buffer = geometryUtils.calculate(config, event.data);
 
-  //@ts-ignore
+  // @ts-expect-error Typings issue
   self.postMessage(buffer, [buffer]);
 };

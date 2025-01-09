@@ -7,7 +7,7 @@ import { formatSize } from "../../../../../helpers";
 import { StatisticsContainer } from "../statistics-container";
 
 const FolderPreview: SingleFileComponent<LIBRARY_FILE_TYPE.FOLDER> = ({
-  file,
+  file
 }) => {
   const { size, childCount } = getFolderStatistic(file.children);
   const messages = [`File count: ${childCount}`, `Size: ${formatSize(size)}`];

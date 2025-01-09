@@ -5,5 +5,5 @@ export { default as generateBounds } from "./generate-bounds";
 export type {
   LibraryImageData,
   ImageTransformWorkerInput,
-  ImageTransformWorkerResult,
+  ImageTransformWorkerResult
 } from "./types";

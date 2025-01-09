@@ -2,7 +2,7 @@ import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import {
   IMAGE_TYPE,
   ImageTransformWorkerResult,
-  transformImageData,
+  transformImageData
 } from "image-editor";
 
 import { PreviewContext } from "../../../../contexts";
@@ -11,7 +11,7 @@ import { LibraryFile } from "../../../../types";
 import { LIBRARY_FILE_TYPE } from "../../../../enums";
 
 export default function useImageSection(
-  files: LibraryFile<LIBRARY_FILE_TYPE.IMAGE>[],
+  files: LibraryFile<LIBRARY_FILE_TYPE.IMAGE>[]
 ) {
   const { onFilesChanged, onProcessing } = useContext(PreviewContext);
   const initialType = useMemo(() => getImageType(files), [files]);
@@ -32,7 +32,7 @@ export default function useImageSection(
       setProcessing(false);
       onFilesChanged(updatedFiles);
     },
-    [onFilesChanged, files],
+    [onFilesChanged, files]
   );
 
   const handleError = useCallback((error: ErrorEvent) => {
@@ -42,7 +42,7 @@ export default function useImageSection(
   const handleSpawn = useCallback(
     (spawned: number, completed: number) =>
       setProgress(Math.round((completed * 100) / fileCount)),
-    [fileCount],
+    [fileCount]
   );
 
   const handleTransform = useCallback(
@@ -54,12 +54,12 @@ export default function useImageSection(
       onProcessing();
       transformImageData(inputFiles, handleComplete, handleError, handleSpawn);
     },
-    [files, handleComplete, handleError, handleSpawn, onProcessing],
+    [files, handleComplete, handleError, handleSpawn, onProcessing]
   );
 
   const handleChangeType = useCallback(
     (nextType: IMAGE_TYPE) => handleTransform(nextType, 0),
-    [handleTransform, onProcessing],
+    [handleTransform, onProcessing]
   );
 
   const handleToggleBorder = useCallback(() => {
@@ -76,6 +76,6 @@ export default function useImageSection(
     isFixBorder,
     isProcessing,
     handleChangeType,
-    handleToggleBorder,
+    handleToggleBorder
   };
 }

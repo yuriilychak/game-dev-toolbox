@@ -23,7 +23,7 @@ const FilePreview: FC<SharedSectionProps> = ({
   file,
   componentMap,
   Icon,
-  title,
+  title
 }) => {
   const Component = componentMap.get(file.type) as SingleFileComponent | null;
 

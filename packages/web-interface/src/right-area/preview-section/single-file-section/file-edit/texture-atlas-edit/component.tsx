@@ -1,22 +1,21 @@
-import { useCallback, useContext, useMemo, useState } from "react";
-import { PolygonPacker } from "polygon-packer";
+import { useCallback, useContext, useMemo, useState } from 'react';
+import { PolygonPacker } from 'polygon-packer';
 
-import Button from "@mui/material/Button";
+import Button from '@mui/material/Button';
 
-import { LIBRARY_FILE_TYPE, SHARED_ACTION } from "../../../../../enums";
-import { SingleFileComponent } from "../../types";
-import { useModal } from "../../../../../hooks";
+import { LIBRARY_FILE_TYPE, SHARED_ACTION } from '../../../../../enums';
+import { SingleFileComponent } from '../../types';
+import { useModal } from '../../../../../hooks';
 import {
   ActionModal,
   LibraryTree,
-  SHARED_MODAL_ACTIONS,
-} from "../../../../../shared-components";
-import { PreviewContext } from "../../../../../contexts";
-import { filterTree } from "./helpers";
-import { NEST_CONFIG } from "./constants";
+  SHARED_MODAL_ACTIONS
+} from '../../../../../shared-components';
+import { PreviewContext } from '../../../../../contexts';
+import { filterTree } from './helpers';
 
 const TextureAtlasEdit: SingleFileComponent<
-  LIBRARY_FILE_TYPE.TEXTURE_ATLAS
+    LIBRARY_FILE_TYPE.TEXTURE_ATLAS
 > = ({ file }) => {
   const [isProcesing, setProcessing] = useState<boolean>(false);
   const { tree } = useContext(PreviewContext);
@@ -30,18 +29,18 @@ const TextureAtlasEdit: SingleFileComponent<
       setCheckedIds((prevCheckedIds) =>
         isChecked
           ? prevCheckedIds.concat(idsToUpdate)
-          : prevCheckedIds.filter((id) => !idsToUpdate.includes(id)),
+          : prevCheckedIds.filter((id) => !idsToUpdate.includes(id))
       ),
-    [],
+    []
   );
 
   const actions = useMemo(
     () =>
       SHARED_MODAL_ACTIONS.map((action) => ({
         ...action,
-        disabled: action.action === SHARED_ACTION.SUBMIT || isProcesing,
+        disabled: action.action === SHARED_ACTION.SUBMIT || isProcesing
       })),
-    [isProcesing],
+    [isProcesing]
   );
 
   const handleGenerate = useCallback(() => {
@@ -53,13 +52,13 @@ const TextureAtlasEdit: SingleFileComponent<
   return (
     <>
       <Button variant="contained" size="small" onClick={handleOpen}>
-        Edit
+                Edit
       </Button>
       <ActionModal
         actions={actions}
         open={isOpen}
         width={500}
-        title={"Edit atlas"}
+        title={'Edit atlas'}
         onAction={handleClose}
       >
         <LibraryTree

@@ -4,11 +4,11 @@ import App from './app';
 import fetchLocales from './i18n';
 
 async function init() {
-    await fetchLocales();
+  await fetchLocales();
 
-    const root = createRoot(document.getElementById('app'));
+  const root = createRoot(document.getElementById('app'));
 
-    root.render(<App />);
+  root.render(<App />);
 }
 
 init();

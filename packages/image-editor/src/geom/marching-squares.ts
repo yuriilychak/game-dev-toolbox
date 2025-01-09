@@ -1,12 +1,12 @@
-import ImageData from "../image-data";
-import Point from "./point";
+import ImageData from '../image-data';
+import Point from './point';
 
 function checkNeigboar(
   x: number,
   y: number,
   imageData: ImageData,
   threshold: number,
-  value: number,
+  value: number
 ): number {
   return imageData.inBounds(x, y) && imageData.getPixelAlpha(x, y) > threshold
     ? value
@@ -17,7 +17,7 @@ function getSquareValue(
   x: number,
   y: number,
   rect: ImageData,
-  threshold: number,
+  threshold: number
 ): number {
   /*
      checking the 2x2 pixel grid, assigning these values to each pixel, if not transparent
@@ -28,13 +28,13 @@ function getSquareValue(
      +---+---+
      */
   const sv: number =
-    checkNeigboar(x - 1, y - 1, rect, threshold, 1) +
-    checkNeigboar(x, y - 1, rect, threshold, 2) +
-    checkNeigboar(x - 1, y, rect, threshold, 4) +
-    checkNeigboar(x, y, rect, threshold, 8);
+        checkNeigboar(x - 1, y - 1, rect, threshold, 1) +
+        checkNeigboar(x, y - 1, rect, threshold, 2) +
+        checkNeigboar(x - 1, y, rect, threshold, 4) +
+        checkNeigboar(x, y, rect, threshold, 8);
 
   if (sv == 0 || sv == 15) {
-    console.log("square value should not be 0, or 15");
+    console.log('square value should not be 0, or 15');
   }
 
   return sv;
@@ -42,18 +42,17 @@ function getSquareValue(
 
 export default function marchSquare(
   imageData: ImageData,
-  threshold: number,
+  threshold: number
 ): Array<Point> {
   const start = imageData.getFirstNoneTransparentPixel(threshold);
   let stepx: number = 0;
   let stepy: number = 0;
   let prevx: number = 0;
   let prevy: number = 0;
-  let startx: number = start.x;
-  let starty: number = start.y;
+  const startx: number = start.x;
+  const starty: number = start.y;
   let curx: number = startx;
   let cury: number = starty;
-  let count: number = 0;
   let problem: boolean = false;
   const case9s: number[] = [];
   const case6s: number[] = [];
@@ -188,7 +187,6 @@ export default function marchSquare(
       _points.push(new Point(curx, cury));
     }
 
-    count++;
     prevx = stepx;
     prevy = stepy;
     problem = false;

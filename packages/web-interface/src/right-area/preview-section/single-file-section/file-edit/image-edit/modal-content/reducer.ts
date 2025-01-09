@@ -11,13 +11,13 @@ const REDUCER = new Map<REDUCER_ACTION, ReducerMiddleware>([
     REDUCER_ACTION.INIT,
     (
       prevState: ReducerState,
-      file: LibraryFile<LIBRARY_FILE_TYPE.IMAGE>,
+      file: LibraryFile<LIBRARY_FILE_TYPE.IMAGE>
     ): ReducerState => ({
       ...prevState,
       type: file.data.type,
       isFixBorder: file.data.isFixBorder,
-      scale: SCALE_VALUE.DEFAULT,
-    }),
+      scale: SCALE_VALUE.DEFAULT
+    })
   ],
   [
     REDUCER_ACTION.RESET,
@@ -27,7 +27,7 @@ const REDUCER = new Map<REDUCER_ACTION, ReducerMiddleware>([
       boundEditor.resetTransform();
 
       return { ...prevState, scale: SCALE_VALUE.DEFAULT };
-    },
+    }
   ],
   [
     REDUCER_ACTION.CHANGE_SCALE,
@@ -37,7 +37,7 @@ const REDUCER = new Map<REDUCER_ACTION, ReducerMiddleware>([
       boundEditor.scale = scale;
 
       return { ...prevState, scale };
-    },
+    }
   ],
   [
     REDUCER_ACTION.MOUSE_ZOOM,
@@ -46,21 +46,21 @@ const REDUCER = new Map<REDUCER_ACTION, ReducerMiddleware>([
 
       const nextScale = Math.min(
         Math.max(scale - Math.sign(wheelOffset) * ZOOM_STEP, SCALE_VALUE.MIN),
-        SCALE_VALUE.MAX,
+        SCALE_VALUE.MAX
       );
 
       boundEditor.scale = nextScale;
 
       return { ...prevState, scale: nextScale };
-    },
+    }
   ],
   [
     REDUCER_ACTION.FINISH_PROCESSING,
     (prevState: ReducerState): ReducerState => ({
       ...prevState,
       isChanged: prevState.boundEditor.isChanged,
-      isProcessing: false,
-    }),
+      isProcessing: false
+    })
   ],
   [
     REDUCER_ACTION.CHANGE_TYPE,
@@ -70,7 +70,7 @@ const REDUCER = new Map<REDUCER_ACTION, ReducerMiddleware>([
       boundEditor.updateType(type);
 
       return { ...prevState, type, isProcessing: true };
-    },
+    }
   ],
   [
     REDUCER_ACTION.TOGGLE_FIX_BORDER,
@@ -83,15 +83,15 @@ const REDUCER = new Map<REDUCER_ACTION, ReducerMiddleware>([
       return {
         ...prevState,
         isFixBorder: nextFixBorder,
-        isProcessing: true,
+        isProcessing: true
       };
-    },
-  ],
+    }
+  ]
 ]);
 
 export default function reducer(
   prevState: ReducerState,
-  { type, payload }: ReducerAction,
+  { type, payload }: ReducerAction
 ): ReducerState {
   return REDUCER.has(type) ? REDUCER.get(type)(prevState, payload) : prevState;
 }

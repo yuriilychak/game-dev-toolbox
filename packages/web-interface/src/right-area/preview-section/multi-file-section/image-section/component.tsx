@@ -10,7 +10,7 @@ const ImageSection: FilesComponent<LIBRARY_FILE_TYPE.IMAGE> = ({ files }) => {
     isFixBorder,
     isProcessing,
     handleChangeType,
-    handleToggleBorder,
+    handleToggleBorder
   } = useImageSection(files);
 
   return (

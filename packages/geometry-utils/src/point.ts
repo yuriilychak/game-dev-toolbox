@@ -1,7 +1,8 @@
-import { ANGLE_CACHE, TOL } from "./constants";
-import { almostEqual, clipperRound, midValue, slopesEqual } from "./helpers";
+import { ANGLE_CACHE, TOL } from './constants';
+import { almostEqual, clipperRound, midValue, slopesEqual } from './helpers';
 
 export default class Point {
+
   private memSeg: Float64Array;
 
   private offset: number;
@@ -21,7 +22,7 @@ export default class Point {
   public fromMemSeg(
     data: Float64Array | number[],
     index: number = 0,
-    offset: number = 0,
+    offset: number = 0
   ): Point {
     this.x = data[offset + (index << 1)];
     this.y = data[offset + (index << 1) + 1];
@@ -97,7 +98,10 @@ export default class Point {
     const sin: number = angleData[0];
     const cos: number = angleData[1];
 
-    return this.set(this.x * cos - this.y * sin, this.x * sin + this.y * cos);
+    return this.set(
+      this.x * cos - this.y * sin,
+      this.x * sin + this.y * cos
+    );
   }
 
   public cross(point: Point): number {
@@ -111,8 +115,8 @@ export default class Point {
   public getBetween(point1: Point, point2: Point): boolean {
     if (
       point1.almostEqual(point2) ||
-      point1.almostEqual(this) ||
-      this.almostEqual(point2)
+            point1.almostEqual(this) ||
+            this.almostEqual(point2)
     ) {
       return false;
     }
@@ -176,8 +180,8 @@ export default class Point {
     if (almostEqual(pointA.x, pointB.x) && almostEqual(this.x, pointA.x)) {
       return (
         !almostEqual(this.y, pointB.y) &&
-        !almostEqual(this.y, pointA.y) &&
-        midY < 0
+                !almostEqual(this.y, pointA.y) &&
+                midY < 0
       );
     }
 
@@ -185,18 +189,18 @@ export default class Point {
     if (almostEqual(pointA.y, pointB.y) && almostEqual(this.y, pointA.y)) {
       return (
         !almostEqual(this.x, pointB.x) &&
-        !almostEqual(this.x, pointA.x) &&
-        midX < 0
+                !almostEqual(this.x, pointA.x) &&
+                midX < 0
       );
     }
 
     if (
-      // range check
+    // range check
       midX > 0 ||
-      midY > 0 ||
-      // exclude end points
-      this.almostEqual(pointA) ||
-      this.almostEqual(pointB)
+            midY > 0 ||
+            // exclude end points
+            this.almostEqual(pointA) ||
+            this.almostEqual(pointB)
     ) {
       return false;
     }
@@ -222,23 +226,23 @@ export default class Point {
   public almostEqual(point: Point, tolerance: number = TOL): boolean {
     return (
       almostEqual(this.x, point.x, tolerance) &&
-      almostEqual(this.y, point.y, tolerance)
+            almostEqual(this.y, point.y, tolerance)
     );
   }
 
   public interpolateX(beginPoint: Point, endPoint: Point): number {
     return (
       ((beginPoint.x - endPoint.x) * (this.y - endPoint.y)) /
-        (beginPoint.y - endPoint.y) +
-      endPoint.x
+                (beginPoint.y - endPoint.y) +
+            endPoint.x
     );
   }
 
   public interpolateY(beginPoint: Point, endPoint: Point): number {
     return (
       ((beginPoint.y - endPoint.y) * (this.x - endPoint.x)) /
-        (beginPoint.x - endPoint.x) +
-      endPoint.y
+                (beginPoint.x - endPoint.x) +
+            endPoint.y
     );
   }
 
@@ -278,16 +282,16 @@ export default class Point {
     Pt1a: Point,
     Pt1b: Point,
     Pt2a: Point,
-    Pt2b: Point,
+    Pt2b: Point
   ): boolean {
     //precondition: both segments are horizontal
     return (
       Pt1a.x > Pt2a.x === Pt1a.x < Pt2b.x ||
-      Pt1b.x > Pt2a.x === Pt1b.x < Pt2b.x ||
-      Pt2a.x > Pt1a.x === Pt2a.x < Pt1b.x ||
-      Pt2b.x > Pt1a.x === Pt2b.x < Pt1b.x ||
-      (Pt1a.x === Pt2a.x && Pt1b.x === Pt2b.x) ||
-      (Pt1a.x === Pt2b.x && Pt1b.x === Pt2a.x)
+            Pt1b.x > Pt2a.x === Pt1b.x < Pt2b.x ||
+            Pt2a.x > Pt1a.x === Pt2a.x < Pt1b.x ||
+            Pt2b.x > Pt1a.x === Pt2b.x < Pt1b.x ||
+            (Pt1a.x === Pt2a.x && Pt1b.x === Pt2b.x) ||
+            (Pt1a.x === Pt2b.x && Pt1b.x === Pt2a.x)
     );
   }
 
@@ -295,19 +299,20 @@ export default class Point {
     pt1: Point,
     pt2: Point,
     pt3: Point,
-    useFullRange: boolean,
+    useFullRange: boolean
   ): boolean {
     return slopesEqual(
       pt1.y - pt2.y,
       pt2.x - pt3.x,
       pt1.x - pt2.x,
       pt2.y - pt3.y,
-      useFullRange,
+      useFullRange
     );
   }
 
   public static create(x: number, y: number): Point {
     const data = new Float64Array(2);
+
     data[0] = x;
     data[1] = y;
 
@@ -326,7 +331,7 @@ export default class Point {
     return [
       point2.y - point1.y,
       point1.x - point2.x,
-      point2.x * point1.y - point1.x * point2.y,
+      point2.x * point1.y - point1.x * point2.y
     ];
   }
 
@@ -334,13 +339,15 @@ export default class Point {
     if (useFullRange) {
       if (
         Math.abs(point.x) > Point.HIGH_RANGE ||
-        Math.abs(point.y) > Point.HIGH_RANGE
+                Math.abs(point.y) > Point.HIGH_RANGE
       ) {
-        console.warn("Coordinate outside allowed range in rangeTest().");
+        console.warn(
+          'Coordinate outside allowed range in rangeTest().'
+        );
       }
     } else if (
       Math.abs(point.x) > Point.LOW_RANGE ||
-      Math.abs(point.y) > Point.LOW_RANGE
+            Math.abs(point.y) > Point.LOW_RANGE
     ) {
       return Point.rangeTest(point, true);
     }
@@ -351,11 +358,13 @@ export default class Point {
   public static pointsAreClose(
     point1: Point,
     point2: Point,
-    distSqrd: number,
+    distSqrd: number
   ): boolean {
     return Point.from(point1).len2(point2) <= distSqrd;
   }
 
   private static LOW_RANGE = 47453132; // sqrt(2^53 -1)/2
+
   private static HIGH_RANGE = 4503599627370495; // sqrt(2^106 -1)/2
+
 }

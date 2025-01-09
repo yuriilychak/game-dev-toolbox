@@ -11,5 +11,5 @@ export const PREVIEW_COMPONENTS: Map<
   [LIBRARY_FILE_TYPE.IMAGE, ImagePreview as SingleFileComponent],
   [LIBRARY_FILE_TYPE.TEXTURE_ATLAS, TextureAtlasPreview as SingleFileComponent],
   [LIBRARY_FILE_TYPE.NONE, null],
-  [LIBRARY_FILE_TYPE.FOLDER, FolderPreview as SingleFileComponent],
+  [LIBRARY_FILE_TYPE.FOLDER, FolderPreview as SingleFileComponent]
 ]);

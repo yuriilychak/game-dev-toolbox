@@ -7,7 +7,12 @@ export type NestConfig = {
     readonly useHoles: boolean;
 };
 
-export type DisplayCallback = (placement: string, placePerecntage: number, lacedParts: number, partCount: number) => void;
+export type DisplayCallback = (
+    placement: string,
+    placePerecntage: number,
+    lacedParts: number,
+    partCount: number
+) => void;
 
 export type PolygonNode = {
     source: number;

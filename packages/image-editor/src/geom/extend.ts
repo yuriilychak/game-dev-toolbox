@@ -1,20 +1,20 @@
-import { BOUND } from "../enums";
-import { cycleIndex } from "../utils";
-import BoundRect from "./bound-rect";
+import { BOUND } from '../enums';
+import { cycleIndex } from '../utils';
+import BoundRect from './bound-rect';
 import {
   EXTEND_SIZE,
   MAX_SIMPLIFY_DISTANCE,
-  MIN_SQUARE_DIFF,
-} from "./constants";
-import Point from "./point";
-import { getPointIndex, getQuadrilateralArea } from "./utils";
+  MIN_SQUARE_DIFF
+} from './constants';
+import Point from './point';
+import { getPointIndex, getQuadrilateralArea } from './utils';
 
 type SqareResult = {
-  index: number;
-  neighboarIndex: number;
-  squareDiff: number;
-  current: Point | null;
-  neighboar: Point | null;
+    index: number;
+    neighboarIndex: number;
+    squareDiff: number;
+    current: Point | null;
+    neighboar: Point | null;
 };
 
 function getSeqareCriterias(
@@ -22,19 +22,20 @@ function getSeqareCriterias(
   boundRect: BoundRect,
   index: number,
   offset: number,
-  threshold: number,
+  threshold: number
 ) {
   const pointCount: number = points.length;
   const current: Point = points[index];
   const neighboarIndex: number = cycleIndex(index, pointCount, offset);
   const neighboar1: Point = points[neighboarIndex];
-  const neighboar2: Point = points[cycleIndex(index, pointCount, -1 * offset)];
+  const neighboar2: Point =
+        points[cycleIndex(index, pointCount, -1 * offset)];
   const neighboar3: Point = points[cycleIndex(index, pointCount, 2 * offset)];
   const initialArea = getQuadrilateralArea(
     neighboar2,
     current,
     neighboar1,
-    neighboar3,
+    neighboar3
   );
   const bounds = boundRect.getSegmentIntersectBounds(current, neighboar1);
   const bondCount: number = bounds.length;
@@ -43,7 +44,7 @@ function getSeqareCriterias(
     neighboarIndex,
     squareDiff: MIN_SQUARE_DIFF,
     current: null,
-    neighboar: null,
+    neighboar: null
   };
   let bound: BOUND = BOUND.LEFT;
   let i: number = 0;
@@ -56,7 +57,7 @@ function getSeqareCriterias(
 
     if (
       boundRect.contains(neighboar1) &&
-      boundRect.getDistance(neighboar1, bound) > threshold
+            boundRect.getDistance(neighboar1, bound) > threshold
     ) {
       continue;
     }
@@ -72,7 +73,7 @@ function getSeqareCriterias(
       neighboar2,
       newCurrent,
       newNeighboar,
-      neighboar3,
+      neighboar3
     );
 
     if (result.squareDiff < initialArea - currentArea) {
@@ -88,7 +89,7 @@ function getSeqareCriterias(
 function optimizeSimplifiedContour(
   simplified: Point[],
   original: Point[],
-  threshold: number,
+  threshold: number
 ): Point[] {
   if (simplified.length <= 4) {
     return simplified;
@@ -110,35 +111,35 @@ function optimizeSimplifiedContour(
         boundRect,
         i,
         1,
-        threshold,
+        threshold
       );
       const criteria2 = getSeqareCriterias(
         simplified,
         boundRect,
         i,
         -1,
-        threshold,
+        threshold
       );
 
       if (
         criteria1.squareDiff === MIN_SQUARE_DIFF &&
-        criteria2.squareDiff === MIN_SQUARE_DIFF
+                criteria2.squareDiff === MIN_SQUARE_DIFF
       ) {
         continue;
       }
 
       if (
         criteria1.squareDiff !== MIN_SQUARE_DIFF &&
-        criteria2.squareDiff !== MIN_SQUARE_DIFF
+                criteria2.squareDiff !== MIN_SQUARE_DIFF
       ) {
         simplified[i].x =
-          criteria1.current.x === criteria1.neighboar.x
-            ? criteria1.current.x
-            : criteria2.current.x;
+                    criteria1.current.x === criteria1.neighboar.x
+                      ? criteria1.current.x
+                      : criteria2.current.x;
         simplified[i].y =
-          criteria1.current.y === criteria1.neighboar.y
-            ? criteria1.current.y
-            : criteria2.current.y;
+                    criteria1.current.y === criteria1.neighboar.y
+                      ? criteria1.current.y
+                      : criteria2.current.y;
         simplified[criteria1.neighboarIndex] = criteria1.neighboar;
         simplified[criteria2.neighboarIndex] = criteria2.neighboar;
       } else if (criteria1.squareDiff > criteria2.squareDiff) {
@@ -171,7 +172,7 @@ function findIntersection(line1: Int32Array, line2: Int32Array): Point | null {
 
 export default function extend(
   originalContour: Point[],
-  simplifiedContour: Point[],
+  simplifiedContour: Point[]
 ): Point[] {
   const contourSize: number = originalContour.length;
   const polygonSize: number = simplifiedContour.length;
@@ -235,7 +236,7 @@ export default function extend(
   const res = optimizeSimplifiedContour(
     result,
     originalContour,
-    MAX_SIMPLIFY_DISTANCE,
+    MAX_SIMPLIFY_DISTANCE
   );
 
   return res;

@@ -7,10 +7,10 @@ import { IconMap } from "../../../types";
 
 export const EXPAND_ICONS: IconMap<boolean> = new Map([
   [true, ExpandMoreIcon],
-  [false, NavigateNextIcon],
+  [false, NavigateNextIcon]
 ]);
 
 export const ITEM_ACTIONS: Map<boolean, LIBRARY_ACTION[]> = new Map([
   [true, [LIBRARY_ACTION.SUBMIT, LIBRARY_ACTION.CANCEL]],
-  [false, [LIBRARY_ACTION.RENAME, LIBRARY_ACTION.DELETE]],
+  [false, [LIBRARY_ACTION.RENAME, LIBRARY_ACTION.DELETE]]
 ]);

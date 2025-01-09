@@ -1,12 +1,12 @@
-import { memo, FC } from "react";
+import { memo } from 'react';
 
-import Stack from "@mui/material/Stack";
-import Typography from "@mui/material/Typography";
+import Stack from '@mui/material/Stack';
+import Typography from '@mui/material/Typography';
 
-import { LIBRARY_ITEM_ICONS } from "../../../constants";
-import { FilePreview } from "./file-preview";
-import { FileEdit } from "./file-edit";
-import type { FilesComponent } from "../types";
+import { LIBRARY_ITEM_ICONS } from '../../../constants';
+import { FilePreview } from './file-preview';
+import { FileEdit } from './file-edit';
+import type { FilesComponent } from '../types';
 
 const SingleFileSection: FilesComponent = ({ files }) => {
   const file = files[0];

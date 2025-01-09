@@ -13,7 +13,7 @@ const getLabelExists = (label: string, nodes: LibraryFile[]): boolean =>
 const findItemsAtLevel = (
   id: string,
   items: LibraryFile[],
-  parentItems: LibraryFile[] | null = null,
+  parentItems: LibraryFile[] | null = null
 ): LibraryFile[] | null =>
   items.reduce<LibraryFile[] | null>((result, node) => {
     switch (true) {
@@ -49,38 +49,39 @@ function sortLayer(a: LibraryFile, b: LibraryFile): number {
 const updateLabel = (
   node: LibraryFile,
   nodes: LibraryFile[],
-  label: string = node.label,
+  label: string = node.label
 ): LibraryFile => ({ ...node, label: getUniqueLabel(label, nodes) });
 
 const updateChildren = (
   node: LibraryFile,
   children: LibraryFile[],
-  isSort: boolean = true,
+  isSort: boolean = true
 ): LibraryFile => ({
   ...node,
-  children: isSort ? children.sort(sortLayer) : children,
+  children: isSort ? children.sort(sortLayer) : children
 });
 
 const getExecutionResult = (
-  tree: LibraryFile[] = [],
+  tree: LibraryFile[] = []
 ): BasicExecutionResult => ({
   tree,
-  isExecuted: tree.length !== 0,
+  isExecuted: tree.length !== 0
 });
 
 export function deleteItems(
   tree: LibraryFile[],
-  ids: string[],
+  ids: string[]
 ): DeleteExecutionResult {
   const result: DeleteExecutionResult = {
     tree: [],
     isExecuted: false,
     ids: ids.slice(),
-    removedItems: [],
+    removedItems: []
   };
 
   if (ids.length === 0) {
     result.tree = tree;
+
     return result;
   }
 
@@ -98,7 +99,7 @@ export function deleteItems(
         result.isExecuted = true;
         result.ids = childrenData.ids;
         result.removedItems = result.removedItems.concat(
-          childrenData.removedItems,
+          childrenData.removedItems
         );
         result.tree.push(updateChildren(node, childrenData.tree, false));
       } else {
@@ -121,7 +122,7 @@ export function deleteItems(
 export function getUniqueLabel(
   label: string,
   tree: LibraryFile[],
-  parentId: string | null = null,
+  parentId: string | null = null
 ): string {
   // Отримуємо масив елементів на вказаному рівні дерева або у батьківському рівні
   const nodes: LibraryFile[] | null =
@@ -129,7 +130,7 @@ export function getUniqueLabel(
 
   if (nodes === null) {
     throw new Error(
-      "Parent ID not found in the tree or no valid items at this level.",
+      "Parent ID not found in the tree or no valid items at this level."
     );
   }
 
@@ -152,11 +153,11 @@ export function getUniqueLabel(
 
 const insertItemsWithRename = (
   nodesToInsert: LibraryFile[],
-  prevNodes: LibraryFile[],
+  prevNodes: LibraryFile[]
 ): LibraryFile[] =>
   nodesToInsert
     .reduce((result, node) => {
-      let resultNode: LibraryFile = getLabelExists(node.label, result)
+      const resultNode: LibraryFile = getLabelExists(node.label, result)
         ? updateLabel(node, result)
         : node;
 
@@ -169,7 +170,7 @@ const insertItemsWithRename = (
 export function insertItems(
   inputTree: LibraryFile[],
   nodesToInsert: LibraryFile[],
-  id: string | null,
+  id: string | null
 ): BasicExecutionResult {
   if (id === null || id === ROOT_ID) {
     return getExecutionResult(insertItemsWithRename(nodesToInsert, inputTree));
@@ -202,7 +203,7 @@ export function insertItems(
 export function moveItems(
   inputTree: LibraryFile[],
   ids: string[],
-  parentId: string | null,
+  parentId: string | null
 ): LibraryFile[] {
   const { tree, removedItems } = deleteItems(inputTree, ids);
 
@@ -212,7 +213,7 @@ export function moveItems(
 export const renameItem = (
   inputTree: LibraryFile[],
   id: string,
-  label: string,
+  label: string
 ): BasicExecutionResult =>
   inputTree.reduce<BasicExecutionResult>((result, node) => {
     let updatedNode: LibraryFile = null;
@@ -241,7 +242,7 @@ export const createNode = (): LibraryFile<LIBRARY_FILE_TYPE.FOLDER> => ({
   type: LIBRARY_FILE_TYPE.FOLDER,
   children: [],
   label: "New Folder",
-  data: null,
+  data: null
 });
 
 export const createTextureAtlas =
@@ -255,6 +256,6 @@ export const createTextureAtlas =
       placement: [] as object[],
       isGenerated: false,
       width: 4096,
-      height: 4096,
-    },
+      height: 4096
+    }
   });

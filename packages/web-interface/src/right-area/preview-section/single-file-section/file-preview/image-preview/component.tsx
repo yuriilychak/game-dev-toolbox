@@ -9,7 +9,7 @@ import { StatisticsContainer } from "../statistics-container";
 import { PREVIEW_CHECKER } from "../../../constants";
 
 const ImagePreview: SingleFileComponent<LIBRARY_FILE_TYPE.IMAGE> = ({
-  file,
+  file
 }) => {
   const [isCanvasLoaded, setCanvasLoaded] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -32,7 +32,7 @@ const ImagePreview: SingleFileComponent<LIBRARY_FILE_TYPE.IMAGE> = ({
       const context = canvasRef.current.getContext("2d");
       const imageScale = Math.min(
         (canvas.width - 8) / file.data.src.width,
-        (canvas.height - 8) / file.data.src.height,
+        (canvas.height - 8) / file.data.src.height
       );
       const imageWidth = Math.round(file.data.src.width * imageScale);
       const imageHeight = Math.round(file.data.src.height * imageScale);
@@ -51,7 +51,7 @@ const ImagePreview: SingleFileComponent<LIBRARY_FILE_TYPE.IMAGE> = ({
         `Format: ${file.data.extension}`,
         `Size: ${formatSize(file.data.size)}`,
         `Width: ${file.data.src.width}px`,
-        `Height: ${file.data.src.height}px`,
+        `Height: ${file.data.src.height}px`
       ]}
     >
       <Box component="canvas" width="100%" height={128} ref={canvasRef} />

@@ -27,10 +27,10 @@ const App: FC = () => {
                 borderRadius: 0,
                 boxShadow: "none",
                 "&:before": {
-                  display: "none",
-                },
-              },
-            },
+                  display: "none"
+                }
+              }
+            }
           },
           MuiAccordionSummary: {
             styleOverrides: {
@@ -41,25 +41,25 @@ const App: FC = () => {
                 minHeight: 32,
                 "&.Mui-expanded": {},
                 ".MuiAccordionSummary-content": {
-                  margin: 0,
-                },
-              },
-            },
+                  margin: 0
+                }
+              }
+            }
           },
           MuiAccordionDetails: {
             styleOverrides: {
               root: {
                 borderRadius: 0,
                 padding: 0,
-                boxShadow: "none",
-              },
-            },
-          },
+                boxShadow: "none"
+              }
+            }
+          }
         },
         typography: { fontFamily: "Arial" },
-        palette: { mode: "dark" },
+        palette: { mode: "dark" }
       }),
-    [],
+    []
   );
   const { t } = useTranslation();
   const [libararyTree, setLibraryTree] = useState<LibraryFile[]>([]);
@@ -72,15 +72,15 @@ const App: FC = () => {
       prevFiles.map(
         (file) =>
           updatedFiles.find((updatedFile) => updatedFile.id === file.id) ||
-          file,
-      ),
+          file
+      )
     );
     setLibraryTree((prevTree) =>
       updatedFiles.reduce((result, file) => {
         updateNode(result, file);
 
         return result;
-      }, prevTree.slice()),
+      }, prevTree.slice())
     );
     setProcessing(false);
   }, []);
@@ -95,23 +95,24 @@ const App: FC = () => {
       focusedId: libraryFocusedId,
       onTreeChange: setLibraryTree,
       onFocusChanged: setLibraryFocusedId,
-      onSelectionChanged: setLibrarySelectedFiles,
+      onSelectionChanged: setLibrarySelectedFiles
     }),
     [
       libararyTree,
       libraryFocusedId,
       onFilesChanged,
       onProcessing,
-      isProcessing,
-    ],
+      isProcessing
+    ]
   );
   const previewData = useMemo<PreviewContextData>(
     () => ({ selectedFiles, onFilesChanged, onProcessing, tree: libararyTree }),
-    [selectedFiles, onFilesChanged, onProcessing, libararyTree],
+    [selectedFiles, onFilesChanged, onProcessing, libararyTree]
   );
 
   useEffect(() => {
     const metaElement = document.getElementById("metaDescription");
+
     document.title = t("root.title");
 
     metaElement.setAttribute("content", t("root.description"));

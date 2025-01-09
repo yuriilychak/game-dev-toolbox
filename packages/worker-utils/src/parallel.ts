@@ -1,10 +1,11 @@
-﻿import { WORKER_TYPE } from "./enums";
-import { default as getWorker } from "./workers";
+﻿import { WORKER_TYPE } from './enums';
+import { default as getWorker } from './workers';
 
 export default class Parallel<InputType, OutputType> {
-  #threadsUsage: boolean[] = new Array(Parallel.THREAD_COUNT);
 
-  #threads: Worker[] = new Array(Parallel.THREAD_COUNT);
+  #threadsUsage: boolean[] = new Array<boolean>(Parallel.THREAD_COUNT);
+
+  #threads: Worker[] = new Array<Worker>(Parallel.THREAD_COUNT);
 
   #input: InputType[] = null;
 
@@ -35,10 +36,11 @@ export default class Parallel<InputType, OutputType> {
     onSuccess: (result: OutputType[]) => void,
     onError: (error: ErrorEvent) => void,
     onTrigger: (input: InputType) => Transferable[] = () => [],
-    onSpawn: (spawned: number, completed: number) => void = null,
+    onSpawn: (spawned: number, completed: number) => void = null
   ): boolean {
     if (input.length === 0) {
-      this.onError(new ErrorEvent("Empty data"));
+      this.onError(new ErrorEvent('Empty data'));
+
       return false;
     }
 
@@ -189,7 +191,7 @@ export default class Parallel<InputType, OutputType> {
   private get hasFreeThreads(): boolean {
     return (
       this.startedThreads < this.totalThreads &&
-      this.#threadsUsage.includes(false)
+            this.#threadsUsage.includes(false)
     );
   }
 
@@ -203,6 +205,7 @@ export default class Parallel<InputType, OutputType> {
 
   public static readonly THREAD_COUNT: number = Math.min(
     navigator.hardwareConcurrency || Parallel.MIN_THREAD_COUNT,
-    Parallel.MAX_THREAD_COUNT,
+    Parallel.MAX_THREAD_COUNT
   );
+
 }

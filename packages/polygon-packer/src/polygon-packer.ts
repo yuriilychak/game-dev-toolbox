@@ -6,6 +6,7 @@ import NFPStore from "./nfp-store";
 import { BoundRect, DisplayCallback, NestConfig, PolygonNode } from "./types";
 
 export default class PolygonPacker {
+
   #geneticAlgorithm = new GeneticAlgorithm();
 
   #binNode: PolygonNode = null;
@@ -40,7 +41,7 @@ export default class PolygonPacker {
     polygons: Float64Array[],
     binPolygon: Float64Array,
     progressCallback: (progress: number) => void,
-    displayCallback: DisplayCallback,
+    displayCallback: DisplayCallback
   ): void {
     const clipperWrapper = new ClipperWrapper(configuration);
     const binData = clipperWrapper.generateBounds(binPolygon);
@@ -68,7 +69,7 @@ export default class PolygonPacker {
     this.#nfpStore.init(
       this.#geneticAlgorithm.individual,
       this.#binNode,
-      configuration,
+      configuration
     );
     this.#paralele.start(
       this.#nfpStore.nfpPairs,
@@ -76,7 +77,7 @@ export default class PolygonPacker {
         this.onPair(configuration, generatedNfp, displayCallback),
       this.onError,
       PolygonPacker.handleTrigger,
-      this.onSpawn,
+      this.onSpawn
     );
   }
 
@@ -87,7 +88,7 @@ export default class PolygonPacker {
   private onPair(
     configuration: NestConfig,
     generatedNfp: ArrayBuffer[],
-    displayCallback: DisplayCallback,
+    displayCallback: DisplayCallback
   ): void {
     this.#nfpStore.update(generatedNfp);
 
@@ -97,14 +98,14 @@ export default class PolygonPacker {
       (placements: ArrayBuffer[]) =>
         this.onPlacement(configuration, placements, displayCallback),
       this.onError,
-      PolygonPacker.handleTrigger,
+      PolygonPacker.handleTrigger
     );
   }
 
   private onPlacement(
     configuration: NestConfig,
     placements: ArrayBuffer[],
-    displayCallback: DisplayCallback,
+    displayCallback: DisplayCallback
   ): void {
     if (placements.length === 0) {
       return;
@@ -113,6 +114,7 @@ export default class PolygonPacker {
     let i: number = 0;
     let placementsData: Float64Array = new Float64Array(placements[0]);
     let currentPlacement: Float64Array = null;
+
     this.#nfpStore.fitness = placementsData[0];
 
     for (i = 1; i < placements.length; ++i) {
@@ -164,7 +166,7 @@ export default class PolygonPacker {
         placementsData,
         nodes: this.#nodes,
         bounds: this.#binBounds,
-        angleSplit: configuration.rotations,
+        angleSplit: configuration.rotations
       };
     }
 
@@ -196,4 +198,5 @@ export default class PolygonPacker {
   private static handleTrigger(input: ArrayBuffer): ArrayBuffer[] {
     return [input];
   }
+
 }

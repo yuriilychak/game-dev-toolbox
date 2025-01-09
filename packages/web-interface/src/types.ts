@@ -44,7 +44,7 @@ export type PreviewContextData = {
   onFilesChanged(files: LibraryFile[]): void;
 };
 
-export interface FieldOption {
+export type FieldOption = {
   label: string;
   value: string | number;
   disabled?: boolean;

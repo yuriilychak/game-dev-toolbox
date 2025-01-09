@@ -1,5 +1,5 @@
-import { cycleIndex } from "../utils";
-import Point from "./point";
+import { cycleIndex } from '../utils';
+import Point from './point';
 
 function generateOffsets(): Point[] {
   const maxOffset: number = 1;
@@ -38,7 +38,7 @@ function getPolygonValid(polygon: Point[], contour: Point[]): boolean {
 
 export function optimizeSimplifiedPolygon(
   polygon: Point[],
-  contour: Point[],
+  contour: Point[]
 ): Point[] {
   const optimizedPolygon: Point[] = polygon.map((point) => point.clone());
   const tempPolygon: Point[] = polygon.map((point) => point.clone());
@@ -65,11 +65,15 @@ export function optimizeSimplifiedPolygon(
         indices[j] = cycleIndex(i, pointCount, j - 1);
       }
 
-      tempPolygon.forEach((point, index) => point.set(optimizedPolygon[index]));
+      tempPolygon.forEach((point, index) =>
+        point.set(optimizedPolygon[index])
+      );
 
       for (const offset1 of offsets) {
         currIndex = indices[0];
-        tempPolygon[currIndex].set(optimizedPolygon[currIndex]).add(offset1);
+        tempPolygon[currIndex]
+          .set(optimizedPolygon[currIndex])
+          .add(offset1);
 
         if (tempPolygon[currIndex].getInside(contour)) {
           continue;
@@ -77,7 +81,9 @@ export function optimizeSimplifiedPolygon(
 
         for (const offset2 of offsets) {
           currIndex = indices[1];
-          tempPolygon[currIndex].set(optimizedPolygon[currIndex]).add(offset2);
+          tempPolygon[currIndex]
+            .set(optimizedPolygon[currIndex])
+            .add(offset2);
 
           if (tempPolygon[currIndex].getInside(contour)) {
             continue;
@@ -95,12 +101,17 @@ export function optimizeSimplifiedPolygon(
 
             currArea = Math.abs(Point.getArea(tempPolygon));
 
-            if (currArea < bestArea && getPolygonValid(tempPolygon, contour)) {
+            if (
+              currArea < bestArea &&
+                            getPolygonValid(tempPolygon, contour)
+            ) {
               bestArea = currArea;
 
               for (j = 0; j < indexCount; ++j) {
                 currIndex = indices[j];
-                optimizedPolygon[currIndex].set(tempPolygon[currIndex]);
+                optimizedPolygon[currIndex].set(
+                  tempPolygon[currIndex]
+                );
               }
 
               isImproved = true;

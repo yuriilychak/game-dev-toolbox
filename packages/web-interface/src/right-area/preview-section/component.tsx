@@ -1,17 +1,17 @@
-import { memo, FC, useContext, useMemo } from "react";
+import { memo, FC, useContext } from 'react';
 
-import Stack from "@mui/material/Stack";
-import Typography from "@mui/material/Typography";
+import Stack from '@mui/material/Stack';
+import Typography from '@mui/material/Typography';
 
-import { PreviewContext } from "../../contexts";
-import { SingleFileSection } from "./single-file-section";
-import { MultiFileSection } from "./multi-file-section";
-import { FilesComponent } from "./types";
+import { PreviewContext } from '../../contexts';
+import { SingleFileSection } from './single-file-section';
+import { MultiFileSection } from './multi-file-section';
+import { FilesComponent } from './types';
 
 const FILE_COMPONENTS: (FilesComponent | null)[] = [
   null,
   SingleFileSection,
-  MultiFileSection,
+  MultiFileSection
 ];
 
 const PreviewSection: FC = () => {

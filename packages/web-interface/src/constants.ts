@@ -18,43 +18,43 @@ export const LIBRARY_ITEM_TYPE_LOCALES: LocaleMap<LIBRARY_FILE_TYPE> = new Map([
   [LIBRARY_FILE_TYPE.IMAGE, "fileType.image"],
   [LIBRARY_FILE_TYPE.TEXTURE_ATLAS, "fileType.textureAtlas"],
   [LIBRARY_FILE_TYPE.FOLDER, "fileType.folder"],
-  [LIBRARY_FILE_TYPE.NONE, "fileType.none"],
+  [LIBRARY_FILE_TYPE.NONE, "fileType.none"]
 ]);
 
 export const IMAGE_TYPE_LOCALES: LocaleMap<IMAGE_TYPE> = new Map([
   [IMAGE_TYPE.QUAD, "imageType.quad"],
   [IMAGE_TYPE.POLYGON, "imageType.polygon"],
-  [IMAGE_TYPE.MESH, "imageType.mesh"],
+  [IMAGE_TYPE.MESH, "imageType.mesh"]
 ]);
 
 export const LIBRARY_ITEM_ICONS: IconMap<LIBRARY_FILE_TYPE> = new Map([
   [LIBRARY_FILE_TYPE.FOLDER, FolderIcon],
   [LIBRARY_FILE_TYPE.IMAGE, ImageIcon],
   [LIBRARY_FILE_TYPE.TEXTURE_ATLAS, TextureIcon],
-  [LIBRARY_FILE_TYPE.NONE, WarningIcon],
+  [LIBRARY_FILE_TYPE.NONE, WarningIcon]
 ]);
 
 export const IMAGE_TYPE_ICONS: IconMap<IMAGE_TYPE> = new Map([
   [IMAGE_TYPE.QUAD, RectangleIcon],
   [IMAGE_TYPE.POLYGON, PolylineIcon],
-  [IMAGE_TYPE.MESH, Grid4x4Icon],
+  [IMAGE_TYPE.MESH, Grid4x4Icon]
 ]);
 
 export const GLOBAL_STYLES: Record<string, SxProps> = {
   "*": {
     scrollbarColor: "white rgba(0, 0, 0, 0)",
-    scrollbarWidth: "thin",
+    scrollbarWidth: "thin"
   },
   body: {
     fontFamily: "Arial",
     width: "100vw",
     height: "100vh",
     margin: 0,
-    background: "black",
+    background: "black"
   },
   "#app": {
     width: "100vw",
     height: "100vh",
-    background: "black",
-  },
+    background: "black"
+  }
 };

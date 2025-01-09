@@ -12,7 +12,7 @@ const TextureAtlasPreview: SingleFileComponent<
       `ImageCount: ${file.data.images.length}`,
       `Generated: ${file.data.isGenerated}`,
       `Width: ${file.data.width}px`,
-      `Height: ${file.data.height}px`,
+      `Height: ${file.data.height}px`
     ]}
   />
 );

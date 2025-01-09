@@ -1,0 +1,10 @@
+{
+    "bracketSpacing": true,
+    "paddedBlocks": "never",
+    "semi": true,
+    "singleQuote": true,
+    "tabWidth": 2,
+    "useTabs": false,
+    "trailingComma": "none",
+    "requirePragma": false
+}

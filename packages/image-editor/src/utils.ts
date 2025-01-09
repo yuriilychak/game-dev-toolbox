@@ -3,7 +3,7 @@ import type {
   ImageFileData,
   ImageTransformWorkerInput,
   ImageTransformWorkerResult,
-  LibraryImageData,
+  LibraryImageData
 } from "./types";
 import { QUAD_TRIANGLES } from "./constants";
 import { IMAGE_TYPE } from "./enums";
@@ -11,11 +11,11 @@ import { IMAGE_TYPE } from "./enums";
 const onTransfer = (input: ImageFileData) => [input.buffer];
 
 export async function formatImageData(
-  fileData: ImageFileData[],
+  fileData: ImageFileData[]
 ): Promise<LibraryImageData[]> {
   return new Promise((resolve, reject) => {
     const workerPool = new Parallel<ImageFileData, LibraryImageData>(
-      WORKER_TYPE.CROP_IMAGE,
+      WORKER_TYPE.CROP_IMAGE
     );
 
     workerPool.start(fileData, resolve, reject, onTransfer);
@@ -26,7 +26,7 @@ export function transformImageData(
   input: ImageTransformWorkerInput[],
   onSuccess: (result: ImageTransformWorkerResult[]) => void,
   onError: (error: ErrorEvent) => void,
-  onSpawn: (spawned: number, completed: number) => void,
+  onSpawn: (spawned: number, completed: number) => void
 ) {
   const workerPool = new Parallel<
     ImageTransformWorkerInput,
@@ -40,7 +40,7 @@ export function transformImageData(
 export function cycleIndex(
   index: number,
   size: number,
-  offset: number,
+  offset: number
 ): number {
   return (index + size + offset) % size;
 }
@@ -52,7 +52,7 @@ function getIndex(x: number, y: number, width: number) {
 export async function cropImageBitmap(
   inputImageBitmap: ImageBitmap,
   type: string,
-  context: OffscreenCanvasRenderingContext2D,
+  context: OffscreenCanvasRenderingContext2D
 ): Promise<ImageBitmap> {
   if (type.includes("jpeg")) {
     return inputImageBitmap;
@@ -60,8 +60,9 @@ export async function cropImageBitmap(
 
   const bitmapSize: Uint16Array = new Uint16Array([
     inputImageBitmap.width,
-    inputImageBitmap.height,
+    inputImageBitmap.height
   ]);
+
   context.clearRect(0, 0, bitmapSize[0], bitmapSize[0]);
   context.drawImage(inputImageBitmap, 0, 0);
 
@@ -69,11 +70,11 @@ export async function cropImageBitmap(
     0,
     0,
     bitmapSize[0],
-    bitmapSize[1],
+    bitmapSize[1]
   );
   const last: Uint16Array = new Uint16Array([
     bitmapSize[0] - 1,
-    bitmapSize[1] - 1,
+    bitmapSize[1] - 1
   ]);
   const min: Int16Array = new Int16Array([-1, -1]);
   const max: Int16Array = new Int16Array([-1, -1]);
@@ -147,14 +148,14 @@ export async function cropImageBitmap(
     targetStart = y * widthOffset;
     croppedData.set(
       data.subarray(sourceStart, sourceStart + widthOffset),
-      targetStart,
+      targetStart
     );
   }
 
   const croppedImageData = new ImageData(
     croppedData,
     bitmapSize[0],
-    bitmapSize[1],
+    bitmapSize[1]
   );
 
   return await createImageBitmap(croppedImageData);
@@ -169,7 +170,7 @@ export function getQuadPolygon(imageBitmap: ImageBitmap): Uint16Array {
     imageBitmap.width,
     imageBitmap.height,
     0,
-    imageBitmap.height,
+    imageBitmap.height
   ]);
 }
 
@@ -178,7 +179,7 @@ const FIVE_BIT_MASK: number = 0b11111;
 export function serializeTriangleIndices(
   index1: number,
   index2: number,
-  index3: number,
+  index3: number
 ): number {
   return (
     (index1 & FIVE_BIT_MASK) |
@@ -193,7 +194,7 @@ export function getTriangleIndex(source: number, index: number): number {
 
 export async function cropImage(
   data: ImageFileData,
-  context: OffscreenCanvasRenderingContext2D,
+  context: OffscreenCanvasRenderingContext2D
 ): Promise<LibraryImageData> {
   const { buffer, type, label } = data;
   const blob = new Blob([buffer], { type });
@@ -201,7 +202,7 @@ export async function cropImage(
   const imageBitmap: ImageBitmap = await cropImageBitmap(
     inputImageBitmap,
     type,
-    context,
+    context
   );
   const labelSplit = label.split(".");
   const extension = labelSplit.pop().toUpperCase();
@@ -217,6 +218,6 @@ export async function cropImage(
     inputLabel,
     type: IMAGE_TYPE.QUAD,
     polygons: [polygon],
-    triangles: [triangles],
+    triangles: [triangles]
   };
 }

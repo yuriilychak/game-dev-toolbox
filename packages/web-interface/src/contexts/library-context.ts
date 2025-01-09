@@ -11,7 +11,7 @@ const LibraryContext = createContext<LibraryContextData>({
   onProcessing: emptyCallback,
   onTreeChange: emptyCallback,
   onSelectionChanged: emptyCallback,
-  onFocusChanged: emptyCallback,
+  onFocusChanged: emptyCallback
 });
 
 export default LibraryContext;

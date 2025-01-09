@@ -4,7 +4,7 @@ import { MultiFileSection } from "../../../multi-file-section";
 import type { SingleFileComponent } from "../../types";
 
 const FolderEdit: SingleFileComponent<LIBRARY_FILE_TYPE.FOLDER> = ({
-  file,
+  file
 }) => {
   const files = flattenFiles([file]);
 

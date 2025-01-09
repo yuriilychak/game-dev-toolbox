@@ -34,7 +34,7 @@ function ActionModal<T extends number = SHARED_ACTION>({
   dividerIndex = 0,
   actions,
   onAction,
-  fotterContent = null,
+  fotterContent = null
 }: ActionModalProps<T>) {
   return (
     <Modal open={open} sx={STYLES.ROOT}>

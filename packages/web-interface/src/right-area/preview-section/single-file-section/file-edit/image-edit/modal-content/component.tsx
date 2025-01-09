@@ -31,7 +31,7 @@ const ModalContent: FC<{
     handleChangeType,
     handleAction,
     handleToggleBorder,
-    handleValueText,
+    handleValueText
   } = useImageEdit(file, onClose);
 
   return (

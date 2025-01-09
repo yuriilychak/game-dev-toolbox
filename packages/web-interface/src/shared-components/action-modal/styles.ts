@@ -7,15 +7,15 @@ const STYLES: Record<string, SxProps> = {
     display: "flex",
     flexDirection: "column",
     gap: 2,
-    overflow: "hidden",
+    overflow: "hidden"
   },
   FOOTER: {
     gap: 1,
     flexDirection: "row",
     height: 48,
     alignItems: "center",
-    justifyContent: "end",
-  },
+    justifyContent: "end"
+  }
 };
 
 export default STYLES;
