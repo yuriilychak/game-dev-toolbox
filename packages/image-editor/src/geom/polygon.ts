@@ -1,4 +1,3 @@
-// @ts-expect-error no ts-defintion
 import poly2tri from 'poly2tri';
 
 import BoundRect from './bound-rect';
@@ -101,12 +100,12 @@ export default class Polygon {
     this._polygon = this._boundRect.exportPolygon();
   }
 
-  private triangulate(convexPolygon: Point[]): number {
+  private triangulate(convexPolygon: poly2tri.Point[]): number[] {
     const sweepContext = new poly2tri.SweepContext(convexPolygon);
     const triangulation = sweepContext.triangulate().getTriangles();
 
-    return triangulation.map((triangle: { points_: Point[] }) => {
-      const indices = triangle.points_.map((vertex: Point) =>
+    return triangulation.map((triangle: poly2tri.Triangle) => {
+      const indices = triangle.getPoints().map((vertex: Point) =>
         getPointIndex(this._polygon, vertex)
       );
 
