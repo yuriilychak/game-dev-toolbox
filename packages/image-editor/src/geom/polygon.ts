@@ -29,7 +29,11 @@ export default class Polygon {
     } else {
       const simplifiedPolygon = simplifyPolygon(contour);
 
-      this._polygon = extend(contour, simplifiedPolygon);
+      const extendedPolygon = extend(contour, simplifiedPolygon);
+
+      const secondIteration = simplifyPolygon(extendedPolygon);
+
+      this._polygon = extend(extendedPolygon, secondIteration, 0);
 
       this._boundRect = BoundRect.fromPoints(this._polygon);
     }

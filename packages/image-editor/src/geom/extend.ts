@@ -172,7 +172,8 @@ function findIntersection(line1: Int32Array, line2: Int32Array): Point | null {
 
 export default function extend(
   originalContour: Point[],
-  simplifiedContour: Point[]
+  simplifiedContour: Point[],
+  size: number = EXTEND_SIZE
 ): Point[] {
   const contourSize: number = originalContour.length;
   const polygonSize: number = simplifiedContour.length;
@@ -206,7 +207,7 @@ export default function extend(
         const point = originalContour[j % contourSize];
         const value = line[0] * point.x + line[1] * point.y + line[2];
 
-        if (value < 0 || point.lineDistance(line) < EXTEND_SIZE) {
+        if (value < 0 || point.lineDistance(line) < size) {
           line[2] += 1;
           isLineInvalid = true;
           break;
