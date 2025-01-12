@@ -1,23 +1,27 @@
-import { FC, memo } from "react";
-import { useTranslation } from "react-i18next";
+import { FC, memo } from 'react';
+import { useTranslation } from 'react-i18next';
 
-import Stack from "@mui/material/Stack";
-import Typography from "@mui/material/Typography";
-import Box from "@mui/material/Box";
+import Stack from '@mui/material/Stack';
+import Typography from '@mui/material/Typography';
+import Box from '@mui/material/Box';
+import Menu from '@mui/material/Menu';
+import MenuItem from '@mui/material/MenuItem';
 
 import {
   ActionButton,
   LibraryTree,
   LIBRARY_ACTION_ICONS,
   ACTION_TO_LOCALE
-} from "../../shared-components";
-import { ROOT_ACTIONS } from "./constants";
-import { useLibraryView } from "./hooks";
-import { AddFileModal } from "./add-file-modal";
+} from '../../shared-components';
+import { ROOT_ACTIONS } from './constants';
+import { useLibraryView } from './hooks';
+import { AddFileModal } from './add-file-modal';
 
 const LibrarySection: FC = () => {
   const { t } = useTranslation();
   const {
+    isMenuOpen,
+    anchorEl,
     tree,
     isProcessing,
     isAddModalOpen,
@@ -29,13 +33,15 @@ const LibrarySection: FC = () => {
     handleRename,
     handleAddModalClose,
     handleAddFiles,
-    handleSelect
+    handleSelect,
+    handleOpenContextMenu,
+    handleCloseContextMenu
   } = useLibraryView();
 
   return (
     <Stack gap={0.5} padding={0.5}>
       <Stack direction="row">
-        <Typography noWrap>{t("library.title")}</Typography>
+        <Typography noWrap>{t('library.title')}</Typography>
         <Box flex={1} />
         {ROOT_ACTIONS.map((action) => (
           <ActionButton
@@ -56,7 +62,21 @@ const LibrarySection: FC = () => {
         onSelect={handleSelect}
         onMove={handleMove}
         onDelete={handleDelete}
+        onOpenContextMenu={handleOpenContextMenu}
       />
+      <Menu
+        id="basic-menu"
+        anchorEl={anchorEl}
+        open={isMenuOpen}
+        onClose={handleCloseContextMenu}
+        MenuListProps={{
+          'aria-labelledby': 'basic-button'
+        }}
+      >
+        <MenuItem onClick={handleCloseContextMenu}>Profile</MenuItem>
+        <MenuItem onClick={handleCloseContextMenu}>My account</MenuItem>
+        <MenuItem onClick={handleCloseContextMenu}>Logout</MenuItem>
+      </Menu>
       {isAddModalOpen && (
         <AddFileModal
           onCancel={handleAddModalClose}

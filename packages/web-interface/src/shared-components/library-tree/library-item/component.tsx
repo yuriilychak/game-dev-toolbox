@@ -43,16 +43,14 @@ const LibraryItem: FC<NodeRendererProps<LibraryFile>> = ({
     //@ts-expect-error - tree props are not typed
     checkedIds,
     //@ts-expect-error - tree props are not typed
-    onCheck
+    onCheck,
+    //@ts-expect-error - tree props are not typed
+    onOpenContextMenu
   } = tree.props;
 
-  const selectionState: SELECTION_STATE = checkSelection(
-    node.data,
-    checkedIds
-  );
+  const selectionState: SELECTION_STATE = checkSelection(node.data, checkedIds);
   const isChecked = selectionState === SELECTION_STATE.SELECTED;
-  const isIndeterminate =
-        selectionState === SELECTION_STATE.SELECTED_PARTIALY;
+  const isIndeterminate = selectionState === SELECTION_STATE.SELECTED_PARTIALY;
   const isFolder = node.data.type === LIBRARY_FILE_TYPE.FOLDER;
 
   const { t } = useTranslation();
@@ -151,24 +149,38 @@ const LibraryItem: FC<NodeRendererProps<LibraryFile>> = ({
     [onCheck, node.data.id, isFolder, node.data.children, isChecked]
   );
 
+  const handleOpenContextMenu: MouseEventHandler<HTMLDivElement> = useCallback(
+    (event) => {
+      event.preventDefault();
+      onOpenContextMenu && onOpenContextMenu(event.target as HTMLElement);
+    },
+    [onOpenContextMenu]
+  );
+
   return (
     <Stack
       key={node.data.id}
       alignItems="center"
       direction="row"
       ref={dragHandle}
+      onContextMenu={handleOpenContextMenu}
       onClick={handleClick}
       onDoubleClick={handleDoubleClick}
       style={style}
       sx={{
         maxHeight: 24,
         cursor: 'pointer',
-        backgroundColor:
-                    node.isFocused || node.isSelected ? '#555' : 'unset',
+        backgroundColor: node.isFocused || node.isSelected ? '#555' : 'unset',
         '&:hover': { backgroundColor: '#666' }
       }}
     >
-      <Stack direction="row" gap={0.5} alignItems="center" maxHeight={24}>
+      <Stack
+        direction="row"
+        gap={0.5}
+        alignItems="center"
+        maxHeight={24}
+        sx={{ userSelect: 'none' }}
+      >
         {hasCheckboxes && (
           <Checkbox
             checked={isChecked}
@@ -176,8 +188,10 @@ const LibraryItem: FC<NodeRendererProps<LibraryFile>> = ({
             onClick={handleCheckClick}
           />
         )}
-        {!node.isLeaf && <ExpandIcon fontSize="small" />}
-        <Icon fontSize="small" />
+        {!node.isLeaf && (
+          <ExpandIcon fontSize="small" sx={{ userSelect: 'none' }} />
+        )}
+        <Icon fontSize="small" sx={{ userSelect: 'none' }} />
       </Stack>
       {node.isEditing ? (
         <FilledInput
@@ -195,25 +209,23 @@ const LibraryItem: FC<NodeRendererProps<LibraryFile>> = ({
           size="small"
         />
       ) : (
-        <Typography noWrap paddingLeft={0.5}>
+        <Typography noWrap paddingLeft={0.5} sx={{ userSelect: 'none' }}>
           {node.data.label}
         </Typography>
       )}
       <Box flex={1} />
       {!disableEdit &&
-                currentActions.map((action) => (
-                  <ActionButton
-                    key={`item_action_${action}`}
-                    title={t(ACTION_TO_LOCALE.get(action))}
-                    Icon={LIBRARY_ACTION_ICONS.get(action)}
-                    action={action}
-                    id={node.data.id}
-                    onClick={handleAction}
-                    disabled={
-                      action === LIBRARY_ACTION.SUBMIT && isSubmitDisabled
-                    }
-                  />
-                ))}
+        currentActions.map((action) => (
+          <ActionButton
+            key={`item_action_${action}`}
+            title={t(ACTION_TO_LOCALE.get(action))}
+            Icon={LIBRARY_ACTION_ICONS.get(action)}
+            action={action}
+            id={node.data.id}
+            onClick={handleAction}
+            disabled={action === LIBRARY_ACTION.SUBMIT && isSubmitDisabled}
+          />
+        ))}
     </Stack>
   );
 };

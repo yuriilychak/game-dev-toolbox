@@ -1,4 +1,4 @@
-import { useCallback, useContext } from "react";
+import { useCallback, useContext, useState } from "react";
 import { DeleteHandler, MoveHandler, RenameHandler } from "react-arborist";
 
 import { LibraryContext } from "../../contexts";
@@ -27,6 +27,9 @@ export function useLibraryView() {
     handleOpen: handleAddModalOpen,
     handleClose: handleAddModalClose
   } = useModal();
+
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const isMenuOpen: boolean = Boolean(anchorEl);
 
   const handleAction = useCallback(
     (focusedId: string, action: LIBRARY_ACTION) => {
@@ -66,17 +69,25 @@ export function useLibraryView() {
     handleAddModalClose();
   };
 
+  const handleOpenContextMenu = useCallback((target: HTMLElement) => setAnchorEl(target), []);
+
+  const handleCloseContextMenu = useCallback(() => setAnchorEl(null), []);
+
   return {
     tree,
+    isMenuOpen,
     isProcessing,
     isAddModalOpen,
     focusedId,
+    anchorEl,
     handleAction,
     handleDelete,
     handleFocus: onFocusChanged,
     handleMove,
     handleRename,
     handleSelect: onSelectionChanged,
+    handleOpenContextMenu,
+    handleCloseContextMenu,
     handleAddModalClose,
     handleAddFiles
   };

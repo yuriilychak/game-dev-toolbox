@@ -6,7 +6,7 @@ import Point from './point';
 import simplifyPolygon from './simplify';
 import { serializeTriangleIndices } from '../utils';
 import { getPointIndex } from './utils';
-import { optimizeSimplifiedPolygon } from './optimization';
+// import { optimizeSimplifiedPolygon } from './optimization';
 
 export default class Polygon {
 
@@ -40,8 +40,8 @@ export default class Polygon {
       return;
     }
 
-    this._polygon = optimizeSimplifiedPolygon(this._polygon, this._contour);
-    this._boundRect = BoundRect.fromPoints(this._polygon);
+    // this._polygon = optimizeSimplifiedPolygon(this._polygon, this._contour);
+    // this._boundRect = BoundRect.fromPoints(this._polygon);
   }
 
   public unite(polygons: Polygon[], index: number): number {

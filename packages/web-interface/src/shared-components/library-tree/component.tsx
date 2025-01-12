@@ -17,19 +17,20 @@ import { LibraryFile } from '../../types';
 import { LIBRAY_STYLES } from './constants';
 
 type LibraryTreeProps = {
-    disabled?: boolean;
-    tree: LibraryFile[];
-    onCheck?: (ids: string[], isChecked: boolean) => void;
-    onRename?: RenameHandler<LibraryFile>;
-    onMove?: MoveHandler<LibraryFile>;
-    onDelete?: DeleteHandler<LibraryFile>;
-    onFocus?: (id: string) => void;
-    onSelect?(files: LibraryFile[]): void;
-    hasCheckboxes?: boolean;
-    checkedIds?: string[];
-    disableEdit?: string | boolean | BoolFunc<LibraryFile>;
-    disableDrag?: string | boolean | BoolFunc<LibraryFile>;
-    disableDrop?: string | boolean | BoolFunc<LibraryFile>;
+  disabled?: boolean;
+  tree: LibraryFile[];
+  onCheck?: (ids: string[], isChecked: boolean) => void;
+  onRename?: RenameHandler<LibraryFile>;
+  onMove?: MoveHandler<LibraryFile>;
+  onDelete?: DeleteHandler<LibraryFile>;
+  onFocus?: (id: string) => void;
+  onSelect?(files: LibraryFile[]): void;
+  onOpenContextMenu?: (anchor: HTMLElement) => void;
+  hasCheckboxes?: boolean;
+  checkedIds?: string[];
+  disableEdit?: string | boolean | BoolFunc<LibraryFile>;
+  disableDrag?: string | boolean | BoolFunc<LibraryFile>;
+  disableDrop?: string | boolean | BoolFunc<LibraryFile>;
 };
 
 const LibraryTree: FC<LibraryTreeProps> = ({
@@ -43,7 +44,8 @@ const LibraryTree: FC<LibraryTreeProps> = ({
   onMove,
   onDelete,
   onFocus,
-  onSelect
+  onSelect,
+  onOpenContextMenu
 }) => {
   const handleFocus = useCallback(
     (node: NodeApi<LibraryFile>) =>
@@ -66,6 +68,7 @@ const LibraryTree: FC<LibraryTreeProps> = ({
           hasCheckboxes={hasCheckboxes}
           checkedIds={checkedIds}
           onCheck={onCheck}
+          onOpenContextMenu={onOpenContextMenu}
           disableEdit={disableEdit}
           onFocus={handleFocus}
           onRename={onRename}
